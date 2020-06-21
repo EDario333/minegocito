@@ -1,0 +1,47 @@
+{% load i18n %}
+
+<div id="ftt-Step9" 
+style="margin: 0 0 0 0;"
+class="popover popover-x popover-default">
+  <div class="arrow"></div>
+  <h3 class="popover-header popover-title">
+  	<span class="close pull-right" data-dismiss="popover-x">
+      &times;
+    </span>
+  	{% trans 'Title step 9 tutorial app' %}
+    <i class="material-icons">
+      keyboard_arrow_down
+    </i>
+  </h3>
+
+  <div class="popover-body popover-content">
+    <p>
+      {% trans 'Access to your user profile and logout session' %}.
+    </p>
+
+    <p>
+      {% trans 'Click on the icon to open the menu' %}.
+    </p>
+  </div>
+
+  <div class="popover-footer">
+    <button 
+    data-dismiss="popover-x"
+    onclick="gotoStep10('{{my_user}}')" 
+    class="btn btn-sm btn-primary">
+  		{% trans 'Next' %}
+    </button>
+
+    <button
+    onclick="gotoStep8('{{my_user}}')" 
+    class="btn btn-sm btn-default">
+    	{% trans 'Previous' %}
+    </button>
+
+    <button
+    data-dismiss="popover-x"
+    class="btn btn-sm btn-default">
+      {% trans 'Cancel' %}
+    </button>
+  </div>
+</div>

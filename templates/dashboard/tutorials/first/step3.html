@@ -1,0 +1,51 @@
+{% load i18n %}
+
+<div id="ftt-Step3" 
+style="margin: 50px 0 0 -60px;"
+class="popover popover-x popover-default">
+  <div class="arrow"></div>
+  <h3 class="popover-header popover-title">
+  	<span class="close pull-right" data-dismiss="popover-x">
+      &times;
+    </span>
+  	{% trans 'Title step 3 tutorial app' %}
+    <i class="material-icons">
+      notifications
+    </i>
+  </h3>
+
+  <div class="popover-body popover-content">
+    <p>
+      {% trans 'All the stuff related with your actions (your shops, stores, products, users, and so on)' %}.
+    	{% trans 'The most recent is presented first' %}.
+    </p>
+  </div>
+
+  <div class="popover-footer">
+    {% if my_user.show_tasks %}
+      <button 
+      onclick="gotoStep4('{{my_user}}')"
+      class="btn btn-sm btn-primary">
+        {% trans 'Next' %}
+      </button>
+    {% else %}
+      <button 
+      onclick="gotoStep5('{{my_user}}')"
+      class="btn btn-sm btn-primary">
+        {% trans 'Next' %}
+      </button>
+    {% endif %}
+
+    <button
+    onclick="gotoStep2('{{my_user}}')" 
+    class="btn btn-sm btn-default">
+    	{% trans 'Previous' %}
+    </button>
+
+    <button
+    data-dismiss="popover-x"
+    class="btn btn-sm btn-default">
+      {% trans 'Cancel' %}
+    </button>
+  </div>
+</div>

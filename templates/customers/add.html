@@ -1,0 +1,14 @@
+{% extends 'customers/generic-form.html' %}
+
+{% load i18n %}
+
+{% block msg_pre_form %}
+	{% trans 'Fields marked are mandatory' %}.
+{% endblock %}
+
+{% block actions_js %}
+	<script type="text/javascript">
+	  $(document).ready(function(){
+	  });
+	</script>
+{% endblock %}

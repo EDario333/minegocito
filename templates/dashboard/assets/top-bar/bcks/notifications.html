@@ -1,0 +1,113 @@
+{% load i18n static %}
+
+<script type="text/javascript" src="{% static 'js/jquery-ui-1.12.1/jquery-ui.min.js' %}"></script>
+
+<link href="{% static 'js/jquery-ui-1.12.1/jquery-ui.min.css' %}" rel="stylesheet">
+
+<script type="text/javascript">
+  var msg_wait;
+
+  $.ajax({
+    method: "GET",
+    url: "/translator/translate/",
+    data: { msg: "Please wait"}
+  })
+  .done(function(result) {
+    msg_wait = result;
+  });
+
+  function markAsRead(dom_element, notif) {
+    show_msg_with_toastr("info", msg_wait);
+    $.ajax({
+      method: "GET",
+      url: "/notifications/mark-as-read/",
+      data: { notif: notif }
+    })
+    .done(function(result) {
+      if (result.status != "success") {
+        toastr.clear();
+        show_msg_with_toastr(result.status, result.msg);
+      }
+      else {
+        //$('.user-notifications').html(result);
+        $(dom_element).parent().remove();
+        counter = parseInt($(".user-notifications .label-count")[0].innerHTML);
+        $(".user-notifications .label-count")[0].innerHTML = counter - 1;
+        toastr.clear();
+      }
+    });
+  }
+</script>
+
+<li class="dropdown user-notifications">
+  <a href="javascript:void(0);" class="dropdown-toggle" 
+  data-toggle="dropdown" role="button">
+    <i class="material-icons">
+    	notifications
+    </i>
+
+    <span class="label-count">
+      {{notifications|length}}
+    </span>
+  </a>
+
+  <ul class="dropdown-menu">
+    <li class="header">
+    	{% trans 'Notifications'|upper %}
+    </li>
+
+    <li class="body">
+      <ul class="menu">
+        {% for itm in notifications %}
+          <li>
+            <a href="javascript:void(0);"
+            data-placement="bottom"
+            data-toggle="tooltip" 
+            onclick="markAsRead(this, {{itm.id}})" 
+            title="{% trans 'Mark as read' %}" 
+            data-original-title="{% trans 'Mark as read' %}">
+  	          <div class="icon-circle bg-{{itm.notification.bg_color}}">
+                <i class="material-icons">
+                	{{itm.notification.icon}}
+                </i>
+  	          </div>
+
+  	          <div class="menu-info" >
+                <h4>
+                  {{itm.notification.name}}:&nbsp;{{itm.obj_name}}
+                </h4>
+
+                <p>
+                  <i class="material-icons">
+  	                access_time
+                	</i> 
+
+                	{{itm.created_when}},
+                  <br />
+                  {{itm.created_at}}
+                </p>
+  	          </div>
+            </a>
+          </li>
+        {% endfor %}
+      </ul>
+    </li>
+
+    <li class="footer">
+      <a href="javascript:void(0);">
+      	{% trans 'View all notifications' %}
+      </a>
+    </li>
+  </ul>
+</li>
+
+<script type="text/javascript">
+  $('[data-toggle="tooltip"]').tooltip();
+
+  function refreshNotifications() {
+    $("li.user-notifications").load("/notifications/retrieve-user-notifications/");
+  }
+
+  setInterval(refreshNotifications, 5000);
+  // setTimeout(refreshNotifications, 3000);
+</script>

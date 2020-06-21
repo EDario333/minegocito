@@ -1,0 +1,50 @@
+{% load i18n %}
+
+{% if shops|length < 1 %}
+<div class="alert alert-danger" style="width: 100%">
+  {% trans 'There are not any record matching with your query options' %}
+</div>
+{% else %}
+{% for shop in shops %}
+  <div class="col-sm-6 col-lg-4 mb-4" 
+  data-aos="fade-up">
+    <div class="block-4 text-center border">
+      <figure class="block-4-image">
+        <a href="#" data-placement="bottom"
+          data-toggle="tooltip" 
+          title="{% trans 'Click to display details' %}" 
+          data-original-title="{% trans 'Click to display details' %}"
+          onclick="showDetails('{{shop.shop.id}}'); return false;">
+          <img src="{{shop.shop.static_photo}}" 
+          alt="{{shop.shop.name}}" class="img-fluid">
+        </a>
+      </figure>
+
+      <div class="block-4-text p-4">
+        <h3>
+          <a href="#" data-placement="bottom"
+          data-toggle="tooltip" 
+          title="{% trans 'Click to display details' %}" 
+          data-original-title="{% trans 'Click to display details' %}"
+          onclick="showDetails('{{shop.shop.id}}'); return false;">
+            {{shop.shop.name}}
+          </a>
+        </h3>
+
+        <p class="mb-0">
+          {% for cat in shop.categories %}
+            {{cat}}&nbsp;
+          {% endfor %}
+        </p>
+
+        <p class="text-primary font-weight-bold">
+          {{shop.shop.city.display_name}}
+        </p>
+      </div>
+    </div>
+  </div>
+{% endfor %}
+<script type="text/javascript">
+  $('[data-toggle="tooltip"]').tooltip();
+</script>
+{% endif %}

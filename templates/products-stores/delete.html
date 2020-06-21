@@ -1,0 +1,58 @@
+{% extends 'products-stores/generic-form.html' %}
+
+{% load i18n productsapp_tags %}
+
+{% block frm_title %}
+	{% trans 'Delete products in store' %}
+{% endblock %}
+
+{% block tbl_results %}
+	{% products_stored %}
+{% endblock %}
+
+{% block additional_msg %}
+	<div class="alert alert-warning alert-dismissible" 
+	role="alert">
+		<button type="button" class="close" 
+		data-dismiss="alert" aria-label="Close"><span aria-hidden="true">×</span></button>
+
+  	{% trans 'Delete msg for products in stores' %}
+	</div>
+{% endblock %}
+
+{% block actions_js %}
+	<script type="text/javascript">
+	  $(document).ready(function(){
+	    $("#btnWithSelections").click(function() {
+	    	if (!confirm("¿Seguro que desea remover los productos seleccionados de su almacen?\n\n¡Esta acción no es reversible!"))
+	    		return false;
+
+	    	show_msg_with_toastr("info", msg_wait);
+
+	    	chks = $("table#tblResults input.select-product:checked");
+	    	tope = chks.length;
+	    	products=[];
+	    	for (x=0;x<tope;x++) {
+	    		product=chks[x].id.substring("chkProduct".length);
+	    		products.push(product);
+	    	}
+
+	    	/*console.log("products");
+	    	console.log(products);*/
+
+	    	valid_csrftoken();
+	  		$.ajax({
+			    method: "POST",
+			    url: "/products-stores/remove-many-from-stores/",
+			    data: { 
+			    	products: JSON.stringify(products) 
+			    }
+			  })
+			  .done(function(result) {
+			  	toastr.clear();
+			  	$("section.content .container-fluid").html(result);
+			  });
+	    });
+	  });
+	</script>
+{% endblock %}

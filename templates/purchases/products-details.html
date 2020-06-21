@@ -1,0 +1,373 @@
+{% load i18n static %}
+
+<fieldset>
+	<legend>
+		{% trans 'Products details' %}
+		<i id="actShowAssistance" 
+    style="float: right; font-size: inherit; cursor: pointer;" 
+    data-placement="top"
+    data-toggle="tooltip" 
+    title="{% trans 'Help' %}" 
+    data-original-title="{% trans 'Help' %}" 
+    onclick="$('#secHelp').show()" 
+    class="material-icons">help_outline</i>
+	</legend>
+
+	<p id="secHelp" class="alert alert-warning alert-dismissible">
+		<button type="button" class="close" 
+		show-icon-onclose="#actShowAssistance"
+		data-hide="#secHelp" aria-label="Close">
+			<span aria-hidden="true">×</span>
+		</button>
+		{% trans 'Msg product without SKU' %}
+	</p>
+
+	{% if products|length < 1 %}
+		{% trans 'Here you will assign the SKU for each product' %}.
+		{% trans 'Just modify the Quantity field and you will see the required fields' %}
+	{% else %}
+		<a href="#" 
+		class="dismiss-all edit">
+			{% trans 'Omit all data' %}
+		</a>
+
+		<a href="#" 
+		class="undismiss-all edit">
+			{% trans 'Show all data' %}
+		</a>
+
+		{% for product in products %}
+			<h4>
+				{% trans 'Product details' %}&nbsp;&#35;{{product.counter}}
+			</h4>
+
+			<a href="#" 
+			class="undismiss-product-data edit" 
+			id="actUnDismiss{{product.counter}}">
+				{% trans 'Show data' %}
+				{% trans 'Product'|lower %}&nbsp;&#35;{{product.counter}}
+			</a>
+
+			<span id="secProductDetails{{product.counter}}"
+			class="product-details edit">
+				<a href="#"
+				class="dismiss-product-data" 
+				id="actDismiss{{product.counter}}">
+					{% trans 'Omit data' %}
+					{% trans 'Product'|lower %}&nbsp;&#35;{{product.counter}}
+				</a>
+				<br />
+
+				<label 
+				for="txtSKUProduct{{product.counter}}">
+					{% trans 'SKU' %}:
+				</label>
+
+				<input 
+				name="sku_product{{product.counter}}" 
+				class="form-control product-sku" 
+				value="{{product.sku}}" 
+				id="txtSKUProduct{{product.counter}}" 
+				style="margin: 0 0 10px 0" />
+
+				<label for="txtImageProduct{{product.counter}}">
+					{% trans 'Image' %}:
+				</label>
+
+				<input name="image_product{{product.counter}}" 
+				class="product-image" value="{{product.image}}"
+				type="file" accept="image/*" 
+				id="txtImageProduct{{product.counter}}" 
+				style="margin: 0 0 30px 0" />
+
+				<input type="checkbox" 
+				id="chkProductStore{{product.counter}}" 
+        name="product{{product.counter}}-in-store"
+        class="product-store sec-store-for-product" />
+
+        <label class="input-product-store" 
+        for="chkProductStore{{product.counter}}">
+          {% trans 'Assign product to store' %}
+        </label>
+        <br class="sec-store-for-product sec-store-for-product-{{product.counter}}" />
+
+        <span 
+        class="sec-store-for-product sec-store-for-product-{{product.counter}}">
+          <label 
+          for="txtProductStore{{product.counter}}">
+            {% trans 'Store name' %}:
+          </label>
+
+          <input name="productstore{{product.counter}}"
+          id="txtProductStore{{product.counter}}" 
+          class="form-control store-for-product" />
+
+          <input class="store-obj-for-product" 
+          name="product{{product.counter}}store_obj" />
+        </span>
+        
+			</span>
+
+			<span class="view">
+				{% trans 'SKU' %}:
+
+				<span style="margin: 0 0 10px 0">
+					{% if product.sku|length > 0 %}
+						{{product.sku}}
+					{% else %}
+						{% trans 'None male' %}
+					{% endif %}
+				</span>
+				<br />
+
+				{% trans 'Image' %}:
+				<span style="margin: 0 0 10px 0">
+					{% if product.image|length > 0 %}
+						{{product.image}}
+					{% else %}
+						{% trans 'None female' %}
+					{% endif %}
+				</span>
+			</span>
+		{% endfor %}
+	{% endif %}
+</fieldset>
+
+{% if editting and editting|upper == 'TRUE' %}
+	<script type="text/javascript">
+		$("#divProductsDetails .view").hide();
+		$("#divProductsDetails .product-sku").change(function() {
+
+			if (this.value.trim().length < 1) {
+				$("section.content form button[type='submit']").removeAttr("disabled");
+        $("#dlgAddProduct #btnAccept").removeAttr("disabled");
+				return false;
+			}
+
+			show_msg_with_toastr("info", msg_wait);
+			$.ajax({
+        method: "GET",
+        url: "/products/search/sku/",
+        data: { sku: this.value }
+      })
+      .done(function(result) {
+        toastr.clear();
+        if (result.exist)
+          $.ajax({
+            method: "GET",
+            url: "/translator/translate",
+            data: { msg: "The indicated SKU already exists" }
+          })
+          .done(function(result) {
+            show_msg_with_toastr("error", result);
+            $("section.content form button[type='submit']").attr("disabled", "true");
+            $("#dlgAddProduct #btnAccept").attr("disabled", "true");
+          });
+        else {
+          $("section.content form button[type='submit']").removeAttr("disabled");
+          $("#dlgAddProduct #btnAccept").removeAttr("disabled");
+        }
+      });
+		});
+	</script>
+{% else %}
+	<script type="text/javascript">
+		$("#divProductsDetails .edit").hide();
+		$("#divProductsDetails .view").show();
+	</script>
+{% endif  %}
+
+<script type="text/javascript" src="{% static 'js/jquery-ui-1.12.1/jquery-ui.min.js' %}"></script>
+
+<link href="{% static 'js/jquery-ui-1.12.1/jquery-ui.min.css' %}" rel="stylesheet">
+
+<script type="text/javascript">
+	$(document).ready(function(){
+		$("#actShowAssistance").hide();
+
+		$("[data-hide]").click(function(){
+	    //$(this).closest("." + $(this).attr("data-hide")).hide();
+	    $(this).closest($(this).attr("data-hide")).hide();
+	    show_icon_onclose = $(this).attr("show-icon-onclose");
+	    if (show_icon_onclose != undefined)
+	      $(show_icon_onclose).show();
+	    set_focus_onclose = $(this).attr("set-focus-onclose");
+	    if (set_focus_onclose != undefined)
+	      $(set_focus_onclose).focus();
+	  });
+
+		module_name = $(".container-fluid .card .header h2")[0].innerHTML;
+    module_name = module_name.toUpperCase();
+
+    if (!module_name.includes('AGREGAR')) {
+      $(".input-product-store").hide();
+      $(".product-store").hide();
+    }
+
+		dismissed_counter = 0;
+		$("a.undismiss-all").hide();
+		$(".undismiss-product-data").hide();
+		if (all_products_in_store) {
+			$(".sec-store-for-product").hide();
+			$(".product-store").hide();
+			$(".input-product-store").hide();
+		}
+		$(".sec-store-for-product").hide();
+
+		$("input.product-store").change(function() {
+			id = this.id;
+			product = id.substr("chkProductStore".length);
+
+			if (this.checked) {
+				$(".sec-store-for-product-" + product).show();
+				$("input#txtProductStore" + product).attr("required", "true");
+				$("input#txtProductStore" + product).focus();
+			}
+			else {
+				$(".sec-store-for-product-" + product).hide();
+				$("input#txtProductStore" + product).removeAttr("required");
+				$("input#txtProductStore" + product).val('');
+				input_name = "product" + product + "store_obj"
+				$("input[name='" + input_name + "']").val("");
+			}
+		});
+
+		$("input.store-for-product").autocomplete({
+      source: "/stores/autocomplete/my-stores/",
+      minLength: 1,
+    });
+
+		$("input.store-for-product").autocomplete("option", "appendTo", "#dlgAddProduct");
+
+		$("input.store-for-product").change(function(){
+      show_msg_with_toastr("info", msg_wait);
+      id = this.id;
+      product = id.substr("txtProductStore".length);
+      storename = this.value.substr(0, this.value.indexOf(' ['))
+
+      $.ajax({
+        method: "GET",
+        url: "/stores/search/by-name/",
+        data: { store: storename }
+      })
+      .done(function(result) {
+        toastr.clear();
+        if (!result['exist'])
+          $.ajax({
+            method: "GET",
+            url: "/translator/translate",
+            data: { msg: "Please enter a valid store"}
+          })
+          .done(function(result) {
+            show_msg_with_toastr("error", result);
+            input_name = 
+            	"product" + product + "store_obj"
+            $("input[name='" + input_name + "']").val("");
+            $("section.content form button[type='submit']").attr("disabled", "true");
+            $("#dlgAddProduct #btnAccept").attr("disabled", "true");
+          });
+        else {
+        	input_name = 
+        	"product" + product + "store_obj"
+          $("input[name='" + input_name + "']").val(result.store);
+          $("section.content form button[type='submit']").removeAttr("disabled");
+          $("#dlgAddProduct #btnAccept").removeAttr("disabled");
+        }
+      });
+    });
+
+		$("a.dismiss-all").click(function(){
+			$(".product-sku").val("@INSTRUCTION:DISCARD-ME@");
+			$("input.store-for-product").removeAttr("required");
+			$("input.store-for-product").val('');
+			$("input.store-obj-for-product").val('');
+
+			chks = $(".product-store");
+			tope = chks.length;
+			for (x = 0; x < tope; x++)
+				if (chks[x].checked)
+					$(chks[x]).click();
+
+	    $("span.product-details").hide();
+    	$("a.dismiss-all").hide();
+    	$("a.undismiss-all").show();
+
+    	$("a.undismiss-product-data").show();
+    	$("a.dismiss-product-data").hide();
+    	dismissed_counter = 999999;
+    	return false;
+	  });
+
+	  $("a.undismiss-all").click(function(){
+	  	$(".product-sku").val('');
+	  	$("span.product-details").show();
+    	$("a.dismiss-all").show();
+    	$("a.undismiss-all").hide();
+
+    	$("a.dismiss-product-data").show();
+    	$("a.undismiss-product-data").hide();
+    	dismissed_counter = 0;
+    	return false;
+	  });
+
+		$("a.dismiss-product-data").click(function(){
+	    id = this.id;
+	    product_number = id.substr("actDismiss".length);
+
+	    $("input#txtProductStore" + product_number).removeAttr("required");
+	    $("input#txtProductStore" + product_number).val('');
+	    input_name = 
+	    	"product" + product_number + "store_obj";
+			$("input[name='" + input_name + "']").val("");
+
+			chk = $("#chkProductStore" + product_number)[0];
+			if (chk.checked)
+				$(chk).click();
+
+	    $("#txtSKUProduct" + product_number).val("@INSTRUCTION:DISCARD-ME@");
+
+    	input_id = "span#secProductDetails" + product_number;
+    	$(input_id).hide();
+
+    	input_id = "a#actUnDismiss" + product_number;
+    	$(input_id).show();
+
+    	input_id = "a#actDismiss" + product_number;
+    	$(input_id).hide();
+
+    	dismissed_counter++;
+
+    	quantity = parseFloat($("input[name='quantity']").val());
+
+    	if (dismissed_counter >= quantity) {
+    		$("a.dismiss-all").hide();
+    		$("a.undismiss-all").show();
+    		dismissed_counter = 0;
+    	}
+	  });
+
+	  $("a.undismiss-product-data").click(function(){
+	    id = this.id;
+	    product_number = id.substr("chkUnDismiss".length);
+
+	    $("#txtSKUProduct" + product_number).val('');
+
+    	input_id = "span#secProductDetails" + product_number;
+    	$(input_id).show();
+
+    	input_id = "a#actUnDismiss" + product_number;
+    	$(input_id).hide();
+
+    	input_id = "a#actDismiss" + product_number;
+    	$(input_id).show();
+
+    	dismissed_counter--;
+
+    	if (dismissed_counter <= 0) {
+    		$("a.dismiss-all").show();
+    		$("a.undismiss-all").hide();
+    		dismissed_counter = 999999;
+    	}
+	  });
+	});
+</script>

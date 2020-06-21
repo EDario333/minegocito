@@ -1,0 +1,65 @@
+{% load i18n %}
+
+<div id="ftt-Step2" 
+style="margin: -5px 0 0 20px;"
+class="popover popover-x popover-default">
+  <div class="arrow"></div>
+  <h3 class="popover-header popover-title">
+  	<span class="close pull-right" data-dismiss="popover-x">
+      &times;
+    </span>
+  	{% trans 'Title step 2 tutorial app' %}
+    <i class="material-icons">
+      search
+    </i>
+  </h3>
+
+  <div class="popover-body popover-content">
+    <p>
+      {% trans 'Search action' %}.
+    	{% trans 'Click on it and you cant start to type your search' %}.
+    </p>
+
+    <p>
+      <span style="color: red; font-weight: bold">
+        {% trans 'Important' %}:
+      </span>
+
+      {% trans 'The feature is not available in this version' %}.
+    </p>
+  </div>
+
+  <div class="popover-footer">
+    {% if my_user.show_notifications %}
+      <button 
+      onclick="gotoStep3('{{my_user}}')"
+      class="btn btn-sm btn-primary">
+    		{% trans 'Next' %}
+      </button>
+    {% elif my_user.show_tasks %}
+      <button 
+      onclick="gotoStep4('{{my_user}}')"
+      class="btn btn-sm btn-primary">
+        {% trans 'Next' %}
+      </button>
+    {% else %}
+      <button 
+      onclick="gotoStep5('{{my_user}}')"
+      class="btn btn-sm btn-primary">
+        {% trans 'Next' %}
+      </button>
+    {% endif %}
+
+    <button
+    onclick="gotoStep1('{{my_user}}')" 
+    class="btn btn-sm btn-default">
+    	{% trans 'Previous' %}
+    </button>
+
+    <button
+    data-dismiss="popover-x"
+    class="btn btn-sm btn-default">
+      {% trans 'Cancel' %}
+    </button>
+  </div>
+</div>

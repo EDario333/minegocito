@@ -1,0 +1,19 @@
+{% extends 'products-stores/generic-form.html' %}
+
+{% load i18n productsapp_tags %}
+
+{% block frm_title %}
+	{% trans 'Find products stored' %}
+{% endblock %}
+
+{% block tbl_results %}
+	{% products_stored %}
+{% endblock %}
+
+{% block actions_js %}
+	<script type="text/javascript">
+	  $(document).ready(function(){
+	  	
+	  });
+	</script>
+{% endblock %}

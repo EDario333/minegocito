@@ -1,0 +1,216 @@
+{% load static i18n %}
+
+<footer class="site-footer border-top">
+  <div class="container">
+    <div class="row">
+      <div class="col-lg-6 mb-5 mb-lg-0">
+        <div class="row">
+          <div class="col-md-12">
+            <h3 class="footer-heading mb-4">
+            	{% trans 'Resources' %}
+          	</h3>
+          </div>
+
+          <div class="col-md-6 col-lg-4">
+            <ul class="list-unstyled">
+              <li>
+              	<a href="#" onclick="return false;" 
+                data-placement="bottom"
+                data-toggle="tooltip"
+                data-original-title="{% trans 'Sell online resource' %}" title="{% trans 'Sell online resource' %}">
+              		{% trans 'Sell online' %}
+              	</a>
+              </li>
+
+              <li>
+              	<a href="/app-versions/">
+              		{% trans 'Features' %}
+              	</a>
+              </li>
+<!-- 
+              <li>
+              	<a href="#">
+              		{% trans 'Shopping cart' %}
+              	</a>
+              </li>
+ -->
+              <li>
+              	<a href="/contact/?subject=Requiero mi tienda en línea" data-placement="bottom"
+                data-toggle="tooltip"
+                data-original-title="{% trans 'Store builder resource' %}" title="{% trans 'Store builder resource' %}">
+              		{% trans 'Store builder' %}
+              	</a>
+              </li>
+            </ul>
+          </div>
+
+          <div class="col-md-6 col-lg-4">
+            <ul class="list-unstyled">
+<!-- 
+              <li>
+              	<a href="#">
+              		{% trans 'Mobile commerce' %}
+              	</a>
+              </li>
+
+              <li>
+              	<a href="#">
+              		{% trans 'Dropshipping' %}
+	              </a>
+	            </li>
+ -->
+              <li>
+              	<a href="#" data-placement="bottom"
+                data-toggle="tooltip" onclick="return false;" 
+                data-original-title="{% trans 'Website development resource' %}" title="{% trans 'Website development resource' %}">
+              		{% trans 'Website development' %}
+	              </a>
+	            </li>
+
+              <li>
+                <a href="#" data-placement="bottom"
+                onclick="$('#dlgCreateUserAccount').modal('show'); return false;"
+                data-toggle="tooltip" onclick="return false;" 
+                data-original-title="{% trans 'Point of sale resource' %}" title="{% trans 'Point of sale resource' %}">
+                  {% trans 'Point of sale' %}
+                </a>
+              </li>
+
+              <li>
+                <a href="#" data-placement="bottom"
+                data-toggle="tooltip" onclick="return false;" 
+                data-original-title="{% trans 'Artificial Intelligence resource' %}" title="{% trans 'Artificial Intelligence resource' %}">
+                  {% trans 'Artificial Intelligence' %}
+                </a>
+              </li>
+            </ul>
+          </div>
+<!-- 
+          <div class="col-md-6 col-lg-4">
+            <ul class="list-unstyled">
+              <li>
+              	<a href="#">
+              		{% trans 'Point of sale' %}
+	              </a>
+              </li>
+
+              <li>
+              	<a href="#" data-placement="bottom"
+                data-toggle="tooltip" onclick="return false;" 
+                data-original-title="{% trans 'Artificial Intelligence resource' %}" title="{% trans 'Artificial Intelligence resource' %}">
+	              	{% trans 'Artificial Intelligence' %}
+	              </a>
+              </li>
+            </ul>
+          </div>
+ -->
+        </div>
+      </div>
+
+      <div class="col-md-6 col-lg-3 mb-4 mb-lg-0">
+        <h3 class="footer-heading mb-4">
+          {% trans 'Join us' %}
+	      </h3>
+
+        <a href="/contact/?subject=Quiero formar parte del Equipo" class="block-6">
+          <img src="{% static '/imgs/socios.jpg' %}" 
+          alt="{% trans 'Join us' %}" 
+          class="img-fluid rounded mb-4">
+          <h3 class="font-weight-light  mb-0">
+	          {% trans 'Join us content' %}
+	        </h3>
+
+          <p>
+	          {% trans 'Join us content 2' %}
+	        </p>
+        </a>
+      </div>
+
+      <div class="col-md-6 col-lg-3">
+        <div class="block-5 mb-5">
+          <h3 class="footer-heading mb-4">
+	          {% trans 'Contact Info' %}
+	        </h3>
+
+          <ul class="list-unstyled">
+<!-- 
+            <li class="address">
+            	{% trans 'Address' %}
+	            203 Fake St. Wacha wacha, Bla bla, Monterrey, MX
+	          </li>
+ -->
+            <li class="phone">
+          		{% trans 'Contact phone' %}:<br />
+              <a href="tel://5218110454902">
+	            	+521 811 0454 902
+	            </a>
+            </li>
+
+            <li class="email">
+            	{% trans 'Contact email' %}:
+            	<a href="mailto:minegocito.mx@gmail.com">minegocito.mx@gmail.com</a>
+            </li>
+          </ul>
+        </div>
+
+        <div class="block-7">
+          <form action="/newsletter/subscribe/" 
+          method="post" id="frmNewsletter">
+            {% csrf_token %}
+
+            <label for="email_subscribe" 
+            class="footer-heading">
+            	{% trans 'Subscribe' %}
+          	</label>
+
+            <div class="form-group">
+              <input type="text" class="form-control py-4" required="" 
+              id="email_subscribe" name="email" 
+              placeholder="{% trans 'Email' %}">
+
+              <input type="submit" class="btn btn-sm btn-primary" 
+              value="{% trans 'Send' %}" id="btnSend">
+            </div>
+
+            <span id="dummy"></span>
+
+            <input type="text" id="txtRecaptchaResponse" 
+            name="g-recaptcha-response" 
+            hidden="true" style="visibility: hidden;">
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <div class="row pt-5 mt-5 text-center">
+      <div class="col-md-12">
+        <p>
+	        <!-- Link back to Colorlib can't be removed. Template is licensed under CC BY 3.0. -->
+	        {%trans 'Copyright' %} &copy;
+<!-- 
+	        <script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js">
+	        </script>
+-->
+        	<script type="text/javascript">
+        		document.write(new Date().getFullYear());
+        	</script> 
+        	{%trans 'All rights reserved' %} | 
+        	{%trans 'This template is made with ' %}
+        	<i class="icon-heart" aria-hidden="true"></i> by 
+        	<a href="https://colorlib.com" target="_blank" class="text-primary">Colorlib</a>
+	      	<!-- Link back to Colorlib can't be removed. Template is licensed under CC BY 3.0. -->
+        </p>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script type="text/javascript">
+  $(document).ready(function() {
+    grecaptcha.ready(function() {
+      grecaptcha.execute('6Ld-f6sUAAAAAB81NR_oPrcJ3AdoGV8IIqCZL7wN', {action: 'subscription_to_newsletter'}).then(function(token) {
+        $("#frmNewsletter #txtRecaptchaResponse").val(token);
+      });
+    });
+  });
+</script>

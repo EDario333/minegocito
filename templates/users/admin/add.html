@@ -1,0 +1,31 @@
+{% extends 'users/admin/generic-form.html' %}
+
+{% load i18n %}
+
+{% block modal_dialogs %}
+	{% load usersgroupsapp_tags %}
+	{% user_assign_group %}
+	{% include 'users/admin/assign-permissions.html' %}
+	<script type="text/javascript">
+		var group_assigned = false;
+		var permissions_assigned = false;
+	</script>
+{% endblock %}
+
+{% block msg_pre_form %}
+	{% trans 'Fields marked are mandatory' %}.
+{% endblock %}
+
+{% block actions_js %}
+	<script type="text/javascript">
+	  $(document).ready(function(){
+	  	$("form #chkRandomPassword").click();
+	  	/*
+	  	$("input[name='shop']").autocomplete({
+	      source: "/shops/autocomplete/my-shops",
+	      minLength: 1,
+	    });
+	    */
+	  });
+	</script>
+{% endblock %}

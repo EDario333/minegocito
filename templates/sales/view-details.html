@@ -1,0 +1,729 @@
+{% load static i18n %}
+
+<style type="text/css">
+  div#modalViewDetails {
+    width: 35%;
+  }
+
+  div#dlgViewDetails {
+    z-index: 2050;
+  }
+
+  table.tbl-view-details {
+    width: 100%;
+  }
+
+  table.tbl-view-details tbody tr td:first-child  {
+    /* text-align: right; */
+    font-weight: bold;
+    /*width: 100%;*/
+  }
+
+  .right-alignment {
+    text-align: right;
+  }
+
+  .hidden {
+    visibility: hidden;
+  }
+
+  img.product-image {
+    width: 128px;
+    height: 128px;
+    margin: 0 0 10px 0;
+    border-radius: 10px;
+  }
+
+  a, a:hover, a:visited {
+    text-decoration: none;
+  }
+</style>
+
+{% if can_edit and can_edit|upper == 'TRUE' %}
+<script src="{% static 'js/dashboard/view-details/edit-functions.js' %}"></script>
+{% endif %}
+
+{% if can_delete and can_delete|upper == 'TRUE' %}
+<script src="{% static 'js/dashboard/view-details/delete-functions.js' %}"></script>
+{% endif %}
+
+<div class="bg-gradient-primary modal fade" 
+id="dlgViewDetails" tabindex="-1" role="dialog" 
+aria-labelledby="lblHeader" aria-hidden="true">
+  <div class="modal-dialog my-modal" 
+  role="document" id="modalViewDetails">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="lblHeader">
+          {% trans 'Sale details' %}
+        </h5>
+
+        <button class="close" type="button" 
+        data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">×</span>
+        </button>
+      </div>
+      <hr />
+
+      <div class="modal-body">
+        <div class="card hidden confirm-delete">
+          <div class="body bg-blue-grey">
+            <h4>
+              <!-- 
+                <i class="material-icons">warning</i> 
+              -->
+              {% trans 'Are you sure do you want to remove this' %}
+            </h4>
+
+            <form action="/sales/confirmed-delete/" 
+            method="post" 
+            class="confirm-delete">
+              {% csrf_token %}
+
+              <label for="txtReasonToDrop">
+                {% trans 'Aditionally you can specify the reason to remove this' %}
+              </label>
+
+              <textarea cols="10" id="txtReasonToDrop" 
+              name="reason" class="form-control"></textarea>
+
+              <input name="sale" hidden="" 
+              style="visibility: hidden;" 
+              value="{{sale.id}}" />
+
+              <input type="text" name="itm_menu" 
+              value="{{itm_menu}}" hidden="true" 
+              style="visibility: hidden;" />
+              <br />
+
+              <button class="btn btn-default" 
+              type="submit">
+                {% trans 'Delete' %}
+              </button>
+
+              <button class="btn btn-default" 
+              type="button" onclick="cancelDelete()">
+                {% trans 'Cancel' %}
+              </button>
+            </form>
+          </div>
+        </div>
+
+        <p class="hidden edit">
+          {% trans 'Fields marked are mandatory' %}.
+        </p>
+
+        <div class="table-responsive">
+          <form method="post" class="update"
+          action="/sales/update/">
+            {% csrf_token %}
+
+            <input type="text" 
+            hidden="true" 
+            style="visibility: hidden;" 
+            value="{{sale.id}}" 
+            name="sale">
+
+            <table class="table-bordered table-striped tbl-view-details" 
+            style="white-space: nowrap;">
+              <tbody>
+                {% if can_edit and can_edit|upper == 'TRUE' %}
+                  <tr class="hidden edit">
+                    <td>
+                      <label for="txtIdentifier">
+                        *&nbsp;{% trans 'Sale ID' %}:
+                      </label>
+                    </td>
+                  </tr>
+
+                  <tr class="hidden edit">
+                    <td>
+                      <input id="txtIdentifier" 
+                      type="text" required="true" 
+                      class="form-control" 
+                      value="{{sale.identifier}}" 
+                      name="identifier">
+                    </td>
+                  </tr>
+                {% endif %}
+
+                <tr class="view">
+                  <td>
+                    {% trans 'Sale ID' %}:
+                  </td>
+
+                  <td>
+                    {{sale.identifier}}
+                  </td>
+                </tr>
+
+                {% if can_edit and can_edit|upper == 'TRUE' %}
+                  <tr class="hidden edit">
+                    <td>
+                      <label for="txtCustomer">
+                        *&nbsp;{% trans 'Customer' %}:
+                      </label>
+                    </td>
+                  </tr>
+
+                  <tr class="hidden edit">
+                    <td>
+                      <input id="txtCustomer" 
+                      type="text" required="true" 
+                      class="form-control" 
+                      value="{{sale.customer.person_ptr.full_name}} [RFC={{sale.customer.rfc}}]"
+                      name="provider">
+
+                      <input id="customer_obj" 
+                      type="text" required="true" 
+                      hidden="" 
+                      style="visibility: hidden;" 
+                      class="form-control" 
+                      value="{{sale.customer.id}}" 
+                      name="customer_obj">
+                    </td>
+                  </tr>
+                {% endif %}
+
+                <tr class="view">
+                  <td>
+                    {% trans 'Customer' %}:
+                  </td>
+
+                  <td>
+                    {{sale.customer.person_ptr.full_name}} [RFC={{sale.customer.rfc}}]
+                  </td>
+                </tr>
+
+                {% if can_edit and can_edit|upper == 'TRUE' %}
+                  <tr class="hidden edit">
+                    <td>
+                      <label for="txtSoldAt">
+                        *&nbsp;{% trans 'Sold at' %}:
+                      </label>
+                    </td>
+                  </tr>
+
+                  <tr class="hidden edit">
+                    <td>
+                      <input id="txtSoldAt" 
+                      class="form-control" 
+                      required="" 
+                      value="{{sale.sold_at}}" 
+                      name="sold_at">
+                    </td>
+                  </tr>
+                {% endif %}
+
+                <tr class="view">
+                  <td>
+                    {% trans 'Sold at' %}:
+                  </td>
+
+                  <td>
+                    {{sale.sold_at}}
+                  </td>
+                </tr>
+
+                {% if can_edit and can_edit|upper == 'TRUE' %}
+                  <tr class="hidden edit">
+                    <td>
+                      <label for="txtSoldWhen">
+                        *&nbsp;{% trans 'Sold when' %}:
+                      </label>
+                    </td>
+                  </tr>
+
+                  <tr class="hidden edit">
+                    <td>
+                      <input id="txtSoldWhen" 
+                      class="form-control" required="" 
+                      placeholder="{% trans 'Date format' %}" 
+                      value="{{sale.sold_when_fmt_mx}}" 
+                      name="sold_when">
+                    </td>
+                  </tr>
+                {% endif %}
+
+                <tr class="view">
+                  <td>
+                    {% trans 'Sold when' %}:
+                  </td>
+
+                  <td>
+                    {{sale.sold_when_fmt_mx}}
+                  </td>
+                </tr>
+
+                {% if can_edit and can_edit|upper == 'TRUE' %}
+                  <tr class="hidden edit">
+                    <td>
+                      <label for="txtDescription">
+                        {% trans 'Description' %}:
+                      </label>
+                    </td>
+                  </tr>
+
+                  <tr class="hidden edit">
+                    <td>
+                      <textarea id="txtDescription" 
+                      class="form-control" 
+                      name="description">{{sale.description}}</textarea>
+                    </td>
+                  </tr>
+                {% endif %}
+
+                <tr class="view">
+                  <td>
+                    {% trans 'Description' %}:
+                  </td>
+
+                  <td>
+                    {{sale.description}}
+                  </td>
+                </tr>
+
+                {% if can_edit and can_edit|upper == 'TRUE' %}
+                  <tr class="hidden edit">
+                    <td>
+                      <label for="txtNotes">
+                        {% trans 'Notes or comments' %}:
+                      </label>
+                    </td>
+                  </tr>
+
+                  <tr class="hidden edit">
+                    <td>
+                      <textarea id="txtNotes" 
+                      class="form-control" 
+                      name="notes">{{sale.notes}}</textarea> 
+                    </td>
+                  </tr>
+                {% endif %}
+
+                <tr class="view">
+                  <td>
+                    {% trans 'Notes or comments' %}:
+                  </td>
+
+                  <td>
+                    {{sale.notes}}
+                  </td>
+                </tr>
+
+                {% if can_edit and can_edit|upper == 'TRUE' %}
+                  <tr class="hidden edit">
+                    <td>
+                    </td>
+                  </tr>
+
+                  <tr class="hidden edit">
+                    <td>
+                      <a href="#"
+                      class="show-sold-products" 
+                      onclick="showSoldProducts('{{sale.id}}', '{{can_edit}}', '{{can_delete}}'); return false;">
+                        {% trans 'Sold products' %}
+                      </a>&nbsp;
+
+                      <a href="#"
+                      class="hide-sold-products" 
+                      onclick="hideSoldProducts(); return false;">
+                        {% trans 'Hide sold products' %}
+                      </a>
+                    </td>
+                  </tr>
+                {% endif %}
+
+                <tr id="rowBtnSave" 
+                hidden="true" class="hidden">
+                  <td colspan="2">
+                    <button type="submit" 
+                    class="btn btn-primary">
+                      {% trans 'Save' %}
+                    </button>
+
+                    <button type="button" 
+                    onclick="cancelEdit();hideSoldProducts()" 
+                    class="btn btn-primary btnCancelEdit">
+                      {% trans 'Cancel' %}
+                    </button>
+                  </td>
+                </tr>
+
+                {% if can_edit and can_edit|upper == 'TRUE' or can_delete and can_delete|upper == 'TRUE' %}
+                <tr class="view">
+                  <td>{% trans 'Options' %}:</td>
+
+                  <td>
+                    {% if can_edit and can_edit|upper == 'TRUE' %}
+                      <a href="#" data-placement="bottom"
+                      data-toggle="tooltip"  
+                      onclick="editData();prepareEditFrm();" 
+                      id="actEditData"
+                      title="{% trans 'Edit' %}" 
+                      data-original-title="{% trans 'Edit' %}"><i class="material-icons">edit</i></a>
+                    {% endif %}
+
+                    {% if can_delete and can_delete|upper == 'TRUE' %}
+                      <a href="#" data-placement="top"
+                      data-toggle="tooltip" 
+                      id="actDelete" 
+                      onclick="confirmDelete()" 
+                      title="{% trans 'Delete' %}" 
+                      data-original-title="{% trans 'Delete' %}"><i class="material-icons">delete</i></a>
+                    {% endif %}
+                  </td>
+                </tr>
+                {% endif %}
+              </tbody>
+            </table>
+            <br />
+
+            <a href="#" 
+            class="view show-sold-products" 
+            onclick="showSoldProducts('{{sale.id}}', '{{can_edit}}', '{{can_delete}}')">
+              {% trans 'Sold products' %}
+            </a>&nbsp;
+
+            <a href="#" 
+            class="view hide-sold-products" 
+            onclick="hideSoldProducts()">
+              {% trans 'Hide sold products' %}
+            </a>
+
+            <div id="divSoldProducts">
+            </div>
+          </form>
+        </div>
+      </div>
+      <hr />
+
+      <div class="modal-footer">
+        <button type="button" 
+        class="btn btn-primary" 
+        data-dismiss="modal">
+          <!--<i class="material-icons">clear</i>-->
+          {% trans 'Back' %}
+        </button>
+        <div id="divAjaxResults"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script type="text/javascript">
+  $(".hide-sold-products").hide();
+
+  function on_close_dlgViewDetails() {
+    $('#dlgViewDetails').on('hidden.bs.modal', 
+      function () {
+        $('#dlgSearchResults').focus();
+        $("#actHidePurchasedProducts").hide();
+        toastr.clear();
+      });
+  }
+
+  function hideSoldProducts() {
+    $('#divSoldProducts').empty(); 
+    $(".hide-sold-products").hide();
+    $("#modalViewDetails").css("width", "35%");
+    return false;
+  }
+
+  function showSoldProducts(sale, can_edit, can_delete) {
+    show_msg_with_toastr("info", msg_wait);
+    $("#modalViewDetails").css("width", "auto");
+
+    /*alert(can_edit);
+    alert(can_delete);*/
+    data = { 
+      sale: sale,
+      can_edit: can_edit,
+      can_delete: can_delete
+    };
+
+    $.ajax({
+      method: "GET",
+      url: "/sales/show-sold-products/",
+      data: data
+    })
+    .done(function(result) {
+      toastr.clear();
+      $(".hide-sold-products").show();
+      //actShowPurchasedProducts
+      $("#divSoldProducts").html(result);
+      return false;
+    });
+
+    return false;
+  }
+
+  $(document).ready(function(){
+    toastr.clear();
+
+    itm_menu = $("div.menu li.active a")[0].id;
+    $("#dlgViewDetails input[name='itm_menu']").val(itm_menu);
+
+    var msg_wait;
+
+    $.ajax({
+      method: "GET",
+      url: "/translator/translate/",
+      data: { msg: "Please wait"}
+    })
+    .done(function(result) {
+      msg_wait = result;
+    });
+
+    $('[data-toggle="tooltip"]').tooltip();
+  });
+</script>
+
+{% if can_delete and can_delete|upper == 'TRUE' %}
+<script type="text/javascript">
+  function prepareDeleteFrm() {
+    options = { 
+      target:        'section.content .container-fluid',
+      beforeSubmit:  showRequest,
+      success:       showResponse
+    }; 
+
+    function showRequest(formData, jqForm, options) { 
+      show_msg_with_toastr("info", msg_wait);
+      return true;
+    }
+ 
+    function showResponse(responseText, statusText, xhr, $form)  { 
+      $("#dlgViewDetails").modal("hide");
+      $("#dlgSearchResults").modal("hide");
+    }
+
+    $("#dlgViewDetails form.confirm-delete").ajaxForm(options);
+  }
+</script>
+{% endif %}
+
+{% if can_edit and can_edit|upper == 'TRUE' %}
+<script type="text/javascript">
+  var original_identifier=$("#dlgViewDetails form.update #txtIdentifier").val();
+
+  function prepareEditFrm() {
+/*
+    $("#dlgViewDetails form.update input[name='product']").autocomplete({
+      source: "/products/autocomplete/my-products",
+      minLength: 1,
+    });
+
+    $("#dlgViewDetails form.update input[name='product']").autocomplete({
+      source: "/products/autocomplete/my-products",
+      minLength: 1,
+    });
+
+    $("#dlgViewDetails form.update input[name='brand']").autocomplete({
+      source: "/brands/autocomplete/my-brands",
+      minLength: 1,
+    });   
+
+    $("#dlgViewDetails form.update input[name='product']").change(function(){
+      show_msg_with_toastr("info", msg_wait);
+      $.ajax({
+        method: "GET",
+        url: "/products/search/by-name",
+        data: { product: this.value}
+      })
+      .done(function(result) {
+        toastr.clear();
+        if (result['exist'] != undefined && 
+            !result['exist'] || result.dropped)
+          $.ajax({
+            method: "GET",
+            url: "/translator/translate",
+            data: { msg: "Please enter a valid product"}
+          })
+          .done(function(result) {
+            show_msg_with_toastr("error", result);
+            $("#dlgViewDetails form.update input[name='product_obj']").val("");
+            $("#dlgViewDetails form.update button[type='submit']").attr("disabled", "true");
+          });
+        else if (result.exist == undefined) {
+          show_msg_with_toastr(result.status, result.msg);
+        }
+        else {
+          $("#dlgViewDetails form.update input[name='product_obj']").val(result.product);
+          $("#dlgViewDetails form.update button[type='submit']").removeAttr("disabled");
+        }
+      });
+    });
+
+    $("#dlgViewDetails form.update input[name='brand']").change(function(){
+      show_msg_with_toastr("info", msg_wait);
+      $.ajax({
+        method: "GET",
+        url: "/brands/search/by-name",
+        data: { brand: this.value}
+      })
+      .done(function(result) {
+        toastr.clear();
+        if (result['exist'] != undefined && 
+            !result['exist'] || result.dropped)
+          $.ajax({
+            method: "GET",
+            url: "/translator/translate",
+            data: { msg: "Please enter a valid brand"}
+          })
+          .done(function(result) {
+            show_msg_with_toastr("error", result);
+            $("#dlgViewDetails form.update input[name='brand_obj']").val("");
+            $("#dlgViewDetails form.update button[type='submit']").attr("disabled", "true");
+          });
+        else if (result['exist'] == undefined) {
+          show_msg_with_toastr(result.status, result.msg);
+        }
+        else {
+          $("#dlgViewDetails form.update input[name='brand_obj']").val(result.brand);
+          $("#dlgViewDetails form.update button[type='submit']").removeAttr("disabled");
+        }
+      });
+    });
+
+    $("#dlgViewDetails form.update input[name='product']").autocomplete("option", "appendTo", "#dlgViewDetails form.update");
+
+    $("#dlgViewDetails form.update input[name='brand']").autocomplete("option", "appendTo", "#dlgViewDetails form.update");
+*/
+    $("#dlgViewDetails form.update #txtCustomer").autocomplete({
+      source: "/customers/autocomplete/my-customers/",
+      minLength: 3,
+    });
+
+    $("#dlgViewDetails form.update #txtSoldWhen").datepicker({maxDate: "+0D",  showButtonPanel: true, changeMonth: true, changeYear: true});
+    $("#dlgViewDetails form.update #txtSoldWhen").datepicker("option", $.datepicker.regional["es"] );
+
+    $("#dlgViewDetails form.update #txtSoldAt").timepicker({'scrollDefault': 'now', 'timeFormat': 'H:i:s', 'step': 15, 'disableTextInput': true});
+
+    $("#dlgViewDetails table.tbl-view-details tbody tr td:first-child").removeClass("right-alignment");
+
+    $("#dlgViewDetails form.update #txtCustomer").autocomplete("option", "appendTo", "#dlgViewDetails form.update");
+
+    $("#dlgViewDetails form.update #txtSoldWhen").change(function(){
+      show_msg_with_toastr("info", msg_wait);
+
+      // Regular expression taken from https://www.regextester.com/99555
+      var re = /^([0-2][0-9]|(3)[0-1])(\/)(((0)[0-9])|((1)[0-2]))(\/)\d{4}$/;
+
+      if (!re.test(this.value)) {
+        $.ajax({
+          method: "GET",
+          url: "/translator/translate/",
+          data: {msg: "Wrong format for date"}
+        })
+        .done(function(result) {
+          toastr.clear();
+          show_msg_with_toastr("error", result);
+          $("#dlgViewDetails form.update button[type='submit']").attr("disabled", "true");
+        });
+      }
+      else {
+        toastr.clear();
+        $("#dlgViewDetails form.update button[type='submit']").removeAttr("disabled");
+      }
+    });
+
+    $("#dlgViewDetails form.update #txtIdentifier").change(function(){
+      if (this.value==original_identifier) {
+        $("#dlgViewDetails form.update button[type='submit']").removeAttr("disabled");
+        return false;
+      }
+
+      show_msg_with_toastr("info", msg_wait);
+
+      $.ajax({
+        method: "GET",
+        url: "/sales/search/by-identifier/",
+        data: {identifier: this.value}
+      })
+      .done(function(result) {
+        toastr.clear();
+        if (result.exist) {
+          if (!result.dropped)
+            $.ajax({
+              method: "GET",
+              url: "/translator/translate",
+              data: {msg: "One sale with the specified identifier already exists"}
+            })
+            .done(function(result) {
+              show_msg_with_toastr("error", result);
+              $("#dlgViewDetails form.update button[type='submit']").attr("disabled", "true");
+            });
+          else
+            $.ajax({
+              method: "GET",
+              url: "/translator/translate",
+              data: {msg: "Msg specified identifier already exists with dropped sale"}
+            })
+            .done(function(result) {
+              show_msg_with_toastr("warning", result);
+              $("#dlgViewDetails form.update button[type='submit']").attr("disabled", "true");
+            });
+        }
+        else {
+          $("#dlgViewDetails form.update button[type='submit']").removeAttr("disabled");
+        }
+      });
+    });
+
+    $("#dlgViewDetails form.update #txtCustomer").change(function(){
+      show_msg_with_toastr("info", msg_wait);
+
+      rfc=this.value.substr(this.value.indexOf("RFC=")+"RFC=".length);
+      rfc=rfc.substr(0, rfc.length-1);
+
+      $.ajax({
+        method: "GET",
+        url: "/customers/search/by-rfc/",
+        data: {rfc: rfc}
+      })
+      .done(function(result) {
+        toastr.clear();
+        if (!result.exist)
+          $.ajax({
+            method: "GET",
+            url: "/translator/translate",
+            data: {msg: "Please enter a valid customer"}
+          })
+          .done(function(result) {
+            show_msg_with_toastr("error", result);
+            $("#dlgViewDetails form.update input[name='customer_obj']").val("");
+            $("#dlgViewDetails form.update button[type='submit']").attr("disabled", "true");
+          });
+        else {
+          $("#dlgViewDetails form.update input[name='customer_obj']").val(result.customer);
+          $("#dlgViewDetails form.update button[type='submit']").removeAttr("disabled");
+        }
+      });
+    });
+
+    options = { 
+      target:        '#dlgViewDetails #divAjaxResults',
+      beforeSubmit:  showRequest,  
+      success:       showResponse
+    }; 
+
+    function showRequest(formData, jqForm, options) { 
+      $('#dlgViewDetails form.update button[type="submit"]').attr("disabled", "true");
+      show_msg_with_toastr("info", msg_wait);
+      return true;
+    }
+ 
+    function showResponse(responseText, statusText, xhr, $form)  { 
+      toastr.clear();
+      if (statusText == "success")
+        show_msg_with_toastr(responseText.status, responseText.msg);
+      $('#dlgViewDetails form.update button[type="submit"]').removeAttr("disabled");
+    }
+
+    $("#dlgViewDetails form.update").ajaxForm(options);  
+  }
+</script>
+{% endif %}
+
+<!-- <div id="divViewDetails"></div> -->

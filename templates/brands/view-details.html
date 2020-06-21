@@ -1,0 +1,315 @@
+{% load static i18n %}
+
+<style type="text/css">
+	div#modalViewDetails {
+		width: 35%;
+	}
+
+  table.tbl-view-details {
+    width: 100%;
+  }
+
+  table.tbl-view-details tbody tr td:first-child  {
+    /* text-align: right; */
+    font-weight: bold;
+    width: 100%;
+  }
+
+  .right-alignment {
+    text-align: right;
+  }
+
+  .hidden {
+    visibility: hidden;
+  }
+</style>
+
+{% if can_edit and can_edit|upper == 'TRUE' %}
+<script src="{% static 'js/dashboard/view-details/edit-functions.js' %}"></script>
+{% endif %}
+
+{% if can_delete and can_delete|upper == 'TRUE' %}
+<script src="{% static 'js/dashboard/view-details/delete-functions.js' %}"></script>
+{% endif %}
+
+<div class="bg-gradient-primary modal fade" 
+id="dlgViewDetails" tabindex="-1" role="dialog" 
+aria-labelledby="lblHeader" aria-hidden="true">
+  <div class="modal-dialog my-modal" 
+  role="document" id="modalViewDetails">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="lblHeader">
+          {% trans 'Brand details' %}
+        </h5>
+
+        <button class="close" type="button" 
+        data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">×</span>
+        </button>
+      </div>
+      <hr />
+
+      <div class="modal-body">
+        <div class="card hidden confirm-delete">
+          <div class="body bg-blue-grey">
+            <h4>
+              <!-- 
+                <i class="material-icons">warning</i> 
+              -->
+              {% trans 'Are you sure do you want to remove this' %}
+            </h4>
+
+            <form action="/brands/confirmed-delete" 
+              method="post" class="confirm-delete">
+              {% csrf_token %}
+
+              <label for="txtReasonToDrop">
+                {% trans 'Aditionally you can specify the reason to remove this' %}
+              </label>
+              <textarea cols="10" id="txtReasonToDrop" 
+              name="reason" class="form-control"></textarea>
+
+              <input type="text" name="brand" 
+              value="{{brand.id}}" hidden="true" 
+              style="visibility: hidden;" />
+              <input type="text" name="itm_menu" 
+              value="{{itm_menu}}" hidden="true" 
+              style="visibility: hidden;" />
+              <br />
+
+              <button class="btn btn-default" 
+              type="submit">
+                {% trans 'Delete' %}
+              </button>
+
+              <button class="btn btn-default" 
+              type="button" onclick="cancelDelete()">
+                {% trans 'Cancel' %}
+              </button>
+            </form>
+          </div>
+        </div>
+
+        <p class="hidden edit">
+          {% trans 'Fields marked are mandatory' %}.
+        </p>
+
+      	<div class="table-responsive">
+          <form method="post" class="update" 
+          action="/brands/update">
+            {% csrf_token %}
+
+            <input type="text" 
+            readonly="true" 
+            value="{{brand.id}}" 
+            hidden="true" 
+            style="visibility: hidden;"
+            name="brand">
+
+            <table class="table-bordered table-striped tbl-view-details" 
+            style="white-space: nowrap;">
+              <tbody>
+                {% if can_edit and can_edit|upper == 'TRUE' %}
+                  <tr class="hidden edit">
+                    <td>
+                      <label for="txtBrandName">
+                        *&nbsp;{% trans 'Brand name' %}:
+                      </label>
+                    </td>
+                  </tr>
+
+                  <tr class="hidden edit">
+                    <td>
+                      <input id="txtBrandName" 
+                      type="text" required="true" 
+                      class="form-control" 
+                      value="{{brand.name}}" 
+                      name="brandname">
+                    </td>
+                  </tr>
+                {% endif %}
+
+                <tr class="view">
+                  <td>
+                    {% trans 'Brand name' %}:
+                  </td>
+
+                  <td>
+                    {{brand.name}}
+                  </td>
+                </tr>
+
+                <tr id="rowBtnSave" 
+                hidden="true" class="hidden">
+                  <td colspan="2">
+                    <button type="submit" 
+                    class="btn btn-primary">
+                      {% trans 'Save' %}
+                    </button>
+
+                    <button type="button" 
+                    onclick="cancelEdit()" 
+                    class="btn btn-primary btnCancelEdit">
+                      {% trans 'Cancel' %}
+                    </button>
+                  </td>
+                </tr>
+
+                {% if can_edit and can_edit|upper == 'TRUE' or can_delete and can_delete|upper == 'TRUE' %}
+                <tr class="view">
+                  <td>{% trans 'Options' %}:</td>
+
+                  <td>
+                  	{% if can_edit and can_edit|upper == 'TRUE' %}
+  	                	<a href="#" 
+                      data-placement="bottom"
+  	                	data-toggle="tooltip"  
+                      onclick="editData();prepareEditFrm();" 
+                      id="actEditData"
+  	                	title="{% trans 'Edit' %}" 
+  	                	data-original-title="{% trans 'Edit' %}"><i class="material-icons">edit</i></a>
+                  	{% endif %}
+
+                  	{% if can_delete and can_delete|upper == 'TRUE' %}
+  	                	<a href="#" 
+                      data-placement="top"
+  	                	data-toggle="tooltip" 
+                      id="actDelete" 
+                      onclick="confirmDelete()" 
+  	                	title="{% trans 'Delete' %}" 
+  	                	data-original-title="{% trans 'Delete' %}"><i class="material-icons">delete</i></a>
+                  	{% endif %}
+                  </td>
+                </tr>
+                {% endif %}
+              </tbody>
+            </table>
+          </form>
+        </div>
+      </div>
+      <hr />
+
+      <div class="modal-footer">
+      	<button type="button" class="btn btn-primary" 
+      	data-dismiss="modal">
+      		<!--<i class="material-icons">clear</i>-->
+      		{% trans 'Back' %}
+      	</button>
+        <div id="divAjaxResults"></div>
+      </div>
+    </div>
+	</div>
+</div>
+
+<script type="text/javascript">
+  function on_close_dlgViewDetails() {
+    $('#dlgViewDetails').on('hidden.bs.modal', 
+      function () {
+        $('#dlgSearchResults').focus();
+        toastr.clear();
+      });
+  }
+
+	$(document).ready(function(){
+		toastr.clear();
+
+    itm_menu = $("div.menu li.active a")[0].id;
+    $("#dlgViewDetails input[name='itm_menu']").val(itm_menu);
+
+		var msg_wait;
+
+	  $.ajax({
+	    method: "GET",
+	    url: "/translator/translate/",
+	    data: { msg: "Please wait"}
+	  })
+	  .done(function(result) {
+	    msg_wait = result;
+	  });
+
+		$('[data-toggle="tooltip"]').tooltip();
+  });
+</script>
+
+{% if can_delete and can_delete|upper == 'TRUE' %}
+<script type="text/javascript">
+  function prepareDeleteFrm() {
+    options = { 
+      target:        'section.content .container-fluid',
+      beforeSubmit:  showRequest,
+      success:       showResponse
+    }; 
+
+    function showRequest(formData, jqForm, options) { 
+      show_msg_with_toastr("info", msg_wait);
+      return true;
+    }
+ 
+    function showResponse(responseText, statusText, xhr, $form)  { 
+      $("#dlgViewDetails").modal("hide");
+      $("#dlgSearchResults").modal("hide");
+    }
+
+    $("#dlgViewDetails form.confirm-delete").ajaxForm(options);
+  }
+</script>
+{% endif %}
+
+{% if can_edit and can_edit|upper == 'TRUE' %}
+<script type="text/javascript">
+  function prepareEditFrm() {
+    $("#dlgViewDetails table.tbl-view-details tbody tr td:first-child").removeClass("right-alignment");
+
+    $("#dlgViewDetails form.update input[name='brandname']").change(function(){
+      show_msg_with_toastr("info", msg_wait);
+      name = this.value.trim();
+      $.ajax({
+        method: "GET",
+        url: "/brands/search/by-name",
+        data: { brand: name}
+      })
+      .done(function(result) {
+        toastr.clear();
+        if (result['exist'] != undefined && 
+          result['exist'])
+          $.ajax({
+            method: "GET",
+            url: "/translator/translate",
+            data: { msg: "The brand already exists"}
+          })
+          .done(function(result) {
+            show_msg_with_toastr("error", result);
+            $("#dlgViewDetails form.update button[type='submit']").attr("disabled", "true");
+          });
+        else {
+          $("#dlgViewDetails form.update button[type='submit']").removeAttr("disabled");
+        }
+      });      
+    });
+
+    options = { 
+      target:        '#dlgViewDetails #divAjaxResults',
+      beforeSubmit:  showRequest,  
+      success:       showResponse
+    }; 
+
+    function showRequest(formData, jqForm, options) { 
+      $('#dlgViewDetails form.update button[type="submit"]').attr("disabled", "true");
+      show_msg_with_toastr("info", msg_wait);
+      return true;
+    }
+ 
+    function showResponse(responseText, statusText, xhr, $form)  { 
+      toastr.clear();
+      if (statusText == "success")
+        show_msg_with_toastr(responseText.status, responseText.msg);
+      $('#dlgViewDetails form.update button[type="submit"]').removeAttr("disabled");
+    }
+
+    $("#dlgViewDetails form.update").ajaxForm(options);
+  }
+</script>
+{% endif %}
+
+<div id="divViewDetails"></div>

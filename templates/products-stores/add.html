@@ -1,0 +1,87 @@
+{% extends 'products-stores/generic-form.html' %}
+
+{% load i18n productsapp_tags %}
+
+{% block frm_title %}
+	{% trans 'Add products to store' %}
+{% endblock %}
+
+{% block tbl_results %}
+	{% products_not_stored %}
+{% endblock %}
+
+{% block actions_js %}
+	<script type="text/javascript">
+		//$("#btnSaveSelected").hide();
+
+		function updateProduct(product) {
+  		show_msg_with_toastr("info", msg_wait);
+
+  		sku = $("table#tblResults input[name='sku" + product + "']").val();
+
+  		store = $("table#tblResults input[name='store_obj" + product + "']").val();
+
+  		itm_menu = $("#itm_menu").val();
+
+  		data = {
+  			product: product, sku: sku, store: store,
+  			itm_menu: itm_menu
+  		};
+
+  		valid_csrftoken();
+  		$.ajax({
+		    method: "POST",
+		    url: "/products-stores/update/",
+		    data: data
+		  })
+		  .done(function(result) {
+		  	toastr.clear();
+		  	show_msg_with_toastr(result.status, result.msg);
+		  });
+  	}
+
+	  $(document).ready(function(){
+	  	$("table#tblResults input.store").autocomplete({
+	      source: "/stores/autocomplete/my-stores",
+	      minLength: 1,
+	    });
+
+	    $("table#tblResults input.store").change(function() {
+
+	    	show_msg_with_toastr("info", msg_wait);
+
+	      name = this.name;
+	      product = name.substring("store".length);
+	      storename = this.value.substring(0, this.value.indexOf(" ["));
+
+	      $.ajax({
+	        method: "GET",
+	        url: "/stores/search/by-name",
+	        data: { store: storename }
+	      })
+	      .done(function(result) {
+	        toastr.clear();
+	        if (result.exist != undefined && 
+	          result.exist) {
+	          $("table#tblResults input[name='store_obj" + product + "']").val(result.store);
+	      	}
+	      	else if (!result.exist) {
+	          $("table#tblResults input[name='store_obj" + product + "']").val('');
+	        }
+	        else if (result['exist'] == undefined) {
+	          show_msg_with_toastr(result.status, result.msg);
+	        }
+	      });
+	    });
+
+	    $("#btnWithSelections").click(function() {
+	    	chks = $("table#tblResults input.select-product:checked");
+	    	tope = chks.length;
+	    	for (x=0;x<tope;x++) {
+	    		product=chks[x].id.substring("chkProduct".length);
+	    		$("table#tblResults .save-product" + product).click();
+	    	}
+	    });
+	  });
+	</script>
+{% endblock %}

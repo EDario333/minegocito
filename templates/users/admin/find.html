@@ -1,0 +1,45 @@
+{% extends 'users/admin/generic-form.html' %}
+
+{% load i18n %}
+
+{% block msg_pre_form %}
+	{% trans 'Enter your search criteria' %}.
+	{% trans 'The search results will include all the matching records with any of your search criteria' %}.
+{% endblock %}
+
+{% block actions_js %}
+	{% if show_modal %}
+	  {% if modal_name == 'dlgSearchResults' %}
+	  	<style type="text/css">
+	  		#dlgAssignGroup, #dlgAssignPermissions {
+	  			z-index: 2000;
+	  		}
+	  	</style>
+	  	<script type="text/javascript">
+	    	var group_assigned = false;
+				var permissions_assigned = false;
+	  	</script>
+	    {% load usersgroupsapp_tags %}
+			{% user_assign_group %}
+			{% include 'users/admin/assign-permissions.html' %}
+	    {% include 'users/admin/search-results.html' %}
+	  {% endif %}
+
+	  <script type="text/javascript">
+	    $(document).ready(function(){
+	      $("#{{modal_name}}").modal('show');
+	    });
+	  </script>
+	{% endif %}
+
+	<script type="text/javascript">
+	  $(document).ready(function(){
+	  	/*
+	  	$("input[name='shop']").autocomplete({
+	      source: "/shops/autocomplete/my-shops",
+	      minLength: 1,
+	    });
+	    */
+	  });
+	</script>
+{% endblock %}

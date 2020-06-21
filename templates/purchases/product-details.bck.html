@@ -1,0 +1,93 @@
+{% load i18n %}
+
+<span class="product-data_{{n_product}}">
+	<div class="form-group">
+		<label for="txtProduct{{n_product}}">
+			*&nbsp;{% trans 'Product' %}:
+		</label>
+
+		<input name="product_{{n_product}}" 
+		class="form-control" 
+		style="margin: 0 0 10px 0" 
+		id="txtProduct{{n_product}}" />
+	</div>
+
+	<div class="form-group">
+		<label for="txtBrand{{n_product}}">
+			*&nbsp;{% trans 'Brand' %}:
+		</label>
+
+		<input name="brand_{{n_product}}" 
+		class="form-control" 
+		style="margin: 0 0 10px 0" 
+		id="txtBrand{{n_product}}" />
+	</div>
+
+	<div class="form-group">
+		<label for="txtPurchasePrice{{n_product}}">
+			*&nbsp;{% trans 'Purchase price' %}:
+		</label>
+
+		<input name="purchase_price_{{n_product}}" 
+		class="form-control" 
+		style="margin: 0 0 10px 0" 
+		id="txtPurchasePrice{{n_product}}" />
+	</div>
+
+	<div class="form-group">
+		<label for="txtQuantity{{n_product}}">
+			*&nbsp;{% trans 'Quantity' %}:
+		</label>
+
+		<input name="quantity_{{n_product}}" 
+		class="form-control" 
+		style="margin: 0 0 10px 0" 
+		id="txtQuantity{{n_product}}" />
+	</div>
+
+	<div class="form-group">
+		<label for="txtNotes{{n_product}}">
+			*&nbsp;{% trans 'Notes or comments' %}:
+		</label>
+
+		<input name="notes_{{n_product}}" 
+		class="form-control" 
+		style="margin: 0 0 10px 0" 
+		id="txtNotes{{n_product}}" />
+	</div>
+
+	<div class="form-group">
+		<label for="txtDescription{{n_product}}">
+			*&nbsp;{% trans 'Description' %}:
+		</label>
+
+		<input name="description_{{n_product}}" 
+		class="form-control" 
+		style="margin: 0 0 10px 0" 
+		id="txtDescription{{n_product}}" />
+	</div>
+
+	<button type="button" 
+	id="btnRemoveProduct{{n_product}}" 
+  class="btn btn-primary btn-remove-product">
+    <i class="material-icons">
+      remove_shopping_cart
+    </i>
+    {% trans 'Remove product' %}  
+  </button>
+</span>
+
+<script type="text/javascript">
+	$("section.content form button.btn-remove-product").click(function() {
+  	id = this.id;
+  	n_product = id.substr("btnRemoveProduct".length);
+
+  	alert(n_product);
+
+  	if (confirm("Perderá los datos capturados. ¿Seguro que desea continuar?")) {
+    	$(".product-data_" + n_product).remove();
+    	items_counter--;
+		}
+  });
+
+</script>

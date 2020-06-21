@@ -1,0 +1,52 @@
+{% load static i18n %}
+
+<div class="site-section block-8">
+  <div class="container">
+    <div class="row justify-content-center  mb-5">
+      <div class="col-md-7 site-section-heading text-center pt-4">
+        <h2>
+        	¡{% trans 'Big Sale' %}!
+        </h2>
+      </div>
+    </div>
+
+    <div class="row align-items-center">
+      <div class="col-md-12 col-lg-7 mb-5">
+        <a href="#" onclick="return false;">
+        	<img src="{% static 'imgs/LabPP.jpg' %}" 
+          alt="LabPP" class="img-fluid rounded">
+        </a>
+      </div>
+
+      <div class="col-md-12 col-lg-5 text-center pl-md-5">
+        <h2>
+        	<a href="#">
+        		{% trans 'Big sale header' %}
+        	</a>
+        </h2>
+
+        <p class="post-meta mb-4">
+        	{% trans 'Posted by' %}
+          <a href="mailto:minegocito.mx@gmail.com" target="_blank">Admin</a> 
+        	<span class="block-8-sep">&bullet;</span> 
+        	01 de julio de 2019
+        </p>
+
+        <p>
+        	{% trans 'Big sale content' %}
+        </p>
+
+        <p>
+        	<!-- <a href="#" class="btn btn-primary btn-sm"
+          onclick="showDetails(1); return false;">
+        		{% trans 'Details' %}
+        	</a> -->
+          <a href="#" class="btn btn-primary btn-sm"
+          onclick="return false;">
+            {% trans 'Details' %}
+          </a>
+        </p>
+      </div>
+    </div>
+  </div>
+</div>

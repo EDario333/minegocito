@@ -1,0 +1,702 @@
+{% load static i18n %}
+
+<style type="text/css">
+	div#modalViewDetails {
+		width: 35%;
+	}
+
+  table.tbl-view-details {
+    width: 100%;
+  }
+
+  table.tbl-view-details tbody tr td:first-child  {
+    /* text-align: right; */
+    font-weight: bold;
+    width: 100%;
+  }
+
+  .right-alignment {
+    text-align: right;
+  }
+
+  .hidden {
+    visibility: hidden;
+  }
+</style>
+
+{% if can_edit and can_edit|upper == 'TRUE' %}
+<!-- Editable Table Plugin Js 
+<script src="{% static 'js/editable-table/mindmup-editabletable.js' %}"></script>
+-->
+
+<script type="text/javascript">
+  /*
+  var msg_to_edit;
+  var msg_to_edit_shown = false;
+
+  $.ajax({
+    method: "GET",
+    url: "/translator/translate/",
+    data: { msg: "Make a click on the field to edit its value"}
+  })
+  .done(function(result) {
+    msg_to_edit = result;
+  });
+  */
+
+  function editData() {
+    prepareEditFrm();
+    $('[data-toggle="tooltip"]').tooltip();
+
+    //$('table.tbl-view-details').editableTableWidget();
+    $(".edit").removeClass("hidden");
+    $(".view").addClass("hidden");
+
+    $("tr#rowBtnSave").removeClass("hidden");
+    $("tr#rowBtnSave").removeAttr("hidden");
+
+    $("#dlgViewDetails table.tbl-view-details").removeClass("table-striped");
+    $("#dlgViewDetails table.tbl-view-details tbody tr td:first-child").removeClass("right-alignment");
+
+    $("#dlgViewDetails form.update input")[2].select();
+  }
+
+  function cancelEdit() {
+    //$('table.tbl-view-details tbody tr td').removeAttr("tabindex").css('cursor', 'default');
+    $('[data-toggle="tooltip"]').tooltip();
+
+    $(".edit").addClass("hidden");
+    $(".view").removeClass("hidden");
+    $("#dlgViewDetails table.tbl-view-details").addClass("table-striped");
+    $("#dlgViewDetails table.tbl-view-details tbody tr td:first-child").addClass("right-alignment");
+
+    $("tr#rowBtnSave").addClass("hidden");
+    $("tr#rowBtnSave").attr("hidden", "true");
+  }
+</script>
+{% endif %}
+
+{% if can_delete and can_delete|upper == 'TRUE' %}
+<!-- Editable Table Plugin Js 
+<script src="{% static 'js/editable-table/mindmup-editabletable.js' %}"></script>
+-->
+
+<script type="text/javascript">
+  function cancelDelete() {
+    $("#dlgViewDetails .confirm-delete").addClass("hidden");
+  }
+
+  function confirmDelete() {
+    prepareDeleteFrm();
+    $("#dlgViewDetails .confirm-delete").removeClass("hidden");
+    $("#dlgViewDetails form textarea").focus();
+  }
+</script>
+{% endif %}
+
+<div class="bg-gradient-primary modal fade" 
+id="dlgViewDetails" tabindex="-1" role="dialog" 
+aria-labelledby="lblHeader" aria-hidden="true">
+  <div class="modal-dialog my-modal" 
+  role="document" id="modalViewDetails">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="lblHeader">
+          {% trans 'Shop details' %}
+        </h5>
+
+        <button class="close" type="button" 
+        data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">×</span>
+        </button>
+      </div>
+      <hr />
+
+      <div class="modal-body">
+        <div class="card hidden confirm-delete">
+          <div class="body bg-blue-grey">
+            <h4>
+              <!-- 
+                <i class="material-icons">warning</i> 
+              -->
+              {% trans 'Are you sure do you want to remove this' %}
+              {% trans 'Shop'|lower %}?
+            </h4>
+
+            <form action="/shops/confirmed-delete" 
+              method="post" class="confirm-delete">
+              {% csrf_token %}
+
+              <label for="txtReasonToDrop">
+                {% trans 'Aditionally you can specify the reason to remove this' %}
+                {% trans 'Shop'|lower %}:
+              </label>
+              <textarea cols="10" id="txtReasonToDrop" 
+              name="reason" class="form-control"></textarea>
+
+              <input type="text" name="shop" 
+              value="{{shop.id}}" hidden="true" 
+              style="visibility: hidden;" />
+              <input type="text" name="itm_menu" 
+              value="{{itm_menu}}" hidden="true" 
+              style="visibility: hidden;" />
+              <br />
+
+              <button class="btn btn-default" 
+              type="submit">
+                {% trans 'Delete' %}
+              </button>
+
+              <button class="btn btn-default" 
+              type="button" onclick="cancelDelete()">
+                {% trans 'Cancel' %}
+              </button>
+            </form>
+          </div>
+        </div>
+
+        <p class="hidden edit">
+          {% trans 'Fields marked are mandatory' %}.
+        </p>
+
+      	<div class="table-responsive">
+          <form method="post" class="update" 
+          action="/shops/update">
+            {% csrf_token %}
+
+            <input type="text" 
+            readonly="true" 
+            value="{{shop.id}}" 
+            hidden="true" 
+            style="visibility: hidden;"
+            name="shop">
+
+            <table class="table-bordered table-striped tbl-view-details" 
+            style="white-space: nowrap;">
+              <tbody>
+                {% if can_edit and can_edit|upper == 'TRUE' %}
+                  <tr class="hidden edit">
+                    <td>
+                      <label for="txtShopName">
+                        *&nbsp;{% trans 'Shop name' %}:
+                      </label>
+                    </td>
+                  </tr>
+
+                  <tr class="hidden edit">
+                    <td>
+                      <input id="txtShopName" 
+                      type="text" required="true" 
+                      class="form-control" 
+                      value="{{shop.name}}" 
+                      name="shopname">
+                    </td>
+                  </tr>
+                {% endif %}
+
+                <tr class="view">
+                  <td>
+                    {% trans 'Shop name' %}:
+                  </td>
+
+                  <td>
+                    {{shop.name}}
+                  </td>
+                </tr>
+
+                {% if can_edit and can_edit|upper == 'TRUE' %}
+                  <tr class="hidden edit">
+                    <td>
+                      <label for="txtAddr1">
+                        *&nbsp;{% trans 'Address line 1' %}:
+                      </label>
+                    </td>
+                  </tr>
+
+                  <tr class="hidden edit">
+                    <td>
+                      <input id="txtAddr1" 
+                      type="text" required="true"
+                      class="form-control" 
+                      value="{{shop.address_line1}}" 
+                      name="addressline1">
+                    </td>
+                  </tr>
+                {% endif %}
+
+                <tr class="view">
+                  <td>
+                    {% trans 'Address line 1' %}:
+                  </td>
+
+                  <td>
+                    {{shop.address_line1}}
+                  </td>
+                </tr>
+
+                {% if can_edit and can_edit|upper == 'TRUE' %}
+                  <tr class="hidden edit">
+                    <td>
+                      <label for="txtAddr2">
+                        {% trans 'Address line 2' %}:
+                      </label>
+                    </td>
+                  </tr>
+
+                  <tr class="hidden edit">
+                    <td>
+                      <input id="txtAddr2" 
+                      type="text" 
+                      class="form-control" 
+                      value="{{shop.address_line2}}" 
+                      name="addressline2">
+                    </td>
+                  </tr>
+                {% endif %}
+
+                <tr class="view">
+                  <td>
+                    {% trans 'Address line 2' %}:
+                  </td>
+
+                  <td>
+                    {{shop.address_line2}}
+                  </td>
+                </tr>
+
+                {% if can_edit and can_edit|upper == 'TRUE' %}
+                  <tr class="hidden edit">
+                    <td>
+                      <label for="txtCity">
+                        *&nbsp;{% trans 'City' %}:
+                      </label>
+                    </td>
+                  </tr>
+
+                  <tr class="hidden edit">
+                    <td>
+                      <input id="txtCity" 
+                      type="text" required="true"
+                      class="form-control" 
+                      value="{{shop.city.display_name}}" 
+                      name="city">
+
+                      <input type="text" 
+                      readonly="true" 
+                      hidden="true" 
+                      style="visibility: hidden;" 
+                      value="{{shop.city.id}}" 
+                      name="city_obj">
+                    </td>
+                  </tr>
+                {% endif %}
+
+                <tr class="view">
+                  <td>
+                    {% trans 'City' %}:
+                  </td>
+
+                  <td>
+                    {{shop.city.display_name}}
+                  </td>
+                </tr>
+
+                {% if can_edit and can_edit|upper == 'TRUE' %}
+                  <tr class="hidden edit">
+                    <td>
+                      <label for="txtUserAdmin">
+                        *&nbsp;{% trans 'User admin' %}:
+                      </label>
+                    </td>
+                  </tr>
+
+                  <tr class="hidden edit">
+                    <td>
+                      <input id="txtUserAdmin" 
+                      class="form-control" required="true"
+                      value="{{shop.admin.first_name}}&nbsp;{{shop.admin.last_name}}&nbsp;[email={{shop.admin.email}}]" 
+                      name="useradmin">
+
+                      <input type="text"
+                      hidden="true" 
+                      style="visibility: hidden;" 
+                      value="{{shop.admin.id}}" 
+                      readonly="true" 
+                      name="useradmin_obj">
+                    </td>
+                  </tr>
+                {% endif %}
+
+                <tr class="view">
+                  <td>
+                    {% trans 'User admin' %}:
+                  </td>
+
+                  <td>
+                    {{shop.admin.first_name}}&nbsp;{{shop.admin.last_name}}&nbsp;[email={{shop.admin.email}}]
+                  </td>
+                </tr>
+
+                {% if can_edit and can_edit|upper == 'TRUE' %}
+                  <tr class="hidden edit">
+                    <td>
+                      <label for="txtCellPhone">
+                        *&nbsp;{% trans 'Cell phone' %}:
+                      </label>
+                    </td>
+                  </tr>
+
+                  <tr class="hidden edit">
+                    <td>
+                      <input id="txtCellPhone" 
+                      class="form-control" required="true"
+                      value="{{shop.cell_phone}}" 
+                      name="cellphone">
+                    </td>
+                  </tr>
+                {% endif %}
+
+                <tr class="view">
+                  <td>
+                    {% trans 'Cell phone' %}:
+                  </td>
+
+                  <td>
+                    {{shop.cell_phone}}
+                  </td>
+                </tr>
+
+                {% if can_edit and can_edit|upper == 'TRUE' %}
+                  <tr class="hidden edit">
+                    <td>
+                      <label for="txtHomePhone">
+                        {% trans 'Home phone' %}:
+                      </label>
+                    </td>
+                  </tr>
+
+                  <tr class="hidden edit">
+                    <td>
+                      <input id="txtHomePhone" 
+                      class="form-control" 
+                      value="{{shop.home_phone}}" 
+                      name="homephone">
+                    </td>
+                  </tr>
+                {% endif %}
+
+                <tr class="view">
+                  <td>
+                    {% trans 'Home phone' %}:
+                  </td>
+
+                  <td>
+                    {{shop.home_phone}}
+                  </td>
+                </tr>
+
+                {% if can_edit and can_edit|upper == 'TRUE' %}
+                  <tr class="hidden edit">
+                    <td>
+                      <label for="txtOtherPhone">
+                        {% trans 'Other phone' %}:
+                      </label>
+                    </td>
+                  </tr>
+
+                  <tr class="hidden edit">
+                    <td>
+                      <input id="txtOtherPhone" 
+                      class="form-control" 
+                      value="{{shop.other_phone}}" 
+                      name="otherphone">
+                    </td>
+                  </tr>
+                {% endif %}
+
+                <tr class="view">
+                  <td>
+                    {% trans 'Other phone' %}:
+                  </td>
+
+                  <td>
+                    {{shop.other_phone}}
+                  </td>
+                </tr>
+
+                <tr id="rowBtnSave" 
+                hidden="true" class="hidden">
+                  <td colspan="2">
+                    <!--
+                    <button type="button" 
+                    onclick="updateShop('{{shop.id}}')" 
+                    class="btn btn-primary">
+                    -->
+                    <button type="submit" 
+                    class="btn btn-primary">
+                      <!--
+                        <i class="material-icons">save</i>
+                      -->
+                      {% trans 'Save' %}
+                    </button>
+
+                    <button type="button" 
+                    onclick="cancelEdit()" 
+                    class="btn btn-primary btnCancelEdit">
+                      {% trans 'Cancel' %}
+                    </button>
+                  </td>
+                </tr>
+
+                {% if can_edit and can_edit|upper == 'TRUE' or can_delete and can_delete|upper == 'TRUE' %}
+                <tr class="view">
+                  <td>{% trans 'Options' %}:</td>
+
+                  <td>
+                  	{% if can_edit and can_edit|upper == 'TRUE' %}
+  	                	<a href="#" data-placement="bottom"
+  	                	data-toggle="tooltip"  
+                      onclick="editData()" 
+                      id="actEditData"
+  	                	title="{% trans 'Edit' %}" 
+  	                	data-original-title="{% trans 'Edit' %}"><i class="material-icons">edit</i></a>
+                  	{% endif %}
+
+                  	{% if can_delete and can_delete|upper == 'TRUE' %}
+  	                	<a href="#" data-placement="top"
+  	                	data-toggle="tooltip" 
+                      id="actDelete" 
+                      onclick="confirmDelete()" 
+  	                	title="{% trans 'Delete' %}" 
+  	                	data-original-title="{% trans 'Delete' %}"><i class="material-icons">delete</i></a>
+                  	{% endif %}
+                  </td>
+                </tr>
+                {% endif %}
+              </tbody>
+            </table>
+          </form>
+        </div>
+      </div>
+      <hr />
+
+      <div class="modal-footer">
+      	<button type="button" class="btn btn-primary" 
+      	data-dismiss="modal">
+      		<!--<i class="material-icons">clear</i>-->
+      		{% trans 'Back' %}
+      	</button>
+        <div id="divAjaxResults"></div>
+      </div>
+    </div>
+	</div>
+</div>
+
+<script type="text/javascript">
+  function on_close_dlgViewDetails() {
+    $('#dlgViewDetails').on('hidden.bs.modal', 
+      function () {
+        $('#dlgSearchResults').focus();
+        toastr.clear();
+      });
+  }
+
+	$(document).ready(function(){
+		toastr.clear();
+
+    itm_menu = $("div.menu li.active a")[0].id;
+    $("#dlgViewDetails input[name='itm_menu']").val(itm_menu);
+
+		var msg_wait;
+
+	  $.ajax({
+	    method: "GET",
+	    url: "/translator/translate/",
+	    data: { msg: "Please wait"}
+	  })
+	  .done(function(result) {
+	    msg_wait = result;
+	  });
+/*
+		function showDetails(shop) {
+			show_msg_with_toastr("info", msg_wait);
+			console.log(shop);
+			$.ajax({
+		    method: "GET",
+		    url: "/shops/view-details",
+		    data: { shop: shop}
+		  })
+		  .done(function(result) {
+		  	$("div#divViewDetails").html(result);
+		  	$("#dlgViewDetails").modal();
+		  });
+		  return false;
+		}
+*/
+		// Tooltips
+		$('[data-toggle="tooltip"]').tooltip();
+  });
+</script>
+
+{% if can_delete and can_delete|upper == 'TRUE' %}
+<script type="text/javascript">
+  function prepareDeleteFrm() {
+    var options = { 
+      target:        'section.content .container-fluid',   // target element(s) to be updated with server response 
+      beforeSubmit:  showRequest,  // pre-submit callback 
+      success:       showResponse  // post-submit callback 
+
+      // other available options: 
+      //url:       url         // override for form's 'action' attribute 
+      //type:      type        // 'get' or 'post', override for form's 'method' attribute 
+      //dataType:  null        // 'xml', 'script', or 'json' (expected server response type) 
+      //clearForm: true        // clear all form fields after successful submit 
+      //resetForm: true        // reset the form after successful submit 
+
+      // $.ajax options can be used here too, for example: 
+      //timeout:   3000 
+    }; 
+
+    // pre-submit callback 
+    function showRequest(formData, jqForm, options) { 
+      // formData is an array; here we use $.param to convert it to a string to display it but the form plugin does this for you automatically when it submits the data 
+      //var queryString = $.param(formData); 
+   
+      // jqForm is a jQuery object encapsulating the form element.  To access the DOM element for the form do this: 
+      // var formElement = jqForm[0]; 
+   
+      //alert('About to submit: \n\n' + queryString); 
+   
+      // here we could return false to prevent the form from being submitted; returning anything other than false will allow the form submit to continue 
+      //showLoader();
+      show_msg_with_toastr("info", msg_wait);
+      return true;
+    }
+ 
+    // post-submit callback 
+    function showResponse(responseText, statusText, xhr, $form)  { 
+      // for normal html responses, the first argument to the success callback is the XMLHttpRequest object's responseText property 
+   
+      // if the ajaxForm method was passed an Options Object with the dataType property set to 'xml' then the first argument to the success callback is the XMLHttpRequest object's responseXML property 
+   
+      // if the ajaxForm method was passed an Options Object with the dataType property set to 'json' then the first argument to the success callback is the json data object returned by the server    
+      //toastr.clear();
+      $("#dlgViewDetails").modal("hide");
+      $("#dlgSearchResults").modal("hide");
+    }
+
+    $("#dlgViewDetails form.confirm-delete").ajaxForm(options);
+  }
+</script>
+{% endif %}
+
+{% if can_edit and can_edit|upper == 'TRUE' %}
+<script type="text/javascript">
+  function prepareEditFrm() {
+    $("#dlgViewDetails form.update input[name='useradmin']").autocomplete({
+      source: "{% url 'my-users-autocomplete' %}",
+      minLength: 1,
+    });
+
+    $("#dlgViewDetails form.update input[name='city']").autocomplete({
+      source: "{% url 'cities-autocomplete' %}",
+      minLength: 1,
+    });
+
+    $("#dlgViewDetails table.tbl-view-details tbody tr td:first-child").removeClass("right-alignment");
+
+    $("#dlgViewDetails form.update input[name='city']").change(function(){
+      show_msg_with_toastr("info", msg_wait);
+      $.ajax({
+        method: "GET",
+        url: "{% url 'search-city-by-name' %}",
+        data: { name: this.value}
+      })
+      .done(function(result) {
+        toastr.clear();
+        if (!result['exist'])
+          $.ajax({
+            method: "GET",
+            url: "/translator/translate",
+            data: { msg: "Please enter a valid city"}
+          })
+          .done(function(result) {
+            show_msg_with_toastr("error", result);
+            $("input[name='city_obj']").val("");
+            $("#dlgViewDetails form.update button[type='submit']").attr("disabled", "true");
+          });
+        else {
+          $("input[name='city_obj']").val(result["city"]);
+          $("#dlgViewDetails form.update button[type='submit']").removeAttr("disabled");
+        }
+      });
+    });
+
+    $("#dlgViewDetails form.update input[name='useradmin']").autocomplete({
+      source: "{% url 'my-users-autocomplete' %}",
+      minLength: 1,
+    });
+
+    $("#dlgViewDetails form.update input[name='useradmin']").change(function(){
+      show_msg_with_toastr("info", msg_wait);
+
+      email = this.value.substring(this.value.indexOf("[email=") + "[email=".length, this.value.indexOf("]"));
+
+      $.ajax({
+        method: "GET",
+        url: "{% url 'search-user-by-email' %}",
+        data: { email: email}
+      })
+      .done(function(result) {
+        toastr.clear();
+        if (!result['exist'])
+          $.ajax({
+            method: "GET",
+            url: "/translator/translate",
+            data: { msg: "Please enter a valid user"}
+          })
+          .done(function(result) {
+            show_msg_with_toastr("error", result);
+            $("#dlgViewDetails form.update input[name='useradmin_obj']").val("");
+            $("#dlgViewDetails form.update button[type='submit']").attr("disabled", "true");
+          });
+        else {
+          $("#dlgViewDetails form.update input[name='useradmin_obj']").val(result["user"]);
+          $("#dlgViewDetails form.update button[type='submit']").removeAttr("disabled");
+        }
+      });
+    });
+
+    // The next approach solve the issue with jQuery autocompletes on Bootstrap's modal dialog
+    // The issue is that the autocomplete options will appear "behind" the modal dialog. In my previous apps I will include a css style modifying the z-index for the ui-autocomplete, but now, I think this approach is even better
+    // This was taken from: 
+    // https://stackoverflow.com/questions/16133654/autocomplete-issue-into-bootstrap-modal
+    $("#dlgViewDetails form.update input[name='useradmin']").autocomplete("option", "appendTo", "#dlgViewDetails form.update");
+
+    $("#dlgViewDetails form.update input[name='city']").autocomplete("option", "appendTo", "#dlgViewDetails form.update");
+
+    var options = { 
+      target:        '#dlgViewDetails #divAjaxResults',
+      beforeSubmit:  showRequest,  
+      success:       showResponse
+    }; 
+
+    function showRequest(formData, jqForm, options) { 
+      $('#dlgViewDetails form.update button[type="submit"]').attr("disabled", "true");
+      show_msg_with_toastr("info", msg_wait);
+      return true;
+    }
+ 
+    function showResponse(responseText, statusText, xhr, $form)  { 
+      toastr.clear();
+      if (statusText == "success")
+        show_msg_with_toastr(responseText.status, responseText.msg);
+      $('#dlgViewDetails form.update button[type="submit"]').removeAttr("disabled");
+    }
+
+    $("#dlgViewDetails form.update").ajaxForm(options);
+  }
+</script>
+{% endif %}
+
+<div id="divViewDetails"></div>

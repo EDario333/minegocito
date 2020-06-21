@@ -1,0 +1,105 @@
+{% extends 'providers/generic-form.html' %}
+
+{% load i18n %}
+
+{% block msg_pre_form %}
+	{% trans 'Fields marked are mandatory' %}.
+{% endblock %}
+
+{% block actions_js %}
+	<script type="text/javascript">
+	  $(document).ready(function(){
+	  	$("#id_email").change(function() {
+	  		show_msg_with_toastr("info", msg_wait);
+
+	  		$.ajax({
+	        method: "GET",
+	        url: "/providers/search/by-email/",
+	        data: {email: this.value}
+	      })
+	      .done(function(result) {
+	        toastr.clear();
+	        if (result.exist) {
+	        	$.ajax({
+			        method: "GET",
+			        url: "/translator/translate/",
+			        data: {msg: "Already exists one provider with the specified email"}
+			      })
+			      .done(function(result) {
+			        toastr.clear();
+			        show_msg_with_toastr("error", result);
+			      });
+	          $("section.content form button[type='submit']").attr("disabled", "true");
+	        }
+	        else
+	          $("section.content form button[type='submit']").removeAttr("disabled");
+	      });
+	  	});
+
+	  	$("#id_name").change(function() {
+	  		show_msg_with_toastr("info", msg_wait);
+
+	  		$.ajax({
+	        method: "GET",
+	        url: "/providers/search/by-name/",
+	        data: {name: this.value}
+	      })
+	      .done(function(result) {
+	        toastr.clear();
+	        if (result.exist) {
+	        	$.ajax({
+			        method: "GET",
+			        url: "/translator/translate/",
+			        data: {msg: "Already exists one provider with the specified name"}
+			      })
+			      .done(function(result) {
+			        toastr.clear();
+			        show_msg_with_toastr("error", result);
+			      });
+	          $("section.content form button[type='submit']").attr("disabled", "true");
+	        }
+	        else
+	          $("section.content form button[type='submit']").removeAttr("disabled");
+	      });
+	  	});
+
+	  	$("#id_rfc").change(function() {
+	  		show_msg_with_toastr("info", msg_wait);
+
+	  		$.ajax({
+	        method: "GET",
+	        url: "/providers/search/by-rfc/",
+	        data: {rfc: this.value}
+	      })
+	      .done(function(result) {
+	        toastr.clear();
+	        if (result.exist) {
+	        	$.ajax({
+			        method: "GET",
+			        url: "/translator/translate/",
+			        data: {msg: "Already exists one provider with the specified RFC"}
+			      })
+			      .done(function(result) {
+			        toastr.clear();
+			        show_msg_with_toastr("error", result);
+			      });
+	          $("section.content form button[type='submit']").attr("disabled", "true");
+	        }
+	        else
+	          $("section.content form button[type='submit']").removeAttr("disabled");
+	      });
+	  	});
+
+	  	$("#actNewContactPerson").click(function() {
+	      show_msg_with_toastr("info", msg_wait);
+	      $("#secContactPerson").load("/providers/new-contact-person/?module=add", 
+	        function() { 
+	          toastr.clear();
+	          $("#secContactPerson #id_last_name").focus();
+	        }
+	      );
+	      return false;
+	    });
+	  });
+	</script>
+{% endblock %}

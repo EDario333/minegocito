@@ -1,0 +1,44 @@
+{% load i18n %}
+
+<div id="ftt-Step8" 
+style="margin: 0 0 0 0;"
+class="popover popover-x popover-default">
+  <div class="arrow"></div>
+  <h3 class="popover-header popover-title">
+  	<span class="close pull-right" data-dismiss="popover-x">
+      &times;
+    </span>
+  	{% trans 'Title step 8 tutorial app' %}
+  </h3>
+
+  <div class="popover-body popover-content">
+    <p>
+      {% trans 'Based on your permissions you will find here the access to app actions' %}.
+    </p>
+
+    <p>
+      {% trans 'Items with a plus sign has more items, click on it to display their children' %}.
+    </p>
+  </div>
+
+  <div class="popover-footer">
+    <button 
+    data-dismiss="popover-x"
+    onclick="gotoStep9('{{my_user}}')" 
+    class="btn btn-sm btn-primary">
+  		{% trans 'Next' %}
+    </button>
+
+    <button
+    onclick="gotoStep7('{{my_user}}')" 
+    class="btn btn-sm btn-default">
+    	{% trans 'Previous' %}
+    </button>
+
+    <button
+    data-dismiss="popover-x"
+    class="btn btn-sm btn-default">
+      {% trans 'Cancel' %}
+    </button>
+  </div>
+</div>

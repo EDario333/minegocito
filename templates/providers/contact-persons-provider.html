@@ -1,0 +1,130 @@
+{% load i18n %}
+
+<!-- For edit/delete provider -->
+<style type="text/css">
+  .ui-datepicker {
+    z-index: 2050;
+  }
+</style>
+
+<script type="text/javascript">
+  function removeAllContactPersons(provider) {
+    if (confirm("Perderá los datos capturados de las personas de contacto. ¿Desea continuar?")) {
+
+      $.ajax({
+        method: "GET",
+        url: "/providers/contact-persons/delete-all",
+        data: {provider: provider}
+      })
+      .done(function(result) {
+        toastr.clear();
+        if (result.status=="success") {
+          $("#tblContactPersons tbody").empty();
+          hideContactPersons();
+          $(".show-contact-persons").hide();
+        }
+        else
+          show_msg_with_toastr(result.status, result.msg);
+      });
+    }
+  }
+
+  function removeContactPerson(cp) {
+    $("#secEditContactPerson").load("/providers/contact-persons/edit/?cp="+cp+"&can_delete=true", function() {
+      $("#dlgEditContactPerson").modal("show");
+      setTimeout(
+        function() {
+          $("#dlgEditContactPerson #actDelete").click();
+        }, 500);
+    });
+  }
+
+  function editDataContactPerson(cp) {
+    $("#secEditContactPerson").load("/providers/contact-persons/edit/?cp="+cp+"&can_edit=true", function() {
+      $("#dlgEditContactPerson").modal("show");
+      setTimeout(
+        function() {
+          prepareEditFrm();
+          //$("#dlgEditContactPerson #txtFirstName").focus();
+        }, 500);
+      //$('#dlgViewDetails').modal("hide");
+    });
+  }
+
+  function viewDataContactPerson(cp,can_edit,can_delete) {
+    $("#secEditContactPerson").load("/providers/contact-persons/edit/?cp="+cp+"&can_edit="+can_edit+"&can_delete="+can_delete+"&enter_and_edit=false", function() {
+      $("#dlgEditContactPerson").modal("show");
+      //$('#dlgViewDetails').modal("hide");
+    });
+  }
+</script>
+
+<h4 id="headerContactPersons">
+{% trans 'Contact persons' %}
+</h4>
+
+<table id="tblContactPersons"
+class="table table-bordered table-striped table-hover no-footer">
+  <thead>
+    <tr>
+      <th>{% trans 'First name' %}</th>
+      <th>{% trans 'Middle name' %}</th>
+      <th>{% trans 'Last name' %}</th>
+      <th>{% trans 'Mothers last name' %}</th>
+      <!--<th>{% trans 'Quantity' %}</th>-->
+      <!--<th>Subtotal</th>-->
+      <th>{% trans 'Options' %}</th>
+      <!-- <th></th> -->
+    </tr>
+  </thead>
+
+  <tbody>
+    {% for cp in contact_persons %}
+      <tr id="row{{cp.id}}">
+        <td>{{cp.contact_person.first_name}}</td>
+        <td>{{cp.contact_person.middle_name}}</td>
+        <td>{{cp.contact_person.last_name}}</td>
+        <td>
+        {{cp.contact_person.mothers_last_name}}</td>
+
+        <td>
+          <a href="#" data-placement="bottom"
+            data-toggle="tooltip"  
+            onclick="viewDataContactPerson('{{cp.id}}', '{{can_edit}}', '{{can_delete}}'); return false;" 
+            title="{% trans 'Details' %}" 
+            data-original-title="{% trans 'Details' %}"><i class="material-icons">zoom_in</i></a>
+
+          {% if can_edit and can_edit|upper == 'TRUE' %}
+            <a href="#" data-placement="bottom"
+            data-toggle="tooltip"  
+            onclick="editDataContactPerson('{{cp.id}}'); return false;" 
+            id="actEditData"
+            title="{% trans 'Edit' %}" 
+            data-original-title="{% trans 'Edit' %}"><i class="material-icons">edit</i></a>
+          {% endif %}
+
+          {% if can_delete and can_delete|upper == 'TRUE' %}
+            <a href="#" data-placement="top"
+            data-toggle="tooltip" 
+            id="actDelete" 
+            onclick="removeContactPerson('{{cp.id}}'); return false;" 
+            title="{% trans 'Delete' %}" 
+            data-original-title="{% trans 'Delete' %}"><i class="material-icons">delete</i></a>
+          {% endif %}
+        </td>
+      </tr>
+    {% endfor %}
+  </tbody>
+</table>
+
+<a href="#" onclick="removeAllContactPersons('{{provider}}'); $(this).blur(); return false;" 
+class="actRemoveContactPersons">
+  <i class="material-icons">
+    delete
+  </i>
+  {% trans 'Remove all' %}  
+</a>
+
+<script type="text/javascript">
+  $('[data-toggle="tooltip"]').tooltip();
+</script>

@@ -1,0 +1,101 @@
+{% load i18n %}
+
+<div class="site-section site-section-sm site-blocks-1">
+  <div class="container">
+    <div class="row">
+      <div class="col-md-6 col-lg-4 d-lg-flex mb-4 mb-lg-0 pl-4" data-aos="fade-up" data-aos-delay="">
+        <div class="icon mr-4 align-self-start">
+          <span class="icon-money_off"></span>
+        </div>
+
+        <div class="text">
+          <h2 class="text-uppercase">
+          	{% trans 'Low price' %}
+          </h2>
+
+          <p>
+          	{% trans 'Low price feature' %}
+          </p>
+
+          <a href="#" id="lpMore" onclick="return false;">
+            {% trans 'Read more' %}
+          </a>
+        </div>
+      </div>
+
+      <div class="col-md-6 col-lg-4 d-lg-flex mb-4 mb-lg-0 pl-4" data-aos="fade-up" data-aos-delay="100">
+        <div class="icon mr-4 align-self-start">
+          <span class="icon-globe"></span>
+        </div>
+
+        <div class="text">
+          <h2 class="text-uppercase">
+          	{% trans 'Advanced technologies' %}
+        	</h2>
+
+          <p>
+          	{% trans 'Advanced technologies feature' %}
+          </p>
+
+          <a href="#" id="atMore" onclick="return false;">
+            {% trans 'Read more' %}
+          </a>
+        </div>
+      </div>
+
+      <div class="col-md-6 col-lg-4 d-lg-flex mb-4 mb-lg-0 pl-4" data-aos="fade-up" data-aos-delay="200">
+        <div class="icon mr-4 align-self-start">
+          <span class="icon-group"></span>
+        </div>
+
+        <div class="text">
+          <h2 class="text-uppercase">
+          	{% trans 'Multidisciplinary team' %}
+        	</h2>
+
+          <p>
+          	{% trans 'Multidisciplinary team feature' %}
+        	</p>
+
+          <a href="#" id="mtMore" onclick="return false;">
+            {% trans 'Read more' %}
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script type="text/javascript">
+  $(document).ready(function(){
+    var msg_lp;
+    var msg_at;
+    var msg_mt;
+
+    $.ajax({
+      method: "GET",
+      url: "/translator/many/",
+      data: {msgs: "Low price feature 2,Advanced technologies feature 2,Multidisciplinary team feature 2"}
+    })
+    .done(function(result) {
+      result=result.split(',');
+      msg_lp=result[0]+", "+result[1]+", "+result[2]+", "+result[3]+result[4];
+      msg_at=result[5]+", "+result[6]+", "+result[7]+", "+result[8]+", "+result[9];
+      msg_mt=result[10]+", "+result[11]+", "+result[12]+", "+result[13];
+
+      $("#lpMore").attr("data-placement", "bottom");
+      $("#lpMore").attr("data-toggle", "tooltip");
+      $("#lpMore").attr("data-original-title", msg_lp);
+
+      $("#atMore").attr("data-placement", "bottom");
+      $("#atMore").attr("data-toggle", "tooltip");
+      $("#atMore").attr("data-original-title", msg_at);
+
+      $("#mtMore").attr("data-placement", "bottom");
+      $("#mtMore").attr("data-toggle", "tooltip");
+      $("#mtMore").attr("data-original-title", msg_mt);
+
+      $('[data-toggle="tooltip"]').tooltip();
+    });
+  });
+</script>

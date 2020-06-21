@@ -1,0 +1,70 @@
+{% load static i18n %}
+
+<link href="{% static 'popover/css/bootstrap-popover-x.min.css' %}" media="all" rel="stylesheet" 
+type="text/css" />
+<script src="{% static 'popover/js/bootstrap-popover-x.min.js' %}"
+type="text/javascript">
+</script>
+
+{% include 'dashboard/tutorials/first/step1.html' %}
+{% include 'dashboard/tutorials/first/step2.html' %}
+{% include 'dashboard/tutorials/first/step3.html' %}
+{% include 'dashboard/tutorials/first/step4.html' %}
+{% include 'dashboard/tutorials/first/step5.html' %}
+{% include 'dashboard/tutorials/first/step6.html' %}
+{% include 'dashboard/tutorials/first/step7.html' %}
+{% include 'dashboard/tutorials/first/step8.html' %}
+{% include 'dashboard/tutorials/first/step9.html' %}
+{% include 'dashboard/tutorials/first/step10.html' %}
+{% include 'dashboard/tutorials/first/step11.html' %}
+
+<!--
+<div class="modal fade" id="dlgCompleteFirstTutorial" 
+tabindex="-1" data-keyboard="false" data-backdrop="static"
+role="dialog" aria-labelledby="lblHeader" aria-hidden="true">
+-->
+<div class="modal fade" id="dlgCompleteFirstTutorial" 
+tabindex="-1" data-backdrop="static"
+role="dialog" aria-labelledby="lblHeader" 
+aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered" 
+  role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="lblHeader">
+          {% trans 'You dont have completed the first tutorial' %}
+        </h5>
+      </div>
+
+      <div class="modal-body">
+        <p style="text-align: justify;">
+          {% trans 'We have detected that you dont have completed the first tutorial' %}. {% trans 'We will to continue the first time tutorial if you wanted' %}.
+        </p>
+
+        <p style="text-align: justify;">
+          {% trans 'Do you want to continue the first time tutorial' %}?
+        </p>
+
+        <input type="checkbox" checked="true" 
+        name="always-show-dlg-first-tutorial"
+        id="chkAlwaysShowDlgFirstTutorial" />
+
+        <label for="chkAlwaysShowDlgFirstTutorial"> 
+          {% trans 'Always show this message' %}
+        </label>
+      </div>
+
+      <div class="modal-footer">
+        <button class="btn btn-secondary" type="button" data-dismiss="modal">
+          {% trans 'No' %}
+        </button>
+
+        <a class="btn btn-primary" href="#" 
+        data-dismiss="modal"
+        onclick="continueFirstTutorial({{my_user.current_step_first_tutorial}});">
+          {% trans 'Yes' %}
+        </a>
+      </div>
+    </div>
+  </div>
+</div>

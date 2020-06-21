@@ -1,0 +1,2536 @@
+{% load static i18n %}
+
+<!-- Jquery DataTable Plugin Js -->
+<script src="{% static 'js/jquery-datatable/jquery.dataTables.js' %}"></script>
+<script src="{% static 'js/jquery-datatable/skin/bootstrap/js/dataTables.bootstrap.js' %}"></script>
+<script src="{% static 'js/jquery-datatable/extensions/export/dataTables.buttons.min.js' %}"></script>
+<script src="{% static 'js/jquery-datatable/extensions/export/buttons.flash.min.js' %}"></script>
+<script src="{% static 'js/jquery-datatable/extensions/export/jszip.min.js' %}"></script>
+<script src="{% static 'js/jquery-datatable/extensions/export/pdfmake.min.js' %}"></script>
+<script src="{% static 'js/jquery-datatable/extensions/export/vfs_fonts.js' %}"></script>
+<script src="{% static 'js/jquery-datatable/extensions/export/buttons.html5.min.js' %}"></script>
+<script src="{% static 'js/jquery-datatable/extensions/export/buttons.print.min.js' %}"></script>
+
+<!-- JQuery DataTable Css -->
+<link href="{% static 'js/jquery-datatable/skin/bootstrap/css/dataTables.bootstrap.css' %}" rel="stylesheet">
+
+<style type="text/css">
+  #secSalesOfTheDay .table-responsive, 
+  #secSalesByRange .table-responsive, 
+  #secSalesByCustomers .table-responsive,
+  #secSalesByUsers .table-responsive,
+  #secSalesOfTheDay table.dataTable thead th,
+  #secSalesByRange table.dataTable thead th,
+  #secSalesByCustomers table.dataTable thead th,
+  #secSalesByUsers table.dataTable thead th {
+    text-align: center;
+  }
+</style>
+
+<script src="{% static 'js/dashboard/search-results/before-load-html.js' %}"></script>
+
+<div class="container-fluid">
+  <div class="row clearfix">
+    <div class="card">
+      <div class="header">
+        <h2>
+      		{{form.title|upper}}
+        </h2>
+  		</div>
+
+			<div class="body">
+		    <p>
+		      {% block msg_pre_form %}
+		      {% endblock %}
+		    </p>
+
+        <!-- Starts row 1 -->
+        <div class="row">
+          <!-- Starts col 1 -->
+  		    <div 
+          class="col-lg-6 col-md-6 col-sm-12 col-xs-12">
+  	        <div class="card">
+  	          <div class="header">
+                <h2>{% trans 'Sales of the day' %}</h2>
+<!--
+                <ul id="menuSalesOfTheDay" 
+                class="header-dropdown m-r--5">
+                  <li class="dropdown">
+                    <a href="javascript:void(0);" 
+                    class="dropdown-toggle" 
+                    data-toggle="dropdown" role="button" aria-haspopup="true" 
+                    aria-expanded="true">
+                      <i class="material-icons">more_vert</i>
+                    </a>
+
+  									<ul class="dropdown-menu pull-right">
+                      <li>
+                      	<a href="javascript:void(0);" class="waves-effect waves-block"
+                        onclick="alert('No disponible en esta versión')">
+                          {% trans 'View' %}
+                      		{% trans 'Sold products'|lower %}
+                      	</a>
+                      </li>
+                    </ul>
+                  </li>
+                </ul>
+-->
+  	          </div>
+
+              <div class="body" id="secSalesOfTheDay">
+              	<!-- 
+                <iframe class="chartjs-hidden-iframe" style="width: 100%; display: block; border: 0px none; height: 0px; margin: 0px; position: absolute; inset: 0px;"></iframe>
+                -->
+                <canvas id="sales_of_the_day" 
+                height="358" 
+                style="display: block; width: 717px; height: 358px;" 
+                width="717"></canvas>
+
+                <p id="secDetails" 
+                style="margin: 10px 0"></p>
+              </div>
+  	        </div>
+  	      </div>
+          <!-- Ends col 1 -->
+
+          <!-- Starts col 2 -->
+  	      <div 
+          class="col-lg-6 col-md-6 col-sm-12 col-xs-12">
+  	      	<div class="card">
+              <div class="header">
+                <h2>{% trans 'Sales by range' %}</h2>
+
+<!--
+                <ul id="menuSalesByRange" 
+                class="header-dropdown m-r--5">
+                  <li class="dropdown">
+                    <a href="javascript:void(0);" 
+                    class="dropdown-toggle" 
+                    data-toggle="dropdown" role="button" aria-haspopup="true" 
+                    aria-expanded="true">
+                      <i class="material-icons">more_vert</i>
+                    </a>
+
+                    <ul class="dropdown-menu pull-right">
+                      <li>
+                        <a href="javascript:void(0);" class="waves-effect waves-block"
+                        onclick="alert('No disponible en esta versión')">
+                          {% trans 'View' %}
+                          {% trans 'Sold products'|lower %}
+                        </a>
+                      </li>
+                    </ul>
+                  </li>
+                </ul>
+-->
+              </div>
+
+              <div class="body" id="secSalesByRange">
+                <form method="post" 
+                onreset="resetFrmSalesByRange()" 
+                action="/analytics/sales/by-range/">
+                {% csrf_token %}
+
+                <input hidden="" 
+                name="itm_menu"
+                style="visibility: hidden;" 
+                value="{{itm_menu}}" />
+
+                  <div class="row hide-me-on-config">
+                    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                      {% trans 'Fields marked are mandatory' %}
+                    </div>
+                  </div>
+
+                  <div class="row hide-me-on-config">
+                    <div class="col-lg-6 col-md-6 col-sm-12 col-xs-12">
+                      <label for="txtStartingWhen">
+                        *&nbsp;{% trans 'Starting when' %}:
+                      </label>
+
+                      <input name="starting_when" 
+                      id="txtStartingWhen" required="" 
+                      placeholder="{% trans 'Date format' %}"
+                      class="form-control">
+                    </div>
+
+                    <div class="col-lg-6 col-md-6 col-sm-12 col-xs-12">
+                      <label for="txtStartingAt">
+                        *&nbsp;{% trans 'Starting at' %}:
+                      </label>
+
+                      <input name="starting_at" 
+                      id="txtStartingAt" required="" 
+                      class="form-control">
+                    </div>
+                  </div>
+
+                  <div class="row hide-me-on-config">
+                    <div class="col-lg-6 col-md-6 col-sm-12 col-xs-12">
+                      <label for="txtEndingWhen">
+                        *&nbsp;{% trans 'Ending when' %}:
+                      </label>
+
+                      <input name="ending_when" 
+                      id="txtEndingWhen" required="" 
+                      placeholder="{% trans 'Date format' %}"
+                      class="form-control">
+                    </div>
+
+                    <div class="col-lg-6 col-md-6 col-sm-12 col-xs-12">
+                      <label for="txtEndingAt">
+                        *&nbsp;{% trans 'Ending at' %}:
+                      </label>
+
+                      <input name="ending_at" 
+                      id="txtEndingAt" required="" 
+                      placeholder="{% trans 'Date format' %}"
+                      class="form-control">
+                    </div>
+                  </div>
+
+                  <a href="#" class="actCfg">
+                    {% trans 'Advanced config' %}
+                  </a>
+
+                  <div style="margin: 0 0 10px 0">
+                    <div class="secAdvancedConfig">
+                    </div>
+                  </div>
+
+                  <div class="btns">
+                    <button type="submit" 
+                    class="btn btn-primary waves-effect">
+                      <i class="material-icons">search</i>
+                      {% trans 'Search' %}
+                    </button>
+
+                    <button type="reset"
+                    class="btn btn-warning waves-effect">
+                      <i class="material-icons">clear_all</i>
+                      {% trans 'Clean all' %}
+                    </button>
+                  </div>
+                </form>
+
+                <p id="msg" 
+                style="margin: 10px 0 0 0"></p>
+
+                <!-- El siguiente es el bueno -->
+                <canvas id="sales_by_range" 
+                height="558" 
+                style="display: block; width: 717px; height: 558px;" 
+                width="717"></canvas>
+
+                <p id="secDetails" 
+                style="margin: 10px 0"></p>
+
+                <!-- <canvas id="sales_by_range" 
+                height="358" 
+                style="display: block; width: 717px; height: 358px;" 
+                width="717"></canvas> -->
+              </div>
+            </div>
+  	      </div>
+          <!-- Ends col 2 -->
+        </div>  
+        <!-- Ends row 1 -->
+
+        <!-- Starts row 2 -->
+        <div class="row">
+          <!-- Starts col 1 -->
+          <div 
+          class="col-lg-6 col-md-6 col-sm-12 col-xs-12">
+            <div class="card">
+              <div class="header">
+                <h2>{% trans 'Sales by customers' %}</h2>
+
+<!--
+                <ul id="menuSalesByCustomers" 
+                class="header-dropdown m-r--5">
+                  <li class="dropdown">
+                    <a href="javascript:void(0);" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="true">
+                      <i class="material-icons">more_vert</i>
+                    </a>
+
+                    <ul class="dropdown-menu pull-right">
+                      <li>
+                        <a href="javascript:void(0);" class="waves-effect waves-block" onclick="alert('No disponible en esta versión')">
+                          Ver
+                          productos vendidos
+                        </a>
+                      </li>
+                    </ul>
+                  </li>
+                </ul>
+-->
+              </div>
+
+              <div class="body" id="secSalesByCustomers">
+                <form method="post" 
+                onreset="resetFrmSalesByCustomers();" 
+                action="/analytics/sales/by-customer/">
+                {% csrf_token %}
+
+                <input hidden="" 
+                name="itm_menu" id="itm_menu" 
+                style="visibility: hidden;" 
+                value="{{itm_menu}}" />
+
+                  <div class="row hide-me-on-config">
+                    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                      {% trans 'Fields marked are mandatory' %}
+                    </div>
+                  </div>
+
+                  <div class="hide-me-on-config"
+                  style="margin: 0 0 20px 0">
+                    <label for="txtCustomer">
+                      *&nbsp;{% trans 'Customer' %}:
+                    </label>
+
+                    <input 
+                    id="txtCustomer" required="" 
+                    name="customer" 
+                    class="form-control">
+
+                    <input hidden="" 
+                    style="visibility: hidden;" 
+                    id="customer_obj"
+                    name="customer_obj" />
+                  </div>
+
+                  <a href="#"
+                  class="hide-me-on-config view-all">
+                    {% trans 'View all' %}s
+                  </a>
+
+                  <a href="#" class="actCfg">
+                    {% trans 'Advanced config' %}
+                  </a>
+
+                  <div style="margin: 0 0 10px 0">
+                    <div class="secAdvancedConfig">
+                    </div>
+                  </div>
+
+                  <div class="btns">
+                    <button type="submit" 
+                    class="btn btn-primary waves-effect">
+                      <i class="material-icons">search</i>
+                      {% trans 'Search' %}
+                    </button>
+
+                    <button type="reset"
+                    class="btn btn-warning waves-effect">
+                      <i class="material-icons">clear_all</i>
+                      {% trans 'Clean all' %}
+                    </button>
+                  </div>
+                </form>
+
+                <p id="msg" 
+                style="margin: 10px 0 0 0"></p>
+
+                <canvas id="sales_by_customers" 
+                height="358" 
+                style="display: block; width: 717px; height: 358px;" 
+                width="717"></canvas>
+
+                <p id="secDetails" 
+                style="margin: 10px 0"></p>
+              </div>
+            </div>
+          </div>
+          <!-- Ends col 1 -->
+
+          <!-- Starts col 2 -->
+          <div 
+          class="col-lg-6 col-md-6 col-sm-12 col-xs-12">
+            <div class="card">
+              <div class="header">
+                <h2>{% trans 'Sales by cashier' %}</h2>
+
+<!--
+                <ul id="menuSalesByUsers" 
+                class="header-dropdown m-r--5">
+                  <li class="dropdown">
+                    <a href="javascript:void(0);" 
+                    class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="true">
+                      <i class="material-icons">more_vert</i>
+                    </a>
+
+                    <ul class="dropdown-menu pull-right">
+                      <li>
+                        <a href="javascript:void(0);" class="waves-effect waves-block" onclick="alert('No disponible en esta versión')">
+                          Ver
+                          productos vendidos
+                        </a>
+                      </li>
+                    </ul>
+                  </li>
+                </ul>
+-->
+              </div>
+
+              <div class="body" id="secSalesByUsers">
+                <form method="post" 
+                onreset="resetFrmSalesByUsers()" 
+                action="/analytics/sales/by-user/">
+                {% csrf_token %}
+
+                <input hidden="" 
+                name="itm_menu" id="itm_menu" 
+                style="visibility: hidden;" 
+                value="{{itm_menu}}" />
+
+                  <div class="row hide-me-on-config">
+                    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                      {% trans 'Fields marked are mandatory' %}
+                    </div>
+                  </div>
+
+                  <div class="hide-me-on-config" 
+                  style="margin: 0 0 20px 0">
+                    <label for="txtUser">
+                      *&nbsp;{% trans 'Cashier' %}:
+                    </label>
+
+                    <input 
+                    id="txtUser" required=""
+                    name="user" class="form-control">
+
+                    <input hidden="" 
+                    id="user_obj" 
+                    style="visibility: hidden;" 
+                    name="user_obj" />
+                  </div>
+
+                  <a href="#" 
+                  class="hide-me-on-config view-all">
+                    {% trans 'View all' %}s
+                  </a>
+
+                  <a href="#" class="actCfg">
+                    {% trans 'Advanced config' %}
+                  </a>
+
+                  <div style="margin: 0 0 10px 0">
+                    <div class="secAdvancedConfig">
+                    </div>
+                  </div>
+
+                  <div class="btns">
+                    <button type="submit" 
+                    class="btn btn-primary waves-effect">
+                      <i class="material-icons">search</i>
+                      {% trans 'Search' %}
+                    </button>
+
+                    <button type="reset"
+                    class="btn btn-warning waves-effect">
+                      <i class="material-icons">clear_all</i>
+                      {% trans 'Clean all' %}
+                    </button>
+                  </div>
+                </form>
+
+                <p id="msg" 
+                style="margin: 10px 0 0 0"></p>
+
+                <canvas id="sales_by_users" 
+                height="358" 
+                style="display: block; width: 717px; height: 358px;" 
+                width="717"></canvas>
+
+                <p id="secDetails" 
+                style="margin: 10px 0"></p>
+              </div>
+            </div>
+          </div>
+          <!-- Ends col 2 -->
+        </div>
+        <!-- Ends row 2 -->
+
+        <!-- Starts row 3 -->
+        <div class="row">
+          <!-- Starts col 1 -->
+          <div 
+          class="col-lg-6 col-md-6 col-sm-12 col-xs-12">
+            <div class="card">
+              <div class="header">
+                <h2>{% trans 'Sales by products' %}</h2>
+              </div>
+
+              <div class="body" 
+              id="secSalesByProducts">
+                <form method="post" 
+                onreset="resetFrmSalesByProducts();" 
+                action="/analytics/sales/by-product/">
+                {% csrf_token %}
+
+                <input hidden="" 
+                name="itm_menu" id="itm_menu" 
+                style="visibility: hidden;" 
+                value="{{itm_menu}}" />
+
+                  <div class="row hide-me-on-config">
+                    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                      {% trans 'Fields marked are mandatory' %}
+                    </div>
+                  </div>
+
+                  <div class="hide-me-on-config"
+                  style="margin: 0 0 20px 0">
+                    <label for="txtProduct">
+                      *&nbsp;{% trans 'Product' %}:
+                    </label>
+
+                    <input 
+                    id="txtProduct" required="" 
+                    name="product" 
+                    class="form-control">
+
+                    <input hidden="" 
+                    style="visibility: hidden;" 
+                    id="product_obj"
+                    name="product_obj" />
+                  </div>
+
+                  <a href="#"
+                  class="hide-me-on-config view-all">
+                    {% trans 'View all' %}s
+                  </a>
+
+                  <a href="#" class="actCfg">
+                    {% trans 'Advanced config' %}
+                  </a>
+
+                  <div style="margin: 0 0 10px 0">
+                    <div class="secAdvancedConfig">
+                    </div>
+                  </div>
+
+                  <div class="btns">
+                    <button type="submit" 
+                    class="btn btn-primary waves-effect">
+                      <i class="material-icons">search</i>
+                      {% trans 'Search' %}
+                    </button>
+
+                    <button type="reset"
+                    class="btn btn-warning waves-effect">
+                      <i class="material-icons">clear_all</i>
+                      {% trans 'Clean all' %}
+                    </button>
+                  </div>
+                </form>
+
+                <p id="msg" 
+                style="margin: 10px 0 0 0"></p>
+
+                <canvas id="sales_by_products" 
+                height="358" 
+                style="display: block; width: 717px; height: 358px;" 
+                width="717"></canvas>
+
+                <p id="secDetails" 
+                style="margin: 10px 0"></p>
+              </div>
+            </div>
+          </div>
+          <!-- Ends col 1 -->
+
+          <!-- Starts col 2 -->
+          <div 
+          class="col-lg-6 col-md-6 col-sm-12 col-xs-12">
+            <div class="card">
+              <div class="header">
+                <h2>
+                  {% trans 'Sales by brands' %}
+                </h2>
+              </div>
+
+              <div class="body" id="secSalesByBrands">
+                <form method="post" 
+                onreset="resetFrmSalesByBrands()" 
+                action="/analytics/sales/by-brand/">
+                {% csrf_token %}
+
+                <input hidden="" 
+                name="itm_menu" id="itm_menu" 
+                style="visibility: hidden;" 
+                value="{{itm_menu}}" />
+
+                  <div class="row hide-me-on-config">
+                    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                      {% trans 'Fields marked are mandatory' %}
+                    </div>
+                  </div>
+
+                  <div class="hide-me-on-config" 
+                  style="margin: 0 0 20px 0">
+                    <label for="txtBrand">
+                      *&nbsp;{% trans 'Brand' %}:
+                    </label>
+
+                    <input 
+                    id="txtBrand" required=""
+                    name="brand" class="form-control">
+
+                    <input hidden="" 
+                    id="brand_obj" 
+                    style="visibility: hidden;" 
+                    name="brand_obj" />
+                  </div>
+
+                  <a href="#" 
+                  class="hide-me-on-config view-all">
+                    {% trans 'View all' %}s
+                  </a>
+
+                  <a href="#" class="actCfg">
+                    {% trans 'Advanced config' %}
+                  </a>
+
+                  <div style="margin: 0 0 10px 0">
+                    <div class="secAdvancedConfig">
+                    </div>
+                  </div>
+
+                  <div class="btns">
+                    <button type="submit" 
+                    class="btn btn-primary waves-effect">
+                      <i class="material-icons">search</i>
+                      {% trans 'Search' %}
+                    </button>
+
+                    <button type="reset"
+                    class="btn btn-warning waves-effect">
+                      <i class="material-icons">clear_all</i>
+                      {% trans 'Clean all' %}
+                    </button>
+                  </div>
+                </form>
+
+                <p id="msg" 
+                style="margin: 10px 0 0 0"></p>
+
+                <canvas id="sales_by_brands" 
+                height="358" 
+                style="display: block; width: 717px; height: 358px;" 
+                width="717"></canvas>
+
+                <p id="secDetails" 
+                style="margin: 10px 0"></p>
+              </div>
+            </div>
+          </div>
+          <!-- Ends col 2 -->
+        </div>
+        <!-- Ends row 3 -->
+
+        <!-- Starts row 4 -->
+        <div class="row">
+          <!-- Starts col 1 -->
+          <div 
+          class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+            <div class="card">
+              <div class="header">
+                <h2>{% trans 'Sales by shops' %}</h2>
+              </div>
+
+              <div class="body" 
+              id="secSalesByShops">
+                <form method="post" 
+                onreset="resetFrmSalesByShops();" 
+                action="/analytics/sales/by-shop/">
+                {% csrf_token %}
+
+                <input hidden="" 
+                name="itm_menu" id="itm_menu" 
+                style="visibility: hidden;" 
+                value="{{itm_menu}}" />
+
+                  <div class="row hide-me-on-config">
+                    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                      {% trans 'Fields marked are mandatory' %}
+                    </div>
+                  </div>
+
+                  <div class="hide-me-on-config"
+                  style="margin: 0 0 20px 0">
+                    <label for="txtShop">
+                      *&nbsp;{% trans 'Shop' %}:
+                    </label>
+
+                    <input 
+                    id="txtShop" required="" 
+                    name="shop" 
+                    class="form-control">
+
+                    <input hidden="" 
+                    style="visibility: hidden;" 
+                    id="shop_obj"
+                    name="shop_obj" />
+                  </div>
+
+                  <a href="#"
+                  class="hide-me-on-config view-all">
+                    {% trans 'View all' %}s
+                  </a>
+
+                  <a href="#" class="actCfg">
+                    {% trans 'Advanced config' %}
+                  </a>
+
+                  <div style="margin: 0 0 10px 0">
+                    <div class="secAdvancedConfig">
+                    </div>
+                  </div>
+
+                  <div class="btns">
+                    <button type="submit" 
+                    class="btn btn-primary waves-effect">
+                      <i class="material-icons">search</i>
+                      {% trans 'Search' %}
+                    </button>
+
+                    <button type="reset"
+                    class="btn btn-warning waves-effect">
+                      <i class="material-icons">clear_all</i>
+                      {% trans 'Clean all' %}
+                    </button>
+                  </div>
+                </form>
+
+                <p id="msg" 
+                style="margin: 10px 0 0 0"></p>
+
+                <canvas id="sales_by_shops" 
+                height="358" 
+                style="display: block; width: 717px; height: 358px;"
+                width="717"></canvas>
+
+                <p id="secDetails" 
+                style="margin: 10px 0"></p>
+              </div>
+            </div>
+          </div>
+          <!-- Ends col 1 -->
+        </div>
+        <!-- Ends row 4 -->
+		  </div>
+		</div>
+  </div>
+</div>
+
+<script type="text/javascript" src="{% static 'js/jquery-ui-1.12.1/jquery-ui.min.js' %}"></script>
+
+<link href="{% static 'js/jquery-ui-1.12.1/jquery-ui.min.css' %}" rel="stylesheet">
+
+<script type="text/javascript" src="{% static 'js/jquery.form.min.js' %}"></script>
+
+<script type="text/javascript" src="{% static 'js/jquery-ui-1.12.1/datepicker-es.js' %}"></script>
+
+<script type="text/javascript" src="{% static 'js/jquery-timepicker/jquery.timepicker.min.js' %}"></script>
+
+<link href="{% static 'js/jquery-timepicker/jquery.timepicker.min.css' %}" rel="stylesheet">
+
+<!-- Chart Plugins Js -->
+<script src="{% static 'js/chartjs/Chart.bundle.min.js' %}"></script>
+
+<script src="{% static 'js/chartjs/utils.js' %}"></script>
+
+<script src="{% static 'js/chartjs/moment.min.js' %}"></script>
+
+<!-- Custom Js 
+<script src="{% static 'js/chartjs/Chart.bundle.js' %}"></script>
+
+<script src="{% static 'AdminBSBMaterialDesign-master/js/pages/charts/chartjs.js' %}"></script>
+-->
+<script type="text/javascript">
+  var msg_wait;
+  var msg_wrong_date_fmt;
+  var msg_wrong_dates;
+  var msg_wrong_times;
+
+  $.ajax({
+    method: "GET",
+    url: "/translator/many/",
+    data: {msgs: "Please wait,Wrong format for date,Starting and ending dates are wrong,Starting and ending times are wrong"}
+  })
+  .done(function(result) {
+    result = result.split(',');
+    msg_wait = result[0];
+    msg_wrong_date_fmt = result[1];
+    msg_wrong_dates = result[2];
+    msg_wrong_times = result[3];
+  });
+
+  /*function on_close_dlgViewDetails() {
+    $('#dlgViewDetails').on('hidden.bs.modal', 
+      function () {
+        toastr.clear();
+      });
+  }*/
+
+  function loadAdvancedCfgSalesByRangeFrm() {
+    show_msg_with_toastr("info", msg_wait);
+    $("#secSalesByRange .secAdvancedConfig").load("/analytics/sales/advanced-cfg-by-range/", function() {
+        toastr.clear();
+        $("#secSalesByRange .secAdvancedConfig").hide();
+
+        can_i_search=
+          selected_shops.length>0 &&
+          selected_products.length>0 &&
+          selected_brands.length>0 &&
+          selected_customers.length>0 &&
+          selected_users.length>0;
+
+        if (!can_i_search) {
+          $("#secSalesByRange").parent().remove();
+          $("#secSalesOfTheDay").parent().parent().attr("class", "col-lg-12 col-md-12 col-sm-12 col-xs-12");
+          return false;          
+        }
+        else {
+          return true;
+        }
+      });
+    /*toastr.clear();
+    $("#secSalesByRange .secAdvancedConfig").hide();*/
+  }
+
+  function resetFrmSalesByRange() {
+    $("#secSalesByRange #msg").empty(); 
+    $("#secSalesByRange #sales_by_range").hide(); 
+    $("#secSalesByRange .secAdvancedConfig").hide();
+    $("#secSalesByRange #secDetails").empty();
+    loadAdvancedCfgSalesByRangeFrm();
+    //$("#secSalesByRange #advanced-search").val(false);
+  }
+
+  function loadAdvancedCfgSalesByCustomersFrm() {
+    show_msg_with_toastr("info", msg_wait);
+    $("#secSalesByCustomers .secAdvancedConfig").load("/analytics/sales/advanced-cfg-by-customers/", function() {
+        toastr.clear();
+        $("#secSalesByCustomers .secAdvancedConfig").hide();
+
+        can_i_search=
+          selected_shops.length>0 &&
+          selected_products.length>0 &&
+          selected_brands.length>0;
+
+        if (!can_i_search) {
+          $("#secSalesByCustomers").parent().remove();
+          $("#secSalesByUsers").parent().parent().attr("class", "col-lg-12 col-md-12 col-sm-12 col-xs-12");
+          return false;          
+        }
+        else {
+          return true;
+        }
+      });
+    /*toastr.clear();
+    $("#secSalesByCustomers .secAdvancedConfig").hide();*/
+  }
+
+  function resetFrmSalesByCustomers() {
+    $("#secSalesByCustomers #msg").empty(); 
+    $("#secSalesByCustomers #sales_by_customers").hide(); 
+    $("#secSalesByCustomers .secAdvancedConfig").hide();
+    loadAdvancedCfgSalesByCustomersFrm();
+    $("#secSalesByCustomers #secDetails").empty();
+    $("#txtCustomer").focus();
+    //$("#secSalesByRange #advanced-search").val(false);
+  }
+
+  function loadAdvancedCfgSalesByUsersFrm() {
+    show_msg_with_toastr("info", msg_wait);
+    $("#secSalesByUsers .secAdvancedConfig").load("/analytics/sales/advanced-cfg-by-users", function() {
+        toastr.clear();
+        $("#secSalesByUsers .secAdvancedConfig").hide();
+
+        can_i_search=
+          selected_shops.length>0 &&
+          selected_products.length>0 &&
+          selected_brands.length>0;
+
+        if (!can_i_search) {
+          $("#secSalesByUsers").parent().remove();
+          $("#secSalesByCustomers").parent().parent().attr("class", "col-lg-12 col-md-12 col-sm-12 col-xs-12");
+          return false;          
+        }
+        else {
+          return true;
+        }
+      });
+    /*toastr.clear();
+    $("#secSalesByUsers .secAdvancedConfig").hide();*/
+  }
+
+  function resetFrmSalesByUsers() {
+    $("#secSalesByUsers #msg").empty(); 
+    $("#secSalesByUsers #sales_by_users").hide(); 
+    $("#secSalesByUsers .secAdvancedConfig").hide();
+    loadAdvancedCfgSalesByUsersFrm();
+    $("#secSalesByUsers #secDetails").empty();
+    $("#txtUser").focus();
+    //$("#secSalesByRange #advanced-search").val(false);
+  }
+
+  function loadAdvancedCfgSalesByProductsFrm() {
+    show_msg_with_toastr("info", msg_wait);
+    $("#secSalesByProducts .secAdvancedConfig").load("/analytics/sales/advanced-cfg-by-products/", function() {
+        toastr.clear();
+        $("#secSalesByProducts .secAdvancedConfig").hide();
+
+        can_i_search=
+          selected_shops.length>0 &&
+          selected_products.length>0 &&
+          selected_brands.length>0;
+
+        if (!can_i_search) {
+          $("#secSalesByProducts").parent().remove();
+          $("#secSalesByBrands").parent().parent().attr("class", "col-lg-12 col-md-12 col-sm-12 col-xs-12");
+          return false;          
+        }
+        else {
+          return true;
+        }
+      });
+  }
+
+  function resetFrmSalesByProducts() {
+    $("#secSalesByProducts #msg").empty(); 
+    $("#secSalesByProducts #sales_by_products").hide(); 
+    $("#secSalesByProducts .secAdvancedConfig").hide();
+    loadAdvancedCfgSalesByProductsFrm();
+    $("#secSalesByProducts #secDetails").empty();
+    $("#txtProduct").focus();
+  }
+
+  function loadAdvancedCfgSalesByBrandsFrm() {
+    show_msg_with_toastr("info", msg_wait);
+    $("#secSalesByBrands .secAdvancedConfig").load("/analytics/sales/advanced-cfg-by-brands/", function() {
+        toastr.clear();
+        $("#secSalesByBrands .secAdvancedConfig").hide();
+
+        can_i_search=
+          selected_shops.length>0 &&
+          selected_products.length>0 &&
+          selected_brands.length>0;
+
+        if (!can_i_search) {
+          $("#secSalesByBrands").parent().remove();
+          $("#secSalesByProducts").parent().parent().attr("class", "col-lg-12 col-md-12 col-sm-12 col-xs-12");
+          return false;          
+        }
+        else {
+          return true;
+        }
+      });
+  }
+
+  function resetFrmSalesByBrands() {
+    $("#secSalesByBrands #msg").empty(); 
+    $("#secSalesByBrands #sales_by_brands").hide(); 
+    $("#secSalesByBrands .secAdvancedConfig").hide();
+    loadAdvancedCfgSalesByBrandsFrm();
+    $("#secSalesByBrands #secDetails").empty();
+    $("#txtBrand").focus();
+  }
+
+  function loadAdvancedCfgSalesByShopsFrm() {
+    show_msg_with_toastr("info", msg_wait);
+    $("#secSalesByShops .secAdvancedConfig").load("/analytics/sales/advanced-cfg-by-shops/", function() {
+        toastr.clear();
+        $("#secSalesByShops .secAdvancedConfig").hide();
+
+        can_i_search=
+          selected_shops.length>0 &&
+          selected_products.length>0 &&
+          selected_brands.length>0;
+
+        if (!can_i_search) {
+          $("#secSalesByShops").parent().remove();
+          //$("#secSalesByProducts").parent().parent().attr("class", "col-lg-12 col-md-12 col-sm-12 col-xs-12");
+          return false;          
+        }
+        else {
+          return true;
+        }
+      });
+  }
+
+  function resetFrmSalesByShops() {
+    $("#secSalesByShops #msg").empty(); 
+    $("#secSalesByShops #sales_by_shops").hide(); 
+    $("#secSalesByShops .secAdvancedConfig").hide();
+    loadAdvancedCfgSalesByShopsFrm();
+    $("#secSalesByShops #secDetails").empty();
+    $("#txtShop").focus();
+  }
+
+  function cfgSalesByRangeFrm() {
+    $("#secSalesByRange #sales_by_range").hide();
+
+    loadAdvancedCfgSalesByRangeFrm();
+
+    $("#secSalesByRange .actCfg").click(function() {
+      $("#secSalesByRange .secAdvancedConfig").show();
+      $("#secSalesByRange .hide-me-on-config").hide();
+      $("#secSalesByRange .btns").hide();
+      $("#secSalesByRange form button[type='submit']").attr("disabled", "");
+      $("#secSalesByRange .form-control").attr("disabled", "");
+      // $(this).blur();
+      $(this).hide();
+      return false;
+    })
+
+    function verifyDateFormat(for_field_id) {
+      // Regular expression taken from https://www.regextester.com/99555
+      var re = /^([0-2][0-9]|(3)[0-1])(\/)(((0)[0-9])|((1)[0-2]))(\/)\d{4}$/;
+
+      if (!re.test($(for_field_id).val())) {
+        $.ajax({
+          method: "GET",
+          url: "/translator/translate/",
+          data: {msg: "Wrong format for date"}
+        })
+        .done(function(result) {
+          toastr.clear();
+          show_msg_with_toastr("error", result);
+          $("#secSalesByRange form button[type='submit']").attr("disabled", "");
+        });
+        return false;
+      }
+      else {
+        toastr.clear();
+        $("#secSalesByRange form button[type='submit']").removeAttr("disabled");
+      }
+      return true;
+    }
+
+    function verifyDateRanges() {
+      show_msg_with_toastr("info", msg_wait);
+      starts=$("#secSalesByRange #txtStartingWhen").val();
+      ends=$("#secSalesByRange #txtEndingWhen").val();
+
+      if (starts>ends) {
+        toastr.clear();
+        show_msg_with_toastr("error", msg_wrong_dates);
+        $("#secSalesByRange form button[type='submit']").attr("disabled", "");
+      }
+      else if (starts==ends) {
+        t_starts=$("#secSalesByRange #txtStartingAt").val();
+        t_ends=$("#secSalesByRange #txtEndingAt").val();
+        if (t_starts>t_ends) {
+          toastr.clear();
+          show_msg_with_toastr("error", msg_wrong_times);
+          $("#secSalesByRange form button[type='submit']").attr("disabled", "");
+        }
+        else {
+          toastr.clear();
+          $("#secSalesByRange form button[type='submit']").removeAttr("disabled");
+        }
+      }
+      else {
+        toastr.clear();
+        $("#secSalesByRange form button[type='submit']").removeAttr("disabled");
+      }
+    }
+
+    // Starting date
+    $("#secSalesByRange #txtStartingWhen").datepicker({maxDate: "+0D", showButtonPanel: true, changeMonth: true, changeYear: true});
+
+    $("#secSalesByRange #txtStartingWhen").datepicker("option", $.datepicker.regional["es"] );
+
+    // Starting time
+    $("#secSalesByRange #txtStartingAt").timepicker({'scrollDefault': 'now', 'timeFormat': 'H:i:s', 'disableTextInput': true});
+
+    $("#secSalesByRange #txtStartingAt").val("00:00:00");
+
+    // Ending date
+    $("#secSalesByRange #txtEndingWhen").datepicker({maxDate: "+0D", showButtonPanel: true, changeMonth: true, changeYear: true});
+
+    $("#secSalesByRange #txtEndingWhen").datepicker("option", $.datepicker.regional["es"] );
+
+    $("#secSalesByRange #txtEndingWhen").val(new Date().toLocaleDateString());
+
+    // Ending time
+    $("#secSalesByRange #txtEndingAt").timepicker({'scrollDefault': 'now', 'timeFormat': 'H:i:s', 'disableTextInput': true});
+
+    $("#secSalesByRange #txtEndingAt").val(new Date().toLocaleTimeString());
+
+    $("#secSalesByRange #txtStartingWhen").change(function() {
+      if (verifyDateFormat("#secSalesByRange #txtStartingWhen"))
+        verifyDateRanges();
+    });
+
+    $("#secSalesByRange #txtStartingAt").change(function() {
+      verifyDateRanges();
+    });
+
+    $("#secSalesByRange #txtEndingWhen").change(function() {
+      if (verifyDateFormat("#secSalesByRange #txtEndingWhen"))
+        verifyDateRanges();
+    });
+
+    $("#secSalesByRange #txtEndingAt").change(function() {
+      verifyDateRanges();
+    });
+
+    function prepareCfgDataForSubmit(addTo) {
+      selected_shops=[];
+      selected_products=[];
+      selected_brands=[];
+      selected_customers=[];
+      selected_users=[];
+
+      // Shops...
+      chks=$("#secSalesByRange .secAdvancedConfig .chkShop");
+      tope=chks.length;
+      for (x=0;x<tope;x++)
+        if (chks[x].checked)
+          selected_shops.push(chks[x].id.substr("chkShop".length));
+
+      // Products...
+      chks=$("#secSalesByRange .secAdvancedConfig .chkProduct");
+      tope=chks.length;
+      for (x=0;x<tope;x++)
+        if (chks[x].checked)
+          selected_products.push(chks[x].id.substr("chkProduct".length));
+
+      // Brands...
+      chks=$("#secSalesByRange .secAdvancedConfig .chkBrand");
+      tope=chks.length;
+      for (x=0;x<tope;x++)
+        if (chks[x].checked)
+          selected_brands.push(chks[x].id.substr("chkBrand".length));
+
+      // Customers...
+      chks=$("#secSalesByRange .secAdvancedConfig .chkCustomer");
+      tope=chks.length;
+      for (x=0;x<tope;x++)
+        if (chks[x].checked)
+          selected_customers.push(chks[x].id.substr("chkCustomer".length));
+
+      // Users...
+      chks=$("#secSalesByRange .secAdvancedConfig .chkUser");
+      tope=chks.length;
+      for (x=0;x<tope;x++)
+        if (chks[x].checked)
+          selected_users.push(chks[x].id.substr("chkUser".length));
+
+      shops = {
+        "name": "shops",
+        "type": "text", 
+        "required": true,
+        "value": JSON.stringify(selected_shops)
+      };
+
+      products = {
+        "name": "products",
+        "type": "text", 
+        "required": true,
+        "value": JSON.stringify(selected_products)
+      };
+
+      brands = {
+        "name": "brands",
+        "type": "text", 
+        "required": true,
+        "value": JSON.stringify(selected_brands)
+      };
+
+      customers = {
+        "name": "customers",
+        "type": "text", 
+        "required": true,
+        "value": JSON.stringify(selected_customers)
+      };
+
+      users = {
+        "name": "users",
+        "type": "text", 
+        "required": true,
+        "value": JSON.stringify(selected_users)
+      };
+
+      addTo.push(shops);
+      addTo.push(products);
+      addTo.push(brands);
+      addTo.push(customers);
+      addTo.push(users);
+    }
+
+    function showRequest(formData, jqForm, options) {
+      toastr.clear(); 
+      show_msg_with_toastr("info", msg_wait);
+      error=false;
+
+      if (selected_shops.length<1) {
+        $.ajax({
+          method: "GET",
+          url: "/translator/translate/",
+          data: {msg: "Please select at least one store"}
+        })
+        .done(function(result) {
+          toastr.clear();
+          show_msg_with_toastr("error", result);
+          $("#secSalesByRange .actCfg").click();
+        });
+        error=true;
+      }
+
+      if (selected_products.length<1) {
+        $.ajax({
+          method: "GET",
+          url: "/translator/translate/",
+          data: {msg: "Please select at least one product"}
+        })
+        .done(function(result) {
+          show_msg_with_toastr("error", result);
+          $("#secSalesByRange .actCfg").click();
+        });
+        error=true;
+      }
+
+      if (selected_brands.length<1) {
+        $.ajax({
+          method: "GET",
+          url: "/translator/translate/",
+          data: {msg: "Please select at least one brand"}
+        })
+        .done(function(result) {
+          show_msg_with_toastr("error", result);
+          $("#secSalesByRange .actCfg").click();
+        });
+        error=true;
+      }
+
+      if (selected_customers.length<1) {
+        $.ajax({
+          method: "GET",
+          url: "/translator/translate/",
+          data: {msg: "Please select at least one customer"}
+        })
+        .done(function(result) {
+          show_msg_with_toastr("error", result);
+          $("#secSalesByRange .actCfg").click();
+        });
+        error=true;
+      }
+
+      if (selected_users.length<1) {
+        $.ajax({
+          method: "GET",
+          url: "/translator/translate/",
+          data: {msg: "Please select at least one customer"}
+        })
+        .done(function(result) {
+          show_msg_with_toastr("error", result);
+          $("#secSalesByRange .actCfg").click();
+        });
+        error=true;
+      }
+
+      if (error)
+        return false;
+
+      prepareCfgDataForSubmit(formData);
+      $("#secSalesByRange form button[type='submit']").attr("disabled", "");
+      return true;
+    }
+ 
+    function showResponse(responseText, statusText, xhr, $form)  {
+      $("#secSalesByRange form button[type='submit']").removeAttr("disabled");
+      $('[data-toggle="tooltip"]').tooltip();
+      toastr.clear();
+    }
+
+    options = { 
+      target:        '#secSalesByRange #sales_by_range',
+      beforeSubmit:  showRequest,
+      success:       showResponse
+    };
+
+    $("#secSalesByRange form").ajaxForm(options);
+  }
+
+  function cfgSalesByCustomerFrm() {
+    $("#secSalesByCustomers #sales_by_customers").hide();
+
+    loadAdvancedCfgSalesByCustomersFrm();
+
+    $("#secSalesByCustomers .view-all").click(function() {
+      show_msg_with_toastr("info", msg_wait);
+      $(this).blur();
+
+      $("#secSalesByCustomers form button[type='submit']").attr("disabled", "");
+
+      result = prepareCfgDataForSubmit_customers(null);
+      shops=result[0];
+      products=result[1];
+      brands=result[2];
+      users=result[3];
+
+      shops=JSON.stringify(shops);
+      products=JSON.stringify(products);
+      brands=JSON.stringify(brands);
+      users=JSON.stringify(users);
+
+      itm_menu = $("#secSalesByCustomers form #itm_menu").val();
+
+      $.ajax({
+        method: "GET",
+        url: "/analytics/sales/all-customers/",
+        data: {shops: shops, products: products, brands: brands, itm_menu: itm_menu, users: users}
+      })
+      .done(function(result) {
+        $("#secSalesByCustomers #sales_by_customers").html(result);
+        $("#secSalesByCustomers form button[type='submit']").removeAttr("disabled");
+        toastr.clear();
+      });
+
+      return false;
+    })
+
+    $("#secSalesByCustomers .actCfg").click(function() {
+      $("#secSalesByCustomers .secAdvancedConfig").show();
+      $("#secSalesByCustomers .hide-me-on-config").hide();
+      $("#secSalesByCustomers .btns").hide();
+      $("#secSalesByCustomers form button[type='submit']").attr("disabled", "");
+      $("#secSalesByCustomers .form-control").attr("disabled", "");
+      // $(this).blur();
+      $(this).hide();
+      return false;
+    })
+
+    function prepareCfgDataForSubmit_customers(addTo) {
+      selected_shops=[];
+      selected_products=[];
+      selected_brands=[];
+      selected_users=[];
+
+      // Shops...
+      chks=$("#secSalesByCustomers .secAdvancedConfig .chkShop_customers");
+      tope=chks.length;
+      for (x=0;x<tope;x++)
+        if (chks[x].checked)
+          selected_shops.push(chks[x].id.substr("chkShop_customers".length));
+
+      // Products...
+      chks=$("#secSalesByCustomers .secAdvancedConfig .chkProduct_customers");
+      tope=chks.length;
+      for (x=0;x<tope;x++)
+        if (chks[x].checked)
+          selected_products.push(chks[x].id.substr("chkProduct_customers".length));
+
+      // Brands...
+      chks=$("#secSalesByCustomers .secAdvancedConfig .chkBrand_customers");
+      tope=chks.length;
+      for (x=0;x<tope;x++)
+        if (chks[x].checked)
+          selected_brands.push(chks[x].id.substr("chkBrand_customers".length));
+
+      // Users...
+      chks=$("#secSalesByCustomers .secAdvancedConfig .chkUser_customers");
+      tope=chks.length;
+      for (x=0;x<tope;x++)
+        if (chks[x].checked)
+          selected_users.push(chks[x].id.substr("chkUser_customers".length));
+
+      shops = {
+        "name": "shops",
+        "type": "text", 
+        "required": true,
+        "value": JSON.stringify(selected_shops)
+      };
+
+      products = {
+        "name": "products",
+        "type": "text", 
+        "required": true,
+        "value": JSON.stringify(selected_products)
+      };
+
+      brands = {
+        "name": "brands",
+        "type": "text", 
+        "required": true,
+        "value": JSON.stringify(selected_brands)
+      };
+
+      users = {
+        "name": "users",
+        "type": "text", 
+        "required": true,
+        "value": JSON.stringify(selected_users)
+      };
+
+      if (addTo!=null) {
+        addTo.push(shops);
+        addTo.push(products);
+        addTo.push(brands);
+        addTo.push(users);
+      }
+      else {
+        result=[selected_shops, selected_products, selected_brands, selected_users];
+        return result;
+      }
+    }
+
+    $("#secSalesByCustomers #txtCustomer").autocomplete({
+      source: "/customers/autocomplete/my-customers/",
+      minLength: 3,
+    });
+
+    $("#secSalesByCustomers #txtCustomer").change(function() {
+      show_msg_with_toastr("info", msg_wait);
+      rfc=this.value.substr(this.value.indexOf('RFC=')+"RFC=".length);
+      rfc=rfc.substr(0, rfc.length-1);
+
+      $.ajax({
+        method: "GET",
+        url: "/customers/search/by-rfc/",
+        data: { rfc: rfc }
+      })
+      .done(function(result) {
+        toastr.clear();
+        if (!result.exist)
+          $.ajax({
+            method: "GET",
+            url: "/translator/translate",
+            data: {msg: "Please enter a valid customer"}
+          })
+          .done(function(result) {
+            show_msg_with_toastr("error", result);
+            $("#secSalesByCustomers #customer_obj").val("");
+            $("#secSalesByCustomers form button[type='submit']").attr("disabled", "");
+          });
+        else {
+          $("#secSalesByCustomers #customer_obj").val(result.customer);
+          $("#secSalesByCustomers form button[type='submit']").removeAttr("disabled");
+        }
+      });
+    });
+
+    function showRequest(formData, jqForm, options) { 
+      toastr.clear(); 
+      show_msg_with_toastr("info", msg_wait);
+      error=false;
+
+      if (selected_shops.length<1) {
+        $.ajax({
+          method: "GET",
+          url: "/translator/translate/",
+          data: {msg: "Please select at least one store"}
+        })
+        .done(function(result) {
+          toastr.clear();
+          show_msg_with_toastr("error", result);
+          $("#secSalesByCustomers .actCfg").click();
+        });
+        error=true;
+      }
+
+      if (selected_products.length<1) {
+        $.ajax({
+          method: "GET",
+          url: "/translator/translate/",
+          data: {msg: "Please select at least one product"}
+        })
+        .done(function(result) {
+          show_msg_with_toastr("error", result);
+          $("#secSalesByCustomers .actCfg").click();
+        });
+        error=true;
+      }
+
+      if (selected_brands.length<1) {
+        $.ajax({
+          method: "GET",
+          url: "/translator/translate/",
+          data: {msg: "Please select at least one brand"}
+        })
+        .done(function(result) {
+          show_msg_with_toastr("error", result);
+          $("#secSalesByCustomers .actCfg").click();
+        });
+        error=true;
+      }
+
+      if (selected_users.length<1) {
+        $.ajax({
+          method: "GET",
+          url: "/translator/translate/",
+          data: {msg: "Please select at least one user"}
+        })
+        .done(function(result) {
+          show_msg_with_toastr("error", result);
+          $("#secSalesByCustomers .actCfg").click();
+        });
+        error=true;
+      }
+
+      if (error)
+        return false;
+
+      prepareCfgDataForSubmit_customers(formData);
+      $("#secSalesByCustomers form button[type='submit']").attr("disabled", "");
+      return true;
+    }
+ 
+    function showResponse(responseText, statusText, xhr, $form)  {
+      toastr.clear();
+      $("#secSalesByCustomers form button[type='submit']").removeAttr("disabled");
+    }
+
+    options = { 
+      target:        '#secSalesByCustomers #sales_by_customers',
+      beforeSubmit:  showRequest,
+      success:       showResponse
+    };
+
+    $("#secSalesByCustomers form").ajaxForm(options);
+  }
+
+  function cfgSalesByUserFrm() {
+    $("#secSalesByUsers #sales_by_users").hide();
+
+    loadAdvancedCfgSalesByUsersFrm();
+
+    function prepareCfgDataForSubmit_users(addTo) {
+      selected_shops=[];
+      selected_products=[];
+      selected_brands=[];
+      selected_customers=[];
+
+      // Shops...
+      chks=$("#secSalesByUsers .secAdvancedConfig .chkShop_users");
+      tope=chks.length;
+      for (x=0;x<tope;x++)
+        if (chks[x].checked)
+          selected_shops.push(chks[x].id.substr("chkShop_users".length));
+
+      // Products...
+      chks=$("#secSalesByUsers .secAdvancedConfig .chkProduct_users");
+      tope=chks.length;
+      for (x=0;x<tope;x++)
+        if (chks[x].checked)
+          selected_products.push(chks[x].id.substr("chkProduct_users".length));
+
+      // Brands...
+      chks=$("#secSalesByUsers .secAdvancedConfig .chkBrand_users");
+      tope=chks.length;
+      for (x=0;x<tope;x++)
+        if (chks[x].checked)
+          selected_brands.push(chks[x].id.substr("chkBrand_users".length));
+
+      // Customers...
+      chks=$("#secSalesByUsers .secAdvancedConfig .chkCustomer_users");
+      tope=chks.length;
+      for (x=0;x<tope;x++)
+        if (chks[x].checked)
+          selected_customers.push(chks[x].id.substr("chkCustomer_users".length));
+
+      shops = {
+        "name": "shops",
+        "type": "text", 
+        "required": true,
+        "value": JSON.stringify(selected_shops)
+      };
+
+      products = {
+        "name": "products",
+        "type": "text", 
+        "required": true,
+        "value": JSON.stringify(selected_products)
+      };
+
+      brands = {
+        "name": "brands",
+        "type": "text", 
+        "required": true,
+        "value": JSON.stringify(selected_brands)
+      };
+
+      customers = {
+        "name": "customers",
+        "type": "text", 
+        "required": true,
+        "value": JSON.stringify(selected_customers)
+      };
+
+      if (addTo!=null) {
+        addTo.push(shops);
+        addTo.push(products);
+        addTo.push(brands);
+        addTo.push(customers);
+      }
+      else {
+        result=[selected_shops, selected_products, selected_brands, selected_customers];
+        return result;
+      }
+    }
+
+    $("#secSalesByUsers .view-all").click(function() {
+      show_msg_with_toastr("info", msg_wait);
+      $(this).blur();
+
+      $("#secSalesByUsers form button[type='submit']").attr("disabled", "");
+
+      result = prepareCfgDataForSubmit_users(null);
+      shops=JSON.stringify(result[0]);
+      products=JSON.stringify(result[1]);
+      brands=JSON.stringify(result[2]);
+      customers=JSON.stringify(result[3]);
+
+      itm_menu = $("#secSalesByUsers form #itm_menu").val();
+
+      $.ajax({
+        method: "GET",
+        url: "/analytics/sales/all-users/",
+        data: {shops: shops, products: products, brands: brands, itm_menu: itm_menu, customers: customers}
+      })
+      .done(function(result) {
+        $("#secSalesByUsers #sales_by_users").html(result);
+        $("#secSalesByUsers form button[type='submit']").removeAttr("disabled");
+        toastr.clear();
+      });
+
+      return false;
+    })
+
+    $("#secSalesByUsers .actCfg").click(function() {
+      $("#secSalesByUsers .secAdvancedConfig").show();
+      $("#secSalesByUsers .hide-me-on-config").hide();
+      $("#secSalesByUsers .btns").hide();
+      $("#secSalesByUsers form button[type='submit']").attr("disabled", "");
+      $("#secSalesByUsers .form-control").attr("disabled", "");
+      // $(this).blur();
+      $(this).hide();
+      return false;
+    })
+
+    $("#secSalesByUsers #txtUser").autocomplete({
+      source: "/users/autocomplete/my-users/",
+      minLength: 1,
+    });
+
+    $("#secSalesByUsers #txtUser").change(function() {
+      show_msg_with_toastr("info", msg_wait);
+      email=this.value.substr(this.value.indexOf('email=')+"email=".length);
+      email=email.substr(0, email.length-1);
+
+      $.ajax({
+        method: "GET",
+        url: "/users/search-by-email",
+        data: { email: email }
+      })
+      .done(function(result) {
+        toastr.clear();
+        if (!result.exist)
+          $.ajax({
+            method: "GET",
+            url: "/translator/translate",
+            data: {msg: "Please enter a valid user"}
+          })
+          .done(function(result) {
+            show_msg_with_toastr("error", result);
+            $("#secSalesByUsers #user_obj").val('');
+            $("#secSalesByUsers form button[type='submit']").attr("disabled", "");
+          });
+        else {
+          $("#secSalesByUsers #user_obj").val(result.user);
+          $("#secSalesByUsers form button[type='submit']").removeAttr("disabled");
+        }
+      });
+    });
+
+    function showRequest(formData, jqForm, options) {
+      toastr.clear(); 
+      show_msg_with_toastr("info", msg_wait);
+      error=false;
+
+      if (selected_shops.length<1) {
+        $.ajax({
+          method: "GET",
+          url: "/translator/translate/",
+          data: {msg: "Please select at least one store"}
+        })
+        .done(function(result) {
+          toastr.clear();
+          show_msg_with_toastr("error", result);
+          $("#secSalesByUsers .actCfg").click();
+        });
+        error=true;
+      }
+
+      if (selected_products.length<1) {
+        $.ajax({
+          method: "GET",
+          url: "/translator/translate/",
+          data: {msg: "Please select at least one product"}
+        })
+        .done(function(result) {
+          show_msg_with_toastr("error", result);
+          $("#secSalesByUsers .actCfg").click();
+        });
+        error=true;
+      }
+
+      if (selected_brands.length<1) {
+        $.ajax({
+          method: "GET",
+          url: "/translator/translate/",
+          data: {msg: "Please select at least one brand"}
+        })
+        .done(function(result) {
+          show_msg_with_toastr("error", result);
+          $("#secSalesByUsers .actCfg").click();
+        });
+        error=true;
+      }
+
+      if (selected_customers.length<1) {
+        $.ajax({
+          method: "GET",
+          url: "/translator/translate/",
+          data: {msg: "Please select at least one customer"}
+        })
+        .done(function(result) {
+          show_msg_with_toastr("error", result);
+          $("#secSalesByUsers .actCfg").click();
+        });
+        error=true;
+      }
+
+      if (error)
+        return false;
+
+      prepareCfgDataForSubmit_users(formData);
+      $("#secSalesByUsers form button[type='submit']").attr("disabled", "");
+      return true;
+    }
+ 
+    function showResponse(responseText, statusText, xhr, $form)  {
+      toastr.clear();
+      $("#secSalesByUsers form button[type='submit']").removeAttr("disabled");
+    }
+
+    options = { 
+      target:        '#secSalesByUsers #sales_by_users',
+      beforeSubmit:  showRequest,
+      success:       showResponse
+    };
+
+    $("#secSalesByUsers form").ajaxForm(options);
+  }
+
+  function cfgSalesByProductFrm() {
+    $("#secSalesByProducts #sales_by_products").hide();
+
+    loadAdvancedCfgSalesByProductsFrm();
+
+    function prepareCfgDataForSubmit_products(addTo) {
+      selected_shops=[];
+      selected_products=[];
+      selected_brands=[];
+      selected_customers=[];
+      selected_users=[];
+
+      // Shops...
+      chks=$("#secSalesByProducts .secAdvancedConfig .chkShop_products");
+      tope=chks.length;
+      for (x=0;x<tope;x++)
+        if (chks[x].checked)
+          selected_shops.push(chks[x].id.substr("chkShop_products".length));
+
+      // Products...
+      chks=$("#secSalesByProducts .secAdvancedConfig .chkProduct_products");
+      tope=chks.length;
+      for (x=0;x<tope;x++)
+        if (chks[x].checked)
+          selected_products.push(chks[x].id.substr("chkProduct_products".length));
+
+      // Brands...
+      chks=$("#secSalesByProducts .secAdvancedConfig .chkBrand_products");
+      tope=chks.length;
+      for (x=0;x<tope;x++)
+        if (chks[x].checked)
+          selected_brands.push(chks[x].id.substr("chkBrand_products".length));
+
+      // Customers...
+      chks=$("#secSalesByProducts .secAdvancedConfig .chkCustomer_products");
+      tope=chks.length;
+      for (x=0;x<tope;x++)
+        if (chks[x].checked)
+          selected_customers.push(chks[x].id.substr("chkCustomer_products".length));
+
+      // Users...
+      chks=$("#secSalesByProducts .secAdvancedConfig .chkUser_products");
+      tope=chks.length;
+      for (x=0;x<tope;x++)
+        if (chks[x].checked)
+          selected_users.push(chks[x].id.substr("chkUser_products".length));
+
+      shops = {
+        "name": "shops",
+        "type": "text", 
+        "required": true,
+        "value": JSON.stringify(selected_shops)
+      };
+
+      products = {
+        "name": "products",
+        "type": "text", 
+        "required": true,
+        "value": JSON.stringify(selected_products)
+      };
+
+      brands = {
+        "name": "brands",
+        "type": "text", 
+        "required": true,
+        "value": JSON.stringify(selected_brands)
+      };
+
+      customers = {
+        "name": "customers",
+        "type": "text", 
+        "required": true,
+        "value": JSON.stringify(selected_customers)
+      };
+
+      users = {
+        "name": "users",
+        "type": "text", 
+        "required": true,
+        "value": JSON.stringify(selected_users)
+      };
+
+      if (addTo!=null) {
+        addTo.push(shops);
+        addTo.push(products);
+        addTo.push(brands);
+        addTo.push(customers);
+        addTo.push(users);
+      }
+      else {
+        return [selected_shops, selected_products, selected_brands, selected_customers, selected_users];
+      }
+    }
+
+    $("#secSalesByProducts .view-all").click(function() {
+      show_msg_with_toastr("info", msg_wait);
+      $(this).blur();
+
+      $("#secSalesByProducts form button[type='submit']").attr("disabled", "");
+
+      result = prepareCfgDataForSubmit_products(null);
+      shops=JSON.stringify(result[0]);
+      products=JSON.stringify(result[1]);
+      brands=JSON.stringify(result[2]);
+      customers=JSON.stringify(result[3]);
+      users=JSON.stringify(result[4]);
+
+      itm_menu = $("#secSalesByProducts form #itm_menu").val();
+
+      $.ajax({
+        method: "GET",
+        url: "/analytics/sales/all-products/",
+        data: {shops: shops, products: products, brands: brands, itm_menu: itm_menu, customers: customers, users: users}
+      })
+      .done(function(result) {
+        $("#secSalesByProducts #sales_by_products").html(result);
+        $("#secSalesByProducts form button[type='submit']").removeAttr("disabled");
+        toastr.clear();
+      });
+
+      return false;
+    })
+
+    $("#secSalesByProducts .actCfg").click(function() {
+      $("#secSalesByProducts .secAdvancedConfig").show();
+      $("#secSalesByProducts .hide-me-on-config").hide();
+      $("#secSalesByProducts .btns").hide();
+      $("#secSalesByProducts form button[type='submit']").attr("disabled", "");
+      $("#secSalesByProducts .form-control").attr("disabled", "");
+      // $(this).blur();
+      $(this).hide();
+      return false;
+    })
+
+    $("#secSalesByProducts #txtProduct").autocomplete({
+      source: "/products/autocomplete/my-products/",
+      minLength: 1,
+    });
+
+    $("#secSalesByProducts #txtProduct").change(function() {
+      show_msg_with_toastr("info", msg_wait);
+
+      $.ajax({
+        method: "GET",
+        url: "/products/search/by-name",
+        data: { product: this.value }
+      })
+      .done(function(result) {
+        toastr.clear();
+        if (!result.exist)
+          $.ajax({
+            method: "GET",
+            url: "/translator/translate",
+            data: {msg: "Please enter a valid product"}
+          })
+          .done(function(result) {
+            show_msg_with_toastr("error", result);
+            $("#secSalesByProducts #product_obj").val('');
+            $("#secSalesByProducts form button[type='submit']").attr("disabled", "");
+          });
+        else {
+          $("#secSalesByProducts #product_obj").val(result.product);
+          $("#secSalesByProducts form button[type='submit']").removeAttr("disabled");
+        }
+      });
+    });
+
+    function showRequest(formData, jqForm, options) {
+      toastr.clear(); 
+      show_msg_with_toastr("info", msg_wait);
+      error=false;
+
+      if (selected_shops.length<1) {
+        $.ajax({
+          method: "GET",
+          url: "/translator/translate/",
+          data: {msg: "Please select at least one store"}
+        })
+        .done(function(result) {
+          toastr.clear();
+          show_msg_with_toastr("error", result);
+          $("#secSalesByProducts .actCfg").click();
+        });
+        error=true;
+      }
+
+      if (selected_products.length<1) {
+        $.ajax({
+          method: "GET",
+          url: "/translator/translate/",
+          data: {msg: "Please select at least one product"}
+        })
+        .done(function(result) {
+          show_msg_with_toastr("error", result);
+          $("#secSalesByProducts .actCfg").click();
+        });
+        error=true;
+      }
+
+      if (selected_brands.length<1) {
+        $.ajax({
+          method: "GET",
+          url: "/translator/translate/",
+          data: {msg: "Please select at least one brand"}
+        })
+        .done(function(result) {
+          show_msg_with_toastr("error", result);
+          $("#secSalesByProducts .actCfg").click();
+        });
+        error=true;
+      }
+
+      if (selected_customers.length<1) {
+        $.ajax({
+          method: "GET",
+          url: "/translator/translate/",
+          data: {msg: "Please select at least one customer"}
+        })
+        .done(function(result) {
+          show_msg_with_toastr("error", result);
+          $("#secSalesByProducts .actCfg").click();
+        });
+        error=true;
+      }
+
+      if (selected_users.length<1) {
+        $.ajax({
+          method: "GET",
+          url: "/translator/translate/",
+          data: {msg: "Please select at least one user"}
+        })
+        .done(function(result) {
+          show_msg_with_toastr("error", result);
+          $("#secSalesByProducts .actCfg").click();
+        });
+        error=true;
+      }
+
+      if (error)
+        return false;
+
+      prepareCfgDataForSubmit_products(formData);
+      $("#secSalesByProducts form button[type='submit']").attr("disabled", "");
+      return true;
+    }
+ 
+    function showResponse(responseText, statusText, xhr, $form)  {
+      toastr.clear();
+      $("#secSalesByProducts form button[type='submit']").removeAttr("disabled");
+    }
+
+    options = { 
+      target:        '#secSalesByProducts #sales_by_products',
+      beforeSubmit:  showRequest,
+      success:       showResponse
+    };
+
+    $("#secSalesByProducts form").ajaxForm(options);
+  }
+
+  function cfgSalesByBrandFrm() {
+    $("#secSalesByBrands #sales_by_brands").hide();
+
+    loadAdvancedCfgSalesByBrandsFrm();
+
+    function prepareCfgDataForSubmit_brands(addTo) {
+      selected_shops=[];
+      selected_products=[];
+      selected_brands=[];
+      selected_customers=[];
+      selected_users=[];
+
+      // Shops...
+      chks=$("#secSalesByBrands .secAdvancedConfig .chkShop_brands");
+      tope=chks.length;
+      for (x=0;x<tope;x++)
+        if (chks[x].checked)
+          selected_shops.push(chks[x].id.substr("chkShop_brands".length));
+
+      // Products...
+      chks=$("#secSalesByBrands .secAdvancedConfig .chkProduct_brands");
+      tope=chks.length;
+      for (x=0;x<tope;x++)
+        if (chks[x].checked)
+          selected_products.push(chks[x].id.substr("chkProduct_brands".length));
+
+      // Brands...
+      chks=$("#secSalesByBrands .secAdvancedConfig .chkBrand_brands");
+      tope=chks.length;
+      for (x=0;x<tope;x++)
+        if (chks[x].checked)
+          selected_brands.push(chks[x].id.substr("chkBrand_brands".length));
+
+      // Customers...
+      chks=$("#secSalesByBrands .secAdvancedConfig .chkCustomer_brands");
+      tope=chks.length;
+      for (x=0;x<tope;x++)
+        if (chks[x].checked)
+          selected_customers.push(chks[x].id.substr("chkCustomer_brands".length));
+
+      // Users...
+      chks=$("#secSalesByBrands .secAdvancedConfig .chkUser_brands");
+      tope=chks.length;
+      for (x=0;x<tope;x++)
+        if (chks[x].checked)
+          selected_users.push(chks[x].id.substr("chkUser_brands".length));
+
+      shops = {
+        "name": "shops",
+        "type": "text", 
+        "required": true,
+        "value": JSON.stringify(selected_shops)
+      };
+
+      products = {
+        "name": "products",
+        "type": "text", 
+        "required": true,
+        "value": JSON.stringify(selected_products)
+      };
+
+      brands = {
+        "name": "brands",
+        "type": "text", 
+        "required": true,
+        "value": JSON.stringify(selected_brands)
+      };
+
+      customers = {
+        "name": "customers",
+        "type": "text", 
+        "required": true,
+        "value": JSON.stringify(selected_customers)
+      };
+
+      users = {
+        "name": "users",
+        "type": "text", 
+        "required": true,
+        "value": JSON.stringify(selected_users)
+      };
+
+      if (addTo!=null) {
+        addTo.push(shops);
+        addTo.push(products);
+        addTo.push(brands);
+        addTo.push(customers);
+        addTo.push(users);
+      }
+      else {
+        return [selected_shops, selected_products, selected_brands, selected_customers, selected_users];
+      }
+    }
+
+    $("#secSalesByBrands .view-all").click(function() {
+      show_msg_with_toastr("info", msg_wait);
+      $(this).blur();
+
+      $("#secSalesByBrands form button[type='submit']").attr("disabled", "");
+
+      result = prepareCfgDataForSubmit_brands(null);
+      shops=JSON.stringify(result[0]);
+      products=JSON.stringify(result[1]);
+      brands=JSON.stringify(result[2]);
+      customers=JSON.stringify(result[3]);
+      users=JSON.stringify(result[4]);
+
+      itm_menu = $("#secSalesByBrands form #itm_menu").val();
+
+      $.ajax({
+        method: "GET",
+        url: "/analytics/sales/all-brands/",
+        data: {shops: shops, products: products, brands: brands, itm_menu: itm_menu, customers: customers, users: users}
+      })
+      .done(function(result) {
+        $("#secSalesByBrands #sales_by_brands").html(result);
+        $("#secSalesByBrands form button[type='submit']").removeAttr("disabled");
+        toastr.clear();
+      });
+
+      return false;
+    })
+
+    $("#secSalesByBrands .actCfg").click(function() {
+      $("#secSalesByBrands .secAdvancedConfig").show();
+      $("#secSalesByBrands .hide-me-on-config").hide();
+      $("#secSalesByBrands .btns").hide();
+      $("#secSalesByBrands form button[type='submit']").attr("disabled", "");
+      $("#secSalesByBrands .form-control").attr("disabled", "");
+      // $(this).blur();
+      $(this).hide();
+      return false;
+    })
+
+    $("#secSalesByBrands #txtBrand").autocomplete({
+      source: "/brands/autocomplete/my-brands/",
+      minLength: 1,
+    });
+
+    $("#secSalesByBrands #txtBrand").change(function() {
+      show_msg_with_toastr("info", msg_wait);
+
+      $.ajax({
+        method: "GET",
+        url: "/brands/search/by-name",
+        data: { brand: this.value }
+      })
+      .done(function(result) {
+        toastr.clear();
+        if (!result.exist)
+          $.ajax({
+            method: "GET",
+            url: "/translator/translate",
+            data: {msg: "Please enter a valid brand"}
+          })
+          .done(function(result) {
+            show_msg_with_toastr("error", result);
+            $("#secSalesByBrands #brand_obj").val('');
+            $("#secSalesByBrands form button[type='submit']").attr("disabled", "");
+          });
+        else {
+          $("#secSalesByBrands #brand_obj").val(result.brand);
+          $("#secSalesByBrands form button[type='submit']").removeAttr("disabled");
+        }
+      });
+    });
+
+    function showRequest(formData, jqForm, options) {
+      toastr.clear(); 
+      show_msg_with_toastr("info", msg_wait);
+      error=false;
+
+      if (selected_shops.length<1) {
+        $.ajax({
+          method: "GET",
+          url: "/translator/translate/",
+          data: {msg: "Please select at least one store"}
+        })
+        .done(function(result) {
+          toastr.clear();
+          show_msg_with_toastr("error", result);
+          $("#secSalesByBrands .actCfg").click();
+        });
+        error=true;
+      }
+
+      if (selected_products.length<1) {
+        $.ajax({
+          method: "GET",
+          url: "/translator/translate/",
+          data: {msg: "Please select at least one product"}
+        })
+        .done(function(result) {
+          show_msg_with_toastr("error", result);
+          $("#secSalesByBrands .actCfg").click();
+        });
+        error=true;
+      }
+
+      if (selected_brands.length<1) {
+        $.ajax({
+          method: "GET",
+          url: "/translator/translate/",
+          data: {msg: "Please select at least one brand"}
+        })
+        .done(function(result) {
+          show_msg_with_toastr("error", result);
+          $("#secSalesByBrands .actCfg").click();
+        });
+        error=true;
+      }
+
+      if (selected_customers.length<1) {
+        $.ajax({
+          method: "GET",
+          url: "/translator/translate/",
+          data: {msg: "Please select at least one customer"}
+        })
+        .done(function(result) {
+          show_msg_with_toastr("error", result);
+          $("#secSalesByBrands .actCfg").click();
+        });
+        error=true;
+      }
+
+      if (selected_users.length<1) {
+        $.ajax({
+          method: "GET",
+          url: "/translator/translate/",
+          data: {msg: "Please select at least one user"}
+        })
+        .done(function(result) {
+          show_msg_with_toastr("error", result);
+          $("#secSalesByBrands .actCfg").click();
+        });
+        error=true;
+      }
+
+      if (error)
+        return false;
+
+      prepareCfgDataForSubmit_brands(formData);
+      $("#secSalesByBrands form button[type='submit']").attr("disabled", "");
+      return true;
+    }
+ 
+    function showResponse(responseText, statusText, xhr, $form)  {
+      toastr.clear();
+      $("#secSalesByBrands form button[type='submit']").removeAttr("disabled");
+    }
+
+    options = { 
+      target:        '#secSalesByBrands #sales_by_brands',
+      beforeSubmit:  showRequest,
+      success:       showResponse
+    };
+
+    $("#secSalesByBrands form").ajaxForm(options);
+  }
+
+  function cfgSalesByShopFrm() {
+    $("#secSalesByShops #sales_by_shops").hide();
+
+    loadAdvancedCfgSalesByShopsFrm();
+
+    function prepareCfgDataForSubmit_shops(addTo) {
+      selected_shops=[];
+      selected_products=[];
+      selected_brands=[];
+      selected_customers=[];
+      selected_users=[];
+
+      // Shops...
+      chks=$("#secSalesByShops .secAdvancedConfig .chkShop_shops");
+      tope=chks.length;
+      for (x=0;x<tope;x++)
+        if (chks[x].checked)
+          selected_shops.push(chks[x].id.substr("chkShop_shops".length));
+
+      // Products...
+      chks=$("#secSalesByShops .secAdvancedConfig .chkProduct_shops");
+      tope=chks.length;
+      for (x=0;x<tope;x++)
+        if (chks[x].checked)
+          selected_products.push(chks[x].id.substr("chkProduct_shops".length));
+
+      // Brands...
+      chks=$("#secSalesByShops .secAdvancedConfig .chkBrand_shops");
+      tope=chks.length;
+      for (x=0;x<tope;x++)
+        if (chks[x].checked)
+          selected_brands.push(chks[x].id.substr("chkBrand_shops".length));
+
+      // Customers...
+      chks=$("#secSalesByShops .secAdvancedConfig .chkCustomer_shops");
+      tope=chks.length;
+      for (x=0;x<tope;x++)
+        if (chks[x].checked)
+          selected_customers.push(chks[x].id.substr("chkCustomer_shops".length));
+
+      // Users...
+      chks=$("#secSalesByShops .secAdvancedConfig .chkUser_shops");
+      tope=chks.length;
+      for (x=0;x<tope;x++)
+        if (chks[x].checked)
+          selected_users.push(chks[x].id.substr("chkUser_shops".length));
+
+      shops = {
+        "name": "shops",
+        "type": "text", 
+        "required": true,
+        "value": JSON.stringify(selected_shops)
+      };
+
+      products = {
+        "name": "products",
+        "type": "text", 
+        "required": true,
+        "value": JSON.stringify(selected_products)
+      };
+
+      brands = {
+        "name": "brands",
+        "type": "text", 
+        "required": true,
+        "value": JSON.stringify(selected_brands)
+      };
+
+      customers = {
+        "name": "customers",
+        "type": "text", 
+        "required": true,
+        "value": JSON.stringify(selected_customers)
+      };
+
+      users = {
+        "name": "users",
+        "type": "text", 
+        "required": true,
+        "value": JSON.stringify(selected_users)
+      };
+
+      if (addTo!=null) {
+        addTo.push(shops);
+        addTo.push(products);
+        addTo.push(brands);
+        addTo.push(customers);
+        addTo.push(users);
+      }
+      else {
+        return [selected_shops, selected_products, selected_brands, selected_customers, selected_users];
+      }
+    }
+
+    $("#secSalesByShops .view-all").click(function() {
+      show_msg_with_toastr("info", msg_wait);
+      $(this).blur();
+
+      $("#secSalesByShops form button[type='submit']").attr("disabled", "");
+
+      result = prepareCfgDataForSubmit_shops(null);
+      shops=JSON.stringify(result[0]);
+      products=JSON.stringify(result[1]);
+      brands=JSON.stringify(result[2]);
+      customers=JSON.stringify(result[3]);
+      users=JSON.stringify(result[4]);
+
+      itm_menu = $("#secSalesByShops form #itm_menu").val();
+
+      $.ajax({
+        method: "GET",
+        url: "/analytics/sales/all-shops/",
+        data: {shops: shops, products: products, brands: brands, itm_menu: itm_menu, customers: customers, users: users}
+      })
+      .done(function(result) {
+        $("#secSalesByShops #sales_by_shops").html(result);
+        $("#secSalesByShops form button[type='submit']").removeAttr("disabled");
+        toastr.clear();
+      });
+
+      return false;
+    })
+
+    $("#secSalesByShops .actCfg").click(function() {
+      $("#secSalesByShops .secAdvancedConfig").show();
+      $("#secSalesByShops .hide-me-on-config").hide();
+      $("#secSalesByShops .btns").hide();
+      $("#secSalesByShops form button[type='submit']").attr("disabled", "");
+      $("#secSalesByShops .form-control").attr("disabled", "");
+      // $(this).blur();
+      $(this).hide();
+      return false;
+    })
+
+    $("#secSalesByShops #txtShop").autocomplete({
+      source: "/shops/autocomplete/my-shops/",
+      minLength: 1,
+    });
+
+    $("#secSalesByShops #txtShop").change(function() {
+      show_msg_with_toastr("info", msg_wait);
+
+      shopname = this.value.substring(0, this.value.indexOf(" ["));
+
+      $.ajax({
+        method: "GET",
+        url: "/shops/search/by-name",
+        data: { shopname: shopname }
+      })
+      .done(function(result) {
+        toastr.clear();
+        if (!result.exist)
+          $.ajax({
+            method: "GET",
+            url: "/translator/translate",
+            data: {msg: "Please enter a valid shop"}
+          })
+          .done(function(result) {
+            show_msg_with_toastr("error", result);
+            $("#secSalesByShops #shop_obj").val('');
+            $("#secSalesByShops form button[type='submit']").attr("disabled", "");
+          });
+        else {
+          $("#secSalesByShops #shop_obj").val(result.shop);
+          $("#secSalesByShops form button[type='submit']").removeAttr("disabled");
+        }
+      });
+    });
+
+    function showRequest(formData, jqForm, options) {
+      toastr.clear(); 
+      show_msg_with_toastr("info", msg_wait);
+      error=false;
+
+      if (selected_shops.length<1) {
+        $.ajax({
+          method: "GET",
+          url: "/translator/translate/",
+          data: {msg: "Please select at least one store"}
+        })
+        .done(function(result) {
+          toastr.clear();
+          show_msg_with_toastr("error", result);
+          $("#secSalesByShops .actCfg").click();
+        });
+        error=true;
+      }
+
+      if (selected_products.length<1) {
+        $.ajax({
+          method: "GET",
+          url: "/translator/translate/",
+          data: {msg: "Please select at least one product"}
+        })
+        .done(function(result) {
+          show_msg_with_toastr("error", result);
+          $("#secSalesByShops .actCfg").click();
+        });
+        error=true;
+      }
+
+      if (selected_brands.length<1) {
+        $.ajax({
+          method: "GET",
+          url: "/translator/translate/",
+          data: {msg: "Please select at least one brand"}
+        })
+        .done(function(result) {
+          show_msg_with_toastr("error", result);
+          $("#secSalesByShops .actCfg").click();
+        });
+        error=true;
+      }
+
+      if (selected_customers.length<1) {
+        $.ajax({
+          method: "GET",
+          url: "/translator/translate/",
+          data: {msg: "Please select at least one customer"}
+        })
+        .done(function(result) {
+          show_msg_with_toastr("error", result);
+          $("#secSalesByShops .actCfg").click();
+        });
+        error=true;
+      }
+
+      if (selected_users.length<1) {
+        $.ajax({
+          method: "GET",
+          url: "/translator/translate/",
+          data: {msg: "Please select at least one user"}
+        })
+        .done(function(result) {
+          show_msg_with_toastr("error", result);
+          $("#secSalesByShops .actCfg").click();
+        });
+        error=true;
+      }
+
+      if (error)
+        return false;
+
+      prepareCfgDataForSubmit_shops(formData);
+      $("#secSalesByShops form button[type='submit']").attr("disabled", "");
+      return true;
+    }
+ 
+    function showResponse(responseText, statusText, xhr, $form)  {
+      toastr.clear();
+      $("#secSalesByShops form button[type='submit']").removeAttr("disabled");
+    }
+
+    options = { 
+      target:        '#secSalesByShops #sales_by_shops',
+      beforeSubmit:  showRequest,
+      success:       showResponse
+    };
+
+    $("#secSalesByShops form").ajaxForm(options);
+  }
+
+  $(document).ready(function(){
+    $("div.menu a#{{itm_menu}}").parent().addClass("active");
+    //html = '<script type="text/javascript">';
+  	//html = 'alert("ok");';
+  	//html += '';
+    //$("#script").html(html);
+    //alert("{{script}}");
+
+    {{sales_of_the_day_chart|safe}}
+
+    cfgSalesByRangeFrm();
+    cfgSalesByCustomerFrm();
+    cfgSalesByUserFrm();
+    cfgSalesByProductFrm();
+    cfgSalesByBrandFrm();
+    cfgSalesByShopFrm();
+  });
+</script>
+
+<div id="divViewDetails"></div>
+
+{% block actions_js %}
+{% endblock %}

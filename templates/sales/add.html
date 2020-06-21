@@ -1,0 +1,108 @@
+{% extends 'sales/generic-form.html' %}
+
+{% load i18n %}
+
+{% block msg_pre_form %}
+	{% trans 'Fields marked are mandatory' %}.
+{% endblock %}
+
+<!--
+{# block global_vars_js #}
+{# endblock #}
+-->
+
+{% block actions_js %}
+	<script type="text/javascript">
+
+	  $(document).ready(function(){
+	  	if (module_name.includes('AGREGAR'))
+  			$("#lblSKU").html("* " + $("#lblSKU").html());
+
+	    function verifySaleData() {
+/*
+	    	module_name = $(".container-fluid .card .header h2")[0].innerHTML;
+	      module_name = module_name.toUpperCase();
+*/
+	      // if (!module_name.includes('AGREGAR'))
+	      // 	return false;
+
+	      if (!module_name.includes('AGREGAR'))
+	      	return false;
+
+	    	show_msg_with_toastr("info", msg_wait);
+
+	    	si = $("#id_identifier").val();
+        s_at = $("#id_sold_at").val();
+        s_when = $("#id_sold_when").val();
+
+        data = {
+          identifier: si,
+          sold_at: s_at,
+          sold_when: s_when
+        };
+
+        $.ajax({
+          method: "GET",
+          url: "/sales/search/by-unique-sale-user",
+          data: data
+        })
+        .done(function(result) {
+          toastr.clear();
+          if (result.exist) {
+            show_msg_with_toastr("error", result.msg);
+            $("section.content button.submit").attr("disabled", "true");
+          }
+          else
+          	$("section.content button.submit").removeAttr("disabled");
+        });
+	    }
+/*
+	    $("#txtSKU").change(function() {
+	    	// if (!module_name.includes('AGREGAR'))
+	     //  	return false;
+
+	      show_msg_with_toastr("info", msg_wait);
+	      $.ajax({
+	        method: "GET",
+	        url: "/sales/search/by-identifier/",
+	        data: { identifier: this.value }
+	      })
+	      .done(function(result) {
+	      	if (result.exist != undefined && 
+	      		result.exist) {
+	        	toastr.clear();
+	        	show_msg_with_toastr("error", result);
+	      	}
+	      });
+	    });
+*/
+	    $("#id_identifier").change(function(){
+	    	// if (!module_name.includes('AGREGAR'))
+	     //  	return false;
+		  	verifySaleData();		  	
+		  });
+
+		  $("#id_sold_at").change(function(){
+		  	// if (!module_name.includes('AGREGAR'))
+	    //   	return false;
+		  	verifySaleData();		  	
+		  });
+
+		  $("#id_sold_when").change(function(){
+		  	// if (!module_name.includes('AGREGAR'))
+	    //   	return false;
+		  	verifySaleData();		  	
+		  });
+	  });
+	</script>
+<!--
+	{# if msg #}
+  <script type="text/javascript">
+    show_msg_with_toastr("{{level}}", "{{msg}}");
+  </script>
+	{# endif #}
+-->
+{% endblock %}
+
+{% block actions_js_search_forms %}
+{% endblock %}

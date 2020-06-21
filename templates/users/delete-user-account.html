@@ -1,0 +1,69 @@
+{% load i18n %}
+
+<div class="modal" 
+id="dlgDeleteUserAccount" tabindex="-1" role="dialog" aria-labelledby="lblHeader" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="lblHeader">
+          ¿{% trans 'Are you sure' %}?
+        </h5>
+
+        <button class="close" type="button" 
+        data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">×</span>
+        </button>
+      </div>
+
+      <div class="modal-body">
+        <p>
+        {% trans 'The action will delete the user account  associated to the email address specified' %}. 
+        ¿{% trans 'Are you sure' %}?
+        </p>
+
+        <form action="/users/delete-user-account" 
+        method="post">
+          {% csrf_token %}
+
+          <div class="form-group">
+            <input type="email" name="email" 
+            class="form-control"
+            value="{{email}}" 
+            id="txtEmail" readonly="true">
+          </div>
+
+          <div class="form-group">
+            <input type="text" name="reason" 
+            class="form-control"
+            style="visibility: hidden;" 
+            value="{{reason}}" hidden="true" 
+            id="txtReason" readonly="true">
+          </div>
+
+          <input type="text" id="txtRecaptchaResponse" 
+          name="g-recaptcha-response" 
+          hidden="true" style="visibility: hidden;">
+
+          <button type="submit" 
+          class="btn btn-primary" 
+          id="form-submit">
+            {% trans 'Yes' %}
+          </button>
+
+          <button type="button" 
+          data-dismiss="modal"
+          class="btn btn-primary">
+            {% trans 'No' %}
+          </button>
+        </form>
+      </div>
+
+      <div class="modal-footer">
+          <a class="small" href="#" 
+          data-dismiss="modal">
+          	{% trans 'Cancel' %}
+          </a>
+      </div>
+    </div>
+  </div>
+</div>

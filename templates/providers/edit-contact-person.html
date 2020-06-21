@@ -1,0 +1,870 @@
+{% load static i18n %}
+
+<!-- For edit/delete provider -->
+
+<style type="text/css">
+	div#modalEditContactPerson {
+		width: 35%;
+	}
+
+  table.tbl-view-details {
+    width: 100%;
+  }
+
+  table.tbl-view-details tbody tr td:first-child  {
+    /* text-align: right; */
+    font-weight: bold;
+    width: 100%;
+  }
+
+  .right-alignment {
+    text-align: right;
+  }
+
+  .hidden {
+    visibility: hidden;
+  }
+</style>
+
+{% if can_edit and can_edit|upper == 'TRUE' %}
+<!-- <script src="{% static 'js/dashboard/view-details/edit-functions.js' %}"></script> -->
+<script type="text/javascript">
+  function editData() {
+    $('[data-toggle="tooltip"]').tooltip();
+
+    //$('table.tbl-view-details').editableTableWidget();
+    $("#dlgEditContactPerson .edit").removeClass("hidden");
+    $("#dlgEditContactPerson .view").addClass("hidden");
+
+    $("#dlgEditContactPerson tr#rowBtnSave").removeClass("hidden");
+    $("#dlgEditContactPerson tr#rowBtnSave").removeAttr("hidden");
+
+    $("#dlgEditContactPerson table.tbl-view-details").removeClass("table-striped");
+    $("#dlgEditContactPerson table.tbl-view-details tbody tr td:first-child").removeClass("right-alignment");
+
+    $("#dlgEditContactPerson form.update input")[2].select();
+  }
+
+  function cancelEdit() {
+    $('[data-toggle="tooltip"]').tooltip();
+
+    $("#dlgEditContactPerson .edit").addClass("hidden");
+    $("#dlgEditContactPerson .view").removeClass("hidden");
+    $("#dlgEditContactPerson table.tbl-view-details").addClass("table-striped");
+    $("#dlgEditContactPerson table.tbl-view-details tbody tr td:first-child").addClass("right-alignment");
+
+    $("#dlgEditContactPerson tr#rowBtnSave").addClass("hidden");
+    $("#dlgEditContactPerson tr#rowBtnSave").attr("hidden", "true");
+  }
+</script>
+{% endif %}
+
+{% if can_delete and can_delete|upper == 'TRUE' %}
+<!-- <script src="{% static 'js/dashboard/view-details/delete-functions.js' %}"></script> -->
+<script type="text/javascript">
+  function cancelDelete() {
+    $("#dlgEditContactPerson .confirm-delete").addClass("hidden");
+  }
+
+  function confirmDelete() {
+    prepareDeleteFrm();
+    $("#dlgEditContactPerson .confirm-delete").removeClass("hidden");
+    $("#dlgEditContactPerson form textarea").focus();
+  }
+</script>
+{% endif %}
+
+<div class="bg-gradient-primary modal fade" 
+id="dlgEditContactPerson" 
+tabindex="-1" role="dialog" 
+aria-labelledby="lblHeader" aria-hidden="true">
+  <div class="modal-dialog my-modal" 
+  role="document" id="modalEditContactPerson">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="lblHeader">
+          {% trans 'Contact person details' %}
+        </h5>
+
+        <button class="close" type="button" 
+        data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">×</span>
+        </button>
+      </div>
+      <hr />
+
+      <div class="modal-body">
+        <div class="card hidden confirm-delete">
+          <div class="body bg-blue-grey">
+            <h4>
+              <!-- 
+                <i class="material-icons">warning</i> 
+              -->
+              {% trans 'Are you sure do you want to remove this' %}
+            </h4>
+
+            <form class="confirm-delete"
+            method="post"
+            action="/providers/contact-persons/confirmed-delete/">
+              {% csrf_token %}
+
+              <label for="txtReasonToDrop">
+                {% trans 'Aditionally you can specify the reason to remove this' %}
+              </label>
+              <textarea cols="10" id="txtReasonToDrop" 
+              name="reason" class="form-control"></textarea>
+
+              <input type="text" 
+              name="contact_person" 
+              value="{{cp.id}}" hidden="true" 
+              style="visibility: hidden;" />
+
+              <input type="text" name="itm_menu" 
+              value="{{itm_menu}}" hidden="true" 
+              style="visibility: hidden;" />
+              <br />
+
+              <button class="btn btn-default" 
+              type="submit">
+                {% trans 'Delete' %}
+              </button>
+
+              <button class="btn btn-default" 
+              type="button" onclick="cancelDelete()">
+                {% trans 'Cancel' %}
+              </button>
+            </form>
+          </div>
+        </div>
+
+        <p class="hidden edit">
+          {% trans 'Fields marked are mandatory' %}.
+        </p>
+
+      	<div class="table-responsive">
+          <form method="post" class="update" 
+          action="/providers/contact-persons/update/">
+            {% csrf_token %}
+
+            <input type="text" 
+            readonly="true" 
+            value="{{cp.id}}" 
+            hidden="true" 
+            style="visibility: hidden;"
+            name="contact_person">
+
+            <table class="table-bordered table-striped tbl-view-details" 
+            style="white-space: nowrap;">
+              <tbody>
+                {% if can_edit and can_edit|upper == 'TRUE' %}
+                  <tr class="hidden edit">
+                    <td>
+                      <label for="txtFirstName">
+                        *&nbsp;{% trans 'First name' %}:
+                      </label>
+                    </td>
+                  </tr>
+
+                  <tr class="hidden edit">
+                    <td>
+                      <input id="txtFirstName" 
+                      type="text" required="true" 
+                      class="form-control" 
+                      value="{{cp.first_name}}" 
+                      name="first_name">
+                    </td>
+                  </tr>
+                {% endif %}
+
+                <tr class="view">
+                  <td>
+                    {% trans 'First name' %}:
+                  </td>
+
+                  <td>
+                    {{cp.first_name}}
+                  </td>
+                </tr>
+
+                {% if can_edit and can_edit|upper == 'TRUE' %}
+                  <tr class="hidden edit">
+                    <td>
+                      <label for="txtMiddleName">
+                        {% trans 'Middle name' %}:
+                      </label>
+                    </td>
+                  </tr>
+
+                  <tr class="hidden edit">
+                    <td>
+                      <input id="txtMiddleName" 
+                      type="text"
+                      class="form-control" 
+                      value="{{cp.middle_name}}" 
+                      name="middle_name">
+                    </td>
+                  </tr>
+                {% endif %}
+
+                <tr class="view">
+                  <td>
+                    {% trans 'Middle name' %}:
+                  </td>
+
+                  <td>
+                    {{cp.middle_name}}
+                  </td>
+                </tr>
+
+                {% if can_edit and can_edit|upper == 'TRUE' %}
+                  <tr class="hidden edit">
+                    <td>
+                      <label for="txtLastName">
+                        *&nbsp;{% trans 'Last name' %}:
+                      </label>
+                    </td>
+                  </tr>
+
+                  <tr class="hidden edit">
+                    <td>
+                      <input id="txtLastName" 
+                      type="text" required="true"
+                      class="form-control" 
+                      value="{{cp.last_name}}" 
+                      name="last_name">
+                    </td>
+                  </tr>
+                {% endif %}
+
+                <tr class="view">
+                  <td>
+                    {% trans 'Last name' %}:
+                  </td>
+
+                  <td>
+                    {{cp.last_name}}
+                  </td>
+                </tr>
+
+                {% if can_edit and can_edit|upper == 'TRUE' %}
+                  <tr class="hidden edit">
+                    <td>
+                      <label for="txtMothersLastName">
+                        {% trans 'Mothers last name' %}:
+                      </label>
+                    </td>
+                  </tr>
+
+                  <tr class="hidden edit">
+                    <td>
+                      <input id="txtMothersLastName" 
+                      type="text" 
+                      class="form-control" 
+                      value="{{cp.mothers_last_name}}" 
+                      name="mothers_last_name">
+                    </td>
+                  </tr>
+                {% endif %}
+
+                <tr class="view">
+                  <td>
+                    {% trans 'Mothers last name' %}:
+                  </td>
+
+                  <td>
+                    {{cp.mothers_last_name}}
+                  </td>
+                </tr>
+
+                {% if can_edit and can_edit|upper == 'TRUE' %}
+                  <tr class="hidden edit">
+                    <td>
+                      <label for="lstGender">
+                        *&nbsp;{% trans 'Gender' %}:
+                      </label>
+                    </td>
+                  </tr>
+
+                  <tr class="hidden edit">
+                    <td>
+                      <select id="lstGender"
+                      class="form-control"
+                      name="gender">
+                        <option>
+                          -- {% trans 'Pick one' %} --
+                        </option>
+
+                        {% if cp.gender == '' %}
+                          <option value="" 
+                          selected="true">
+                            {% trans 'Prefer not to say' %}
+                          </option>
+                        {% else %}
+                          <option value="">
+                            {% trans 'Prefer not to say' %}
+                          </option>
+                        {% endif %}
+
+                        {% if cp.gender == 'M' %}
+                          <option value="M" 
+                          selected="true">
+                            {% trans 'Male' %}
+                          </option>
+                        {% else %}
+                          <option value="M">
+                            {% trans 'Male' %}
+                          </option>
+                        {% endif %}
+
+                        {% if cp.gender == 'F' %}
+                          <option value="F" 
+                          selected="true">
+                            {% trans 'Female' %}
+                          </option>
+                        {% else %}
+                          <option value="F">
+                            {% trans 'Female' %}
+                          </option>
+                        {% endif %}
+                      </select>
+                    </td>
+                  </tr>
+                {% endif %}
+
+                <tr class="view">
+                  <td>
+                    {% trans 'Gender' %}:
+                  </td>
+
+                  <td>
+                    {{cp.gender_as_long_string}}
+                  </td>
+                </tr>
+
+                {% if can_edit and can_edit|upper == 'TRUE' %}
+                  <tr class="hidden edit">
+                    <td>
+                      <label for="txtDOB">
+                        *&nbsp;{% trans 'Date of birth' %}:
+                      </label>
+                    </td>
+                  </tr>
+
+                  <tr class="hidden edit">
+                    <td>
+                      <input id="txtDOB" 
+                      class="form-control"
+                      value="{{cp.dob_fmt_mx}}"
+                      placeholder="{% trans 'Date format' %}" 
+                      name="dob">
+                    </td>
+                  </tr>
+                {% endif %}
+
+                <tr class="view">
+                  <td>
+                    {% trans 'Date of birth' %}:
+                  </td>
+
+                  <td>
+                    {{cp.dob_fmt_mx}}
+                  </td>
+                </tr>
+
+                {% if can_edit and can_edit|upper == 'TRUE' %}
+                  <tr class="hidden edit">
+                    <td>
+                      <label for="txtEmail">
+                        *&nbsp;{% trans 'Email' %}:
+                      </label>
+                    </td>
+                  </tr>
+
+                  <tr class="hidden edit">
+                    <td>
+                      <input id="txtEmail" 
+                      class="form-control" 
+                      required="true"
+                      value="{{cp.email}}" 
+                      name="email">
+                    </td>
+                  </tr>
+                {% endif %}
+
+                <tr class="view">
+                  <td>
+                    {% trans 'Email' %}:
+                  </td>
+
+                  <td>
+                    {{cp.email}}
+                  </td>
+                </tr>
+
+                {% if can_edit and can_edit|upper == 'TRUE' %}
+                  <tr class="hidden edit">
+                    <td>
+                      <label for="txtCity">
+                        {% trans 'City' %}:
+                      </label>
+                    </td>
+                  </tr>
+
+                  <tr class="hidden edit">
+                    <td>
+                      <input id="txtCity" 
+                      class="form-control" 
+                      value="{{cp.city.display_name}}" 
+                      name="city">
+
+                      <input type="text" 
+                      hidden="true" 
+                      style="visibility: hidden;" 
+                      value="{{cp.city.id}}" 
+                      name="city_obj">
+                    </td>
+                  </tr>
+                {% endif %}
+
+                <tr class="view">
+                  <td>
+                    {% trans 'City' %}:
+                  </td>
+
+                  <td>
+                    {{cp.city.display_name}}
+                  </td>
+                </tr>
+
+                {% if can_edit and can_edit|upper == 'TRUE' %}
+                  <tr class="hidden edit">
+                    <td>
+                      <label for="txtAddr1">
+                        {% trans 'Address line 1' %}:
+                      </label>
+                    </td>
+                  </tr>
+
+                  <tr class="hidden edit">
+                    <td>
+                      <input id="txtAddr1" 
+                      class="form-control" 
+                      value="{{cp.addr1}}"
+                      name="addressline1">
+                    </td>
+                  </tr>
+                {% endif %}
+
+                <tr class="view">
+                  <td>
+                    {% trans 'Address line 1' %}:
+                  </td>
+
+                  <td>
+                    {{cp.addr1}}
+                  </td>
+                </tr>
+
+                {% if can_edit and can_edit|upper == 'TRUE' %}
+                  <tr class="hidden edit">
+                    <td>
+                      <label for="txtAddr2">
+                        {% trans 'Address line 2' %}:
+                      </label>
+                    </td>
+                  </tr>
+
+                  <tr class="hidden edit">
+                    <td>
+                      <input id="txtAddr2" 
+                      class="form-control" 
+                      value="{{cp.addr2}}"
+                      name="addressline2">
+                    </td>
+                  </tr>
+                {% endif %}
+
+                <tr class="view">
+                  <td>
+                    {% trans 'Address line 2' %}:
+                  </td>
+
+                  <td>
+                    {{cp.addr2}}
+                  </td>
+                </tr>
+
+                {% if can_edit and can_edit|upper == 'TRUE' %}
+                  <tr class="hidden edit">
+                    <td>
+                      <label for="txtCellPhone">
+                        *&nbsp;{% trans 'Cell phone' %}:
+                      </label>
+                    </td>
+                  </tr>
+
+                  <tr class="hidden edit">
+                    <td>
+                      <input id="txtCellPhone" 
+                      class="form-control" 
+                      required="true"
+                      value="{{cp.cell_phone}}" 
+                      name="cellphone">
+                    </td>
+                  </tr>
+                {% endif %}
+
+                <tr class="view">
+                  <td>
+                    {% trans 'Cell phone' %}:
+                  </td>
+
+                  <td>
+                    {{cp.cell_phone}}
+                  </td>
+                </tr>
+
+                {% if can_edit and can_edit|upper == 'TRUE' %}
+                  <tr class="hidden edit">
+                    <td>
+                      <label for="txtHomePhone">
+                        {% trans 'Home phone' %}:
+                      </label>
+                    </td>
+                  </tr>
+
+                  <tr class="hidden edit">
+                    <td>
+                      <input id="txtHomePhone" 
+                      class="form-control" 
+                      value="{{cp.home_phone}}" 
+                      name="homephone">
+                    </td>
+                  </tr>
+                {% endif %}
+
+                <tr class="view">
+                  <td>
+                    {% trans 'Home phone' %}:
+                  </td>
+
+                  <td>
+                    {{cp.home_phone}}
+                  </td>
+                </tr>
+
+                {% if can_edit and can_edit|upper == 'TRUE' %}
+                  <tr class="hidden edit">
+                    <td>
+                      <label for="txtOtherPhone">
+                        {% trans 'Other phone' %}:
+                      </label>
+                    </td>
+                  </tr>
+
+                  <tr class="hidden edit">
+                    <td>
+                      <input id="txtOtherPhone" 
+                      class="form-control" 
+                      value="{{cp.other_phone}}" 
+                      name="otherphone">
+                    </td>
+                  </tr>
+                {% endif %}
+
+                <tr class="view">
+                  <td>
+                    {% trans 'Other phone' %}:
+                  </td>
+
+                  <td>
+                    {{cp.other_phone}}
+                  </td>
+                </tr>
+
+                <tr id="rowBtnSave" 
+                hidden="true" class="hidden">
+                  <td colspan="2">
+                    <button type="submit" 
+                    class="btn btn-primary">
+                      {% trans 'Save' %}
+                    </button>
+
+                    <button type="button" 
+                    onclick="cancelEdit()" 
+                    class="btn btn-primary btnCancelEdit">
+                      {% trans 'Cancel' %}
+                    </button>
+                  </td>
+                </tr>
+
+                {% if can_edit and can_edit|upper == 'TRUE' or can_delete and can_delete|upper == 'TRUE' %}
+                <tr class="view">
+                  <td>{% trans 'Options' %}:</td>
+
+                  <td>
+                    {% if can_edit and can_edit|upper == 'TRUE' %}
+                      <a href="#" data-placement="bottom"
+                      data-toggle="tooltip"  
+                      onclick="editData();prepareEditFrm();" 
+                      title="{% trans 'Edit' %}" 
+                      data-original-title="{% trans 'Edit' %}"><i class="material-icons">edit</i></a>
+                    {% endif %}
+
+                    {% if can_delete and can_delete|upper == 'TRUE' %}
+                      <a href="#" data-placement="top"
+                      data-toggle="tooltip" 
+                      id="actDelete" 
+                      onclick="confirmDelete(); return false;" 
+                      title="{% trans 'Delete' %}" 
+                      data-original-title="{% trans 'Delete' %}"><i class="material-icons">delete</i></a>
+                    {% endif %}
+                  </td>
+                </tr>
+                {% endif %}
+              </tbody>
+            </table>
+          </form>
+        </div>
+      </div>
+      <hr />
+
+      <div class="modal-footer">
+      	<button type="button" 
+        onclick="$('#dlgEditContactPerson').modal('hide')" 
+        class="btn btn-primary">
+      		<!--<i class="material-icons">clear</i>-->
+      		{% trans 'Back' %}
+      	</button>
+        <div id="divAjaxResults"></div>
+      </div>
+    </div>
+	</div>
+</div>
+
+<script type="text/javascript" src="{% static 'js/jquery.form.min.js' %}"></script>
+
+<script type="text/javascript">
+  //$(".hide-contact-persons").hide();
+  $('[data-toggle="tooltip"]').tooltip();
+
+  /*function on_close_dlgViewDetails() {
+    $('#dlgEditContactPerson').on('hidden.bs.modal', 
+      function () {
+        $('#dlgSearchResults').focus();
+        toastr.clear();
+      });
+  }*/
+
+	$(document).ready(function(){
+		$('[data-toggle="tooltip"]').tooltip();
+
+    $("#dlgEditContactPerson #txtDOB").datepicker({maxDate: "-18Y",  showButtonPanel: true, changeMonth: true, changeYear: true});
+
+    $("#dlgEditContactPerson #txtDOB").datepicker("option", $.datepicker.regional["es"] );
+
+    //$("#id_dob").attr("readonly", "readonly");
+
+    $("#dlgEditContactPerson #txtDOB").change(function(){
+      show_msg_with_toastr("info", msg_wait);
+
+      /*if (this.value=='') {
+        toastr.clear();
+        $("#dlgEditContactPerson form.update button[type='submit']").removeAttr("disabled");
+        return true;
+      }*/
+
+      // Regular expression taken from https://www.regextester.com/99555
+      var re = /^([0-2][0-9]|(3)[0-1])(\/)(((0)[0-9])|((1)[0-2]))(\/)\d{4}$/;
+
+      if (!re.test(this.value)) {
+        $.ajax({
+          method: "GET",
+          url: "/translator/translate/",
+          data: {msg: "Wrong format for date of birth"}
+        })
+        .done(function(result) {
+          toastr.clear();
+          show_msg_with_toastr("error", result);
+          $("#dlgEditContactPerson form.update button[type='submit']").attr("disabled", "true");
+        });
+      }
+      else {
+        toastr.clear();
+        $("#dlgEditContactPerson form.update button[type='submit']").removeAttr("disabled");
+      }
+    });
+
+    $('#dlgEditContactPerson').on('hidden.bs.modal', 
+      function () {
+        //alert("entro");
+        //$('#dlgViewDetails').modal("show");
+        $('#dlgViewDetails').focus();
+        toastr.clear();
+      });
+  });
+</script>
+
+{% if can_delete and can_delete|upper == 'TRUE' %}
+<script type="text/javascript">
+  function prepareDeleteFrm() {
+    options = { 
+      target:        '#dlgViewDetails #divContactPersons',
+      beforeSubmit:  showRequest,
+      success:       showResponse
+    }; 
+
+    function showRequest(formData, jqForm, options) { 
+      show_msg_with_toastr("info", msg_wait);
+      return true;
+    }
+ 
+    function showResponse(responseText, statusText, xhr, $form)  {
+      if (responseText.status=="success") {
+        $("#dlgEditContactPerson").modal("hide");
+        $(".hide-contact-persons").click();
+        $(".show-contact-persons").click();
+
+        // selector="#divContactPersons #tblContactPersons";
+        // selector+=" tbody tr#row"+responseText.cp;
+        // $(selector).remove();
+        setTimeout(function() {
+          show_msg_with_toastr(responseText.status, responseText.msg);
+          rows=$("#dlgViewDetails #divContactPersons #tblContactPersons tbody tr");
+          if (rows.length<1) {
+            $("#divContactPersons").remove();
+            $(".hide-contact-persons").hide();
+          }
+        }, 500);
+      }
+      //$("#dlgSearchResults").modal("hide");
+    }
+
+    $("#dlgEditContactPerson form.confirm-delete").ajaxForm(options);
+  }
+</script>
+{% endif %}
+
+{% if can_edit and can_edit|upper == 'TRUE' %}
+<script type="text/javascript">
+  function prepareEditFrm() {
+    /*$("#dlgEditContactPerson form.update input[name='useradmin']").autocomplete({
+      source: "{% url 'my-users-autocomplete' %}",
+      minLength: 1,
+    });*/
+
+    $("#dlgEditContactPerson form.update input[name='city']").autocomplete({
+      source: "{% url 'cities-autocomplete' %}",
+      minLength: 1,
+    });
+
+    $("#dlgEditContactPerson table.tbl-view-details tbody tr td:first-child").removeClass("right-alignment");
+
+    $("#dlgEditContactPerson form.update input[name='city']").change(function(){
+      show_msg_with_toastr("info", msg_wait);
+      $.ajax({
+        method: "GET",
+        url: "{% url 'search-city-by-name' %}",
+        data: {name: this.value}
+      })
+      .done(function(result) {
+        toastr.clear();
+        if (!result['exist'])
+          $.ajax({
+            method: "GET",
+            url: "/translator/translate",
+            data: { msg: "Please enter a valid city"}
+          })
+          .done(function(result) {
+            show_msg_with_toastr("error", result);
+            $("input[name='city_obj']").val("");
+            $("#dlgEditContactPerson form.update button[type='submit']").attr("disabled", "true");
+          });
+        else {
+          $("input[name='city_obj']").val(result["city"]);
+          $("#dlgEditContactPerson form.update button[type='submit']").removeAttr("disabled");
+        }
+      });
+    });
+
+    /*$("#dlgEditContactPerson form.update input[name='useradmin']").autocomplete({
+      source: "{% url 'my-users-autocomplete' %}",
+      minLength: 1,
+    });
+
+    $("#dlgEditContactPerson form.update input[name='useradmin']").change(function(){
+      show_msg_with_toastr("info", msg_wait);
+
+      email = this.value.substring(this.value.indexOf("[email=") + "[email=".length, this.value.indexOf("]"));
+
+      $.ajax({
+        method: "GET",
+        url: "{% url 'search-user-by-email' %}",
+        data: { email: email}
+      })
+      .done(function(result) {
+        toastr.clear();
+        if (!result['exist'])
+          $.ajax({
+            method: "GET",
+            url: "/translator/translate",
+            data: { msg: "Please enter a valid user"}
+          })
+          .done(function(result) {
+            show_msg_with_toastr("error", result);
+            $("#dlgEditContactPerson form.update input[name='useradmin_obj']").val("");
+            $("#dlgEditContactPerson form.update button[type='submit']").attr("disabled", "true");
+          });
+        else {
+          $("#dlgEditContactPerson form.update input[name='useradmin_obj']").val(result["user"]);
+          $("#dlgEditContactPerson form.update button[type='submit']").removeAttr("disabled");
+        }
+      });
+    });*/
+
+    // The next approach solve the issue with jQuery autocompletes on Bootstrap's modal dialog
+    // The issue is that the autocomplete options will appear "behind" the modal dialog. In my previous apps I will include a css style modifying the z-index for the ui-autocomplete, but now, I think this approach is even better
+    // This was taken from: 
+    // https://stackoverflow.com/questions/16133654/autocomplete-issue-into-bootstrap-modal
+    //$("#dlgEditContactPerson form.update input[name='useradmin']").autocomplete("option", "appendTo", "#dlgEditContactPerson form.update");
+
+    $("#dlgEditContactPerson form.update input[name='city']").autocomplete("option", "appendTo", "#dlgEditContactPerson form.update");
+
+    options = { 
+      target:        '#dlgViewDetails #divContactPersons',
+      beforeSubmit:  showRequest,  
+      success:       showResponse
+    };
+
+    function showRequest(formData, jqForm, options) {
+      $('#dlgEditContactPerson form.update button[type="submit"]').attr("disabled", "true");
+      show_msg_with_toastr("info", msg_wait);
+      return true;
+    }
+ 
+    function showResponse(responseText, statusText, xhr, $form)  { 
+      toastr.clear();
+      if (statusText == "success") {
+        $("#dlgViewDetails .hide-contact-persons").click();
+        $("#dlgViewDetails .show-contact-persons").click();
+      }
+      setTimeout(function() {
+        show_msg_with_toastr(responseText.status, responseText.msg);
+      }, 500);
+      $('#dlgEditContactPerson form.update button[type="submit"]').removeAttr("disabled");
+    }
+
+    $("#dlgEditContactPerson form.update").ajaxForm(options);
+
+    $("#dlgEditContactPerson form.update input")[2].select();
+  }
+
+  //editData();
+</script>
+{% endif %}
+
+{% if can_edit and can_edit|upper == 'TRUE' and not enter_and_edit%}
+<script type="text/javascript">
+  editData();
+</script>
+{% endif %}

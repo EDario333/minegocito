@@ -1,0 +1,95 @@
+{% load static i18n %}
+
+{% if 'success' in status %}
+<script type="text/javascript">
+	function showDetails(shop) {
+    show_msg_with_toastr("info", msg_wait);
+
+    $.ajax({
+      method: "GET",
+      url: "/shops/view-details",
+      data: { shop: shop }
+    })
+    .done(function(result) {
+      $("div#divViewDetails").html(result);
+      $(".confirm-delete").remove();
+      $(".edit").remove();
+      $(".modal-content").css("width", "600px");
+      $("#dlgViewDetails table.tbl-view-details tbody tr td:first-child").addClass("right-alignment");
+      $("#dlgViewDetails").modal();
+
+      toastr.clear();
+    });
+    return false;
+  }
+</script>
+
+{% for shop in shops %}
+<div class="item">
+  <div class="block-4 text-center">
+  	<a href="#" data-placement="bottom"
+  	data-toggle="tooltip" 
+    title="{% trans 'Click to display details' %}" 
+    data-original-title="{% trans 'Click to display details' %}"
+    onclick="showDetails('{{shop.shop.id}}'); return false;">
+      <figure class="block-4-image">
+        <img src="{{shop.shop.static_photo}}" 
+        alt="{{shop.shop.name}}" 
+        class="img-fluid">
+      </figure>
+  	</a>
+
+    <div class="block-4-text p-4">
+      <h3>
+      	<a href="#" data-placement="bottom"
+        data-toggle="tooltip" 
+        title="{% trans 'Click to display details' %}" 
+        data-original-title="{% trans 'Click to display details' %}"
+        onclick="showDetails('{{shop.shop.id}}'); return false;">
+          {{shop.shop.name}}
+        </a>
+      </h3>
+
+      <p class="mb-0">
+      	{% for cat in shop.categories %}
+          {{cat}}&nbsp;
+        {% endfor %}
+      </p>
+
+      <p class="text-primary font-weight-bold">
+      	{{shop.shop.city.display_name}}
+      </p>
+    </div>
+  </div>
+</div>
+{% endfor %}
+<script type="text/javascript">
+	// $(".nonloop-block-3").addClass("owl-carousel");
+	// $(".nonloop-block-3").owlCarousel({navigation : true, items: 3});
+	$("#secShops").addClass("owl-carousel");
+	$("#secShops").owlCarousel({nav: true, items: 3});
+	$('[data-toggle="tooltip"]').tooltip();
+	$(".owl-prev").html("&lt;");
+	$(".owl-next").html("&gt;");
+</script>
+{% elif 'error' in status %}
+<script type="text/javascript">
+	$("#secMostVisitedShops").remove();
+</script>
+<div class="alert alert-danger" style="width: 100%">
+  {{msg}}
+</div>
+{% else %}
+<div class="item">
+  <div class="text-center">
+    <a href="#" data-dismiss="modal" data-toggle="modal"
+    data-target="#dlgCreateUserAccount">
+      <figure class="block-4-image">
+        <img src="{% static 'imgs/most-visited-shops-2.jpg' %}" 
+        alt="{% trans 'Create user account' %}" 
+        class="img-fluid rounded">
+      </figure>
+    </a>
+  </div>
+</div>
+{% endif %}

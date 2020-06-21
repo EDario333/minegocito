@@ -1,0 +1,114 @@
+{% extends 'base.html' %}
+
+{% load static i18n %}
+
+{% block title_suffix %}
+  {% trans 'About' %}
+{% endblock %}
+
+{% block content %}
+<style type="text/css">
+  .header-container {
+    margin: 0 0 20px 0;
+    text-align: justify;
+  }
+
+  h4 {
+    text-align: left;
+  }
+</style>
+
+<div class="bg-light py-3">
+  <div class="container">
+    <div class="row">
+      <div class="col-md-12 mb-0">
+      	<a href="/">{% trans 'Home' %}</a>
+      	<span class="mx-2 mb-0">/</span> 
+      	<strong class="text-black">
+      		{% trans 'About' %}
+      	</strong>
+      </div>
+    </div>
+  </div>
+</div>  
+
+<div class="site-section">
+  <div class="container">
+    <div class="row">
+      <div class="col-md-12">
+        <h3 class="h3 mb-3 text-black">
+        	{% trans 'About' %}
+      	</h3>
+      </div>
+
+      <!-- <div class="col-md-7"> -->
+    	<!-- <div class="col-md-12" 
+      style="height: 500px; border-bottom: 2px groove gray;"> -->
+      <div class="col-md-12 header-container">
+        <h4 class="h4 text-black" data-aos="fade-up">
+          {% trans 'Who are we header' %}
+        </h4>
+
+        <span data-aos="fade" data-aos-delay="500"
+        class="text-black">
+          {% trans 'Who are we content' %}
+        </span>
+      </div>
+
+      <div class="col-md-12 header-container">
+        <h4 class="h4 text-black" data-aos="fade-up">
+          {% trans 'Our main goal header' %}
+        </h4>
+
+        <span data-aos="fade" data-aos-delay="500"
+        class="text-black">
+          {% trans 'Our main goal content' %}
+        </span>
+      </div>
+
+      <div class="col-md-12 header-container">
+        <h4 class="h4 text-black" data-aos="fade-up">
+          {% trans 'Our mission header' %}
+        </h4>
+
+        <span data-aos="fade" data-aos-delay="500"
+        class="text-black">
+          {% trans 'Our mission content' %}
+        </span>
+      </div>
+
+      <div class="col-md-12 header-container">
+        <h4 class="h4 text-black" data-aos="fade-up">
+          {% trans 'Our vision header' %}
+        </h4>
+
+        <span data-aos="fade" data-aos-delay="500"
+        class="text-black">
+          {% trans 'Our vision content' %}
+        </span>
+      </div>
+
+      <div class="col-md-12 header-container">
+        <h4 class="h4 text-black" data-aos="fade-up">
+          {% trans 'Organizational values' %}
+        </h4>
+
+        <span data-aos="fade" data-aos-delay="500"
+        class="text-black">
+          {% trans 'Organizational values content' %}
+        </span>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock content %}
+
+{% block js_footer %}
+<script type="text/javascript">
+  $("ul.site-menu li").removeClass("active");
+  $("ul.site-menu li#navAbout").addClass("active");
+
+  $(document).ready(function(){
+  });
+</script>
+{% endblock %}

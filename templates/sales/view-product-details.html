@@ -1,0 +1,97 @@
+{% load static i18n %}
+
+<style type="text/css">
+	div#modalViewDetails {
+		width: 35%;
+	}
+
+  table.tbl-view-details {
+    /*width: 100%;*/
+    width: auto;
+  }
+
+  table.tbl-view-details tbody tr td:first-child  {
+    /* text-align: right; */
+    font-weight: bold;
+    /*width: 100%;*/
+    width: auto;
+  }
+
+  /*.right-alignment {
+    text-align: right;
+  }*/
+
+  img.product-image {
+    width: 128px;
+    height: 128px;
+    margin: 0 0 10px 0;
+    border-radius: 10px;
+  }
+</style>
+
+<div class="bg-gradient-primary modal fade" 
+id="dlgViewDetails" tabindex="-1" role="dialog" 
+aria-labelledby="lblHeader" aria-hidden="true">
+  <div class="modal-dialog my-modal" 
+  role="document" id="modalViewDetails">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="lblHeader">
+          {% trans 'Product details' %}
+        </h5>
+
+        <button class="close" type="button" 
+        data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">×</span>
+        </button>
+      </div>
+      <hr />
+
+      <div class="modal-body">
+        <img src="{{ppd.static_photo}}" 
+        alt="photo" class="product-image" />
+
+      	<div class="table-responsive">
+          <table class="table-bordered table-striped tbl-view-details" 
+          style="white-space: nowrap;">
+            <tbody>
+              <tr>
+                <td>
+                  {% trans 'Product name' %}:
+                </td>
+
+                <td>
+                  {{ppd.purchase_detail.product.name}}
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+      <hr />
+
+      <div class="modal-footer">
+      	<button type="button" 
+        class="btn btn-primary waves-effect" 
+      	data-dismiss="modal">
+      		<!--<i class="material-icons">clear</i>-->
+      		{% trans 'Back' %}
+      	</button>
+        <!--<div id="divAjaxResults"></div>-->
+      </div>
+    </div>
+	</div>
+</div>
+
+<script type="text/javascript">
+	$(document).ready(function(){
+		toastr.clear();
+/*
+    $('#dlgViewDetails').on('hidden.bs.modal', 
+    function () {
+      $('#dlgSearchResults').focus();
+      toastr.clear();
+    });
+*/
+  });
+</script>

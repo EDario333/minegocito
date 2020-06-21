@@ -1,0 +1,94 @@
+{% load static i18n %}
+
+<div class="bg-gradient-primary modal fade" 
+id="dlgAssignGroup" tabindex="-1" role="dialog" 
+aria-labelledby="lblHeader" aria-hidden="true"
+onfocus='$("#dlgLogin #txtEmail").focus();'>
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="lblHeader">
+          {% trans 'Assign group' %}
+        </h5>
+
+        <button class="close" type="button" 
+        data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">×</span>
+        </button>
+      </div>
+      <hr />
+
+      <div class="modal-body">
+        <div class="col-sm-6">
+          {% for itm in groups %}
+            <input type="radio" name="groups" 
+            value="{{itm.id}}" id="rad{{itm.id}}" />
+            <label for="rad{{itm.id}}">{{itm.name}}</label>
+            <br />
+          {% endfor %}
+        </div>
+
+        <div class="col-sm-6">
+          <fieldset>
+            <legend>{% trans 'Permissions' %}</legend>
+            <div id="divGroupPermissions">
+              {% trans 'Choose one group to the left' %}
+            </div>
+          </fieldset>
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <div class="col-sm-12">
+        <button class="btn btn-primary waves-effect" 
+        type="button" id="actAccept">
+          {% trans 'Accept' %}
+        </button>
+
+        <button class="btn btn-secondary waves-effect" 
+        type="button" data-dismiss="modal">
+          {% trans 'Cancel' %}
+        </button>
+      </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script type="text/javascript">
+  $(document).ready(function(){
+    $("#dlgAssignGroup input[type='radio']").change(function() {
+
+      show_msg_with_toastr("info", msg_wait);
+
+      $.ajax({
+        method: "GET",
+        url: "/users-groups/get-permissions-group/",
+        data: { group: this.value }
+      })
+      .done(function(result) {
+        toastr.clear();
+        if (result.status == "success") {
+          $("#dlgAssignGroup #divGroupPermissions").html(result.html);
+        }
+        else
+          show_msg_with_toastr(result.level, result.msg);
+      });
+    });
+
+    $("#dlgAssignGroup #actAccept").click(function() {
+      group = $("#dlgAssignGroup input[name='groups']:checked").val();
+      $("form input[name='usergroup']").val(group);
+      group_assigned = true;
+
+      //console.log($("form p#divUserGroup"));
+      if ($("form p#divUserGroup").length > 0) {
+        dummy = $("#dlgAssignGroup input[name='groups']:checked")[0].id;
+        group_name = $("#dlgAssignGroup label[for='" + dummy + "']")[0].innerHTML;
+        $("form p#divUserGroup").html(group_name);
+      }
+
+      $("#dlgAssignGroup").modal("hide");
+    });
+  });
+</script>

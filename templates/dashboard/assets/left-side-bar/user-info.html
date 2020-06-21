@@ -1,0 +1,177 @@
+{% load static i18n %}
+
+<style type="text/css">
+  .sidebar .user-info .image img {
+    cursor: pointer;
+  }
+</style>
+
+<div class="user-info">
+  <div class="image">
+    <!-- <img src="{% static 'AdminBSBMaterialDesign-master/images/user.png' %}" 
+    width="48" height="48" alt="User" /> -->
+    <img src="{{my_user.static_profile_picture}}" 
+    width="48" height="48" data-placement="bottom"
+    data-toggle="tooltip" 
+    onclick="$('#ctrlChangeProfilePicture').click()" 
+    title="{% trans 'Change profile picture' %}" 
+    data-original-title="{% trans 'Change profile picture' %}" id="mainProfilePicture" 
+    alt="{% trans 'Profile picture' %}" />
+    <form action="/users/admin/change-my-profile-picture/" 
+    id="changeProfilePicture" 
+    hidden="true" style="visibility: hidden;"
+    method="post" enctype="multipart/form-data">
+      <input accept="image/*" hidden="true" 
+      style="visibility: hidden;" 
+      onchange='$("form#changeProfilePicture").submit();'
+      id="ctrlChangeProfilePicture" 
+      type="file" name="profile_picture" />
+      {% csrf_token %}
+    </form>
+  </div>
+
+  <span
+    id="tutorialStep11"
+    data-toggle="popover-x" 
+    data-placement="right"
+    data-target="#ftt-Step11">
+  </span>
+
+  <div class="info-container">
+    <div class="name" data-toggle="dropdown" 
+    aria-haspopup="true" aria-expanded="false">
+      {{user.first_name}}&nbsp;{{user.last_name}}
+    </div>
+
+    <span
+      id="tutorialStep10"
+      data-toggle="popover-x" 
+      data-placement="bottom bottom-left"
+      data-target="#ftt-Step10">
+    </span>
+
+    <div class="email">
+      {{user.email}}
+    </div>
+
+    <div class="btn-group user-helper-dropdown">
+      <i id="menuUserInfo" 
+      class="material-icons" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
+        keyboard_arrow_down
+      </i>
+      <span
+        id="tutorialStep9"
+        data-toggle="popover-x" 
+        data-placement="right"
+        data-target="#ftt-Step9">
+      </span>
+
+      <ul class="dropdown-menu pull-right">
+        <li>
+          <a id="actMyProfile" 
+          href="/users/admin/my-profile/">
+            <i class="material-icons">person</i>
+            {% trans 'Profile' %}
+          </a>
+        </li>
+
+        <!--
+        <li role="seperator" class="divider"></li>
+
+        <li>
+          <a href="javascript:void(0);">
+            <i class="material-icons">group</i>
+            Followers
+          </a>
+        </li>
+
+        <li>
+          <a href="javascript:void(0);">
+            <i class="material-icons">shopping_cart</i>
+            Sales
+          </a>
+        </li>
+
+        <li>
+          <a href="javascript:void(0);">
+            <i class="material-icons">favorite</i>
+            Likes
+          </a>
+        </li>
+
+        <li role="seperator" class="divider"></li>
+        -->
+
+        <li>
+          <a href="#" data-toggle="modal" 
+          data-target="#dlgLogout">
+            <i class="material-icons">lock</i>
+            {% trans 'Logout' %}
+          </a>
+        </li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<div id="divAjaxResults"></div>
+
+<script type="text/javascript" src="{% static 'js/jquery.form.min.js' %}"></script>
+
+<script type="text/javascript">
+  $(document).ready(function(){
+    $('[data-toggle="tooltip"]').tooltip();
+
+    var options = { 
+      target:        '#divAjaxResults',
+      beforeSubmit:  showRequest,
+      success:       showResponse 
+    };
+
+    $("#actMyProfile").click(function() {
+      action = this.href;
+      showLoader();
+
+      data = {
+        user: "{{user}}", 
+        app_version: "{{app_version}}",
+        //itm_menu: this.id
+      };
+
+      $.ajax({
+        method: "GET",
+        url: action,
+        data: data
+      })
+      .done(function(result) {
+        //$("section.content").empty();
+        $("div.menu li.active").removeClass("active");
+        $("section.content").html(result);
+        $('#id_password').val('');
+        //$("#menuUserInfo").click();
+        if ($("section.content form input")[0] != undefined)
+          $("section.content form input")[0].focus();
+        //$("#id_last_name").click();
+      });
+      return false;
+    });
+
+    function showRequest(formData, jqForm, options) { 
+      show_msg_with_toastr("info", msg_wait);
+    }
+ 
+    function showResponse(responseText, statusText, xhr, $form)  { 
+      //$(".page-loader-wrapper").remove();
+      toastr.clear();
+      show_msg_with_toastr(responseText.status, responseText.msg);
+      if (responseText.status=="success") {
+        $("#mainProfilePicture").attr("src", responseText.new_profile_picture);
+        $("#imgProfilePicture").attr("src", responseText.new_profile_picture);
+      }
+      //console.log(responseText);
+      //alert(statusText);
+    }
+
+    $("form#changeProfilePicture").ajaxForm(options);
+  });
+</script>

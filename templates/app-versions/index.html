@@ -1,0 +1,149 @@
+{% extends 'home/index.html' %}
+
+{% load static i18n %}
+
+{% block title_suffix %}
+  {% trans 'App versions' %}
+{% endblock %}
+
+{% block extra_css2 %}
+<link href="{% static 'fontawesome-free/css/all.min.css' %}" rel="stylesheet" type="text/css">
+
+<style type="text/css">
+  section.pricing {
+    background: #007bff;
+    background: linear-gradient(to right, #0062E6, #33AEFF);
+  }
+
+  .pricing .card {
+    border: none;
+    border-radius: 1rem;
+    transition: all 0.2s;
+    box-shadow: 0 0.5rem 1rem 0 rgba(0, 0, 0, 0.1);
+  }
+
+  .pricing hr {
+    margin: 1.5rem 0;
+  }
+
+  .pricing .card-title {
+    margin: 0.5rem 0;
+    font-size: 0.9rem;
+    letter-spacing: .1rem;
+    font-weight: bold;
+  }
+
+  .pricing .card-price {
+    font-size: 3rem;
+    margin: 0;
+  }
+
+  .pricing .card-price .period {
+    font-size: 0.8rem;
+  }
+
+  .pricing ul li {
+    margin-bottom: 1rem;
+  }
+
+  .pricing .text-muted {
+    opacity: 0.7;
+  }
+
+  .pricing .btn {
+    font-size: 80%;
+    border-radius: 5rem;
+    letter-spacing: .1rem;
+    font-weight: bold;
+    padding: 1rem;
+    opacity: 0.7;
+    transition: all 0.2s;
+  }
+
+  /* Hover Effects on Card */
+
+  @media (min-width: 992px) {
+    .pricing .card:hover {
+      margin-top: -.25rem;
+      margin-bottom: .25rem;
+      box-shadow: 0 0.5rem 1rem 0 rgba(0, 0, 0, 0.3);
+    }
+    .pricing .card:hover .btn {
+      opacity: 1;
+    }
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<section class="pricing py-5">
+  <img src="{% static 'imgs/limited-time.jpg' %}" 
+  alt="{% trans 'Limited offers' %}" 
+  style="border-radius: 25px; margin: 0 auto 20px auto; display: block" />
+
+  <div class="container">
+    <div class="row">
+
+      {% for itm in list %}
+        <div class="col-lg-3" style="margin: 0 0 15px 0">
+          <div class="card mb-5 mb-lg-0">
+            <div class="card-body">
+              <h5 class="card-title text-muted text-uppercase text-center">
+                {{itm.version.name}}
+              </h5>
+
+              <h6 class="card-price text-center">
+                ${{itm.version.price}}<span class="period">/{% trans 'Month' %}</span>
+              </h6>
+
+              <hr>
+
+              <ul class="fa-ul">
+                {% for feature in itm.features %}
+                  {% if feature.feature.disabled  %}
+                    <li class="text-muted">
+                      <span class="fa-li">
+                        <i class="fas fa-times"></i>
+                      </span>
+
+                      <strike>
+                        <strong style="font-weight: bold">{{feature.name}}</strong>:
+                        {{feature.feature.description}}
+                      </strike>
+                  {% else %}
+                    <li>
+                      <span class="fa-li">
+                        <i class="fas fa-check"></i>
+                      </span>
+
+                      <strong style="font-weight: bold">{{feature.name}}</strong>:
+                      {{feature.feature.description}}
+                  {% endif %}
+                  </li>
+                {% endfor %}
+              </ul>
+
+              <a href="#" id="btnPlan{{itm.version.id}}" 
+              data-toggle="modal" 
+              data-target="#dlgCreateUserAccount"
+              class="btn btn-block btn-primary text-uppercase">
+                {% trans 'Acquire' %}
+              </a>
+            </div>
+          </div>
+        </div>
+      {% endfor %}
+
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %}
+
+{% block extra_js_footer %}
+  <script type="text/javascript">
+    inactiveAllNavigationItems();
+    $("nav.site-navigation li#navAppVersions").addClass("active");
+    $("nav.site-navigation li#navAppVersions a").attr("href", "#");
+  </script>
+{% endblock %}

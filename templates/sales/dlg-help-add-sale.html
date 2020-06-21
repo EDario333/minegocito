@@ -1,0 +1,114 @@
+{% load i18n %}
+
+<div id="secHelp" class="card help-products-details">
+  <div class="header bg-blue-grey">
+    <h2>
+      {% trans 'Help' %}
+      <small>
+        {% trans 'Products details' %}
+      </small>
+    </h2>
+
+    <ul class="header-dropdown m-r--5">
+      <li>
+        <a show-icon-onclose="#actShowAssistance"
+        set-focus-onclose="#txtSKU"
+        data-hide="help-products-details"
+        href="javascript:void(0);">
+          <i class="material-icons">close</i>
+        </a>
+      </li>
+    </ul>
+  </div>
+
+  <div class="body">
+    <button style="width: auto;" 
+    id="btnShowHelpWithBarcode" 
+    class="btn btn-info waves-effect" type="button">
+      {% trans 'I am using a barcode reader' %}
+    </button>
+
+    <button style="width: auto;"
+    id="btnShowHelpNoBarcode"  
+    class="btn btn-info waves-effect" type="button">
+      {% trans 'I do not have a barcode reader' %}
+    </button>
+
+    <button style="width: auto;"
+    id="btnShowHelpFinalConsiderations"  
+    class="btn btn-info waves-effect" type="button">
+      {% trans 'Final considerations' %}
+    </button>
+
+    <span id="intro">
+      <p style="text-align: justify;">
+        {% trans 'Msg make a click to show the selected topic' %}
+      </p>
+    </span>
+
+    <span id="withBarcodeReader">
+      <p style="text-align: justify;">
+        {% trans 'Msg using barcode reader' %}
+      </p>
+    </span>
+
+    <span id="noBarcodeReader">
+      <p style="text-align: justify;">
+        {% trans 'Msg shortcut for product details in new sale' %}
+      </p>
+    </span>
+
+    <span id="finalConsiderations">
+      <p style="text-align: justify;">
+        {% trans 'Msg final considerations' %}
+      </p>
+    </span>
+
+    <button style="margin: 10px 0 0 0" 
+    class="btn btn-default waves-effect" 
+    type="button" 
+    set-focus-onclose="#txtSKU"
+    data-hide="help-products-details"
+    show-icon-onclose="#actShowAssistance">
+      <!--<i class="material-icons">done</i>-->
+      {% trans 'Got it' %}
+    </button>
+  </div>
+</div>
+
+<script type="text/javascript">
+  $("#withBarcodeReader").hide();
+  $("#noBarcodeReader").hide();
+  $("#finalConsiderations").hide();
+
+  $("[data-hide]").click(function(){
+    show_icon_onclose = $(this).attr("show-icon-onclose");
+    if (show_icon_onclose != undefined)
+      $(show_icon_onclose).show();
+    set_focus_onclose = $(this).attr("set-focus-onclose");
+    if (set_focus_onclose != undefined)
+      $(set_focus_onclose).focus();
+    $(this).closest("." + $(this).attr("data-hide")).remove();
+  });
+
+  $("#btnShowHelpWithBarcode").click(function() {
+    $("#intro").hide();
+    $("#withBarcodeReader").show();
+    $("#noBarcodeReader").hide();
+    $("#finalConsiderations").hide();
+  });
+
+  $("#btnShowHelpNoBarcode").click(function() {
+    $("#withBarcodeReader").hide();
+    $("#finalConsiderations").hide();
+    $("#intro").hide();
+    $("#noBarcodeReader").show();
+  });
+
+  $("#btnShowHelpFinalConsiderations").click(function() {
+    $("#withBarcodeReader").hide();
+    $("#noBarcodeReader").hide();
+    $("#intro").hide();
+    $("#finalConsiderations").show();
+  });
+</script>

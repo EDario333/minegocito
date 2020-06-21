@@ -1,0 +1,214 @@
+{% extends 'purchases/generic-form.html' %}
+
+{% load i18n %}
+
+{% block msg_pre_form %}
+	{% trans 'Fields marked are mandatory' %}.
+{% endblock %}
+
+{% block global_vars_js %}
+<script type="text/javascript">
+	var subtotal = 0;
+	var total = 0;
+	var counter_products = 0;
+	var all_products_in_store=false;
+
+	function refreshTotal() {
+    $(".purchase-total").html(parseFloat(total).toFixed(2));
+	}
+
+	$("#btnRemoveProducts").hide();
+	$("form .global-store").hide();
+	$("#tblProductDetails tfoot").hide();
+</script>
+{% endblock %}
+
+{% block actions_js %}
+	<script type="text/javascript">
+	  $(document).ready(function(){
+	  	//var product_added = false;
+
+	  	$("#chkAllProductsInStore").change(function() {
+	  		all_products_in_store=this.checked;
+
+	  		if (this.checked) {
+	  			$("form .global-store").show();
+	  			$("form #txtStore").attr("required", "true");
+	  			$("form #txtStore").focus();
+	  		}
+	  		else {
+	  			$("form .global-store").hide();
+	  			$("form #txtStore").removeAttr("required");
+	  		}
+	  	});
+
+	  	$("section.content #btnAddProduct").click(function() {
+	    	/*item_counter++;
+	    	product_added = false;*/
+	    	$("#dlgAddProduct #product_obj").val('');
+	      $("#dlgAddProduct #brand_obj").val('');
+	      $("#dlgAddProduct #txtProduct").val('');
+	      $("#dlgAddProduct #txtBrand").val('');
+	      $("#dlgAddProduct #txtPurchasePrice").val("0.1");
+	      $("#dlgAddProduct #txtSalePrice").val("0.1");
+	      $("#dlgAddProduct #txtQuantity").val("1");
+	      $("#dlgAddProduct #txtDescription").val('');
+	      $("#dlgAddProduct #txtNotes").val('');
+	      $("#dlgAddProduct #secSubtotal").html("0.1");
+
+	    	$.ajax({
+		      method: "GET",
+		      url: "/purchases/sku-products/",
+		      data: { quantity: 1 }
+		    })
+		    .done(function(result) {
+		      toastr.clear();
+	        $("#dlgAddProduct div#divProductsDetails").html(result);
+
+	        if (all_products_in_store) {
+				    $("#dlgAddProduct .all-products-in-store").hide();
+				    $("#dlgAddProduct .global-store").hide();
+				  }
+				  else {
+				  	$("#dlgAddProduct .all-products-in-store").show();
+				  	if ($("#dlgAddProduct #chkAllProductsInSameStore")[0].checked)
+				  		$("#dlgAddProduct #chkAllProductsInSameStore").click();
+				  }
+		    });
+
+	    	$("#dlgAddProduct").modal("show");
+	    });
+
+	  	$("section.content #btnRemoveProducts").click(function() {
+	    	if (!confirm("¿Seguro que desea eliminar los productos de la lista?"))
+		      return false;
+
+		    $('#tblProductDetails tbody tr').remove();
+		    item_counter = 0;
+		    row_number = 0;
+		    subtotal = 0;
+				total = 0;
+				counter_products = 0;
+				refreshTotal();
+
+	      html = 
+	        '<tr id="rowEmptyTable">' +
+	          '<td colspan="5">' +
+	          "{% trans 'Add products using the button above' %}" +
+	          "</td></tr>";
+	      $("#tblProductDetails tbody").append(html);
+	      $("#tblProductDetails tfoot").hide();
+
+	      $("#btnRemoveProducts").hide();
+	    });
+
+	    $("section.content form button[type='reset']").click(function() {
+    		if (!confirm("Perderá los datos capturados. ¿Seguro que desea continuar?")) {
+    			return false;
+    		}
+
+	      //$("form div#divProductDetails").empty();
+	      $("#btnRemoveProducts").hide();
+	      item_counter=0;
+	      row_number=0;
+	      total=0;
+	      subtotal=0;
+	      counter_products = 0;
+	      refreshTotal();
+
+	      $("#tblProductDetails tbody tr").remove();
+	      $("#tblProductDetails tfoot").hide();
+	      html = 
+	        '<tr id="rowEmptyTable">' +
+	          '<td colspan="5">' +
+	          "{% trans 'Add products using the button above' %}" +
+	          "</td></tr>";
+	      $("#tblProductDetails tbody").append(html);
+	    });
+
+	    //$("#id_purchased_at").timepicker({'scrollDefault': 'now', 'setTime': new Date(), 'timeFormat': 'H:i:s', 'step': 15});
+
+	    $("#id_purchased_at").timepicker({'scrollDefault': 'now', 'setTime': new Date(), 'timeFormat': 'H:i:s', 'step': 15, 'disableTextInput': true});
+	    $("#id_purchased_at").val(new Date().toLocaleTimeString());
+/*
+	    $('#id_purchased_at').on('changeTime', function(event) {
+		    console.log(event);
+		    console.log($(this).val());
+			});
+*/
+	    $("#id_purchased_when").datepicker({maxDate: "+0D",  showButtonPanel: true, changeMonth: true, changeYear: true});
+	    $("#id_purchased_when").datepicker("option", $.datepicker.regional["es"] );
+
+	    $("#id_purchased_when").attr("readonly", "readonly");
+	    //$("#id_identifier").datepicker("option", "appendTo", "div.body");
+
+	    function verifyPurchaseData() {
+	    	module_name = $(".container-fluid .card .header h2")[0].innerHTML;
+	      module_name = module_name.toUpperCase();
+
+	      if (!module_name.includes('AGREGAR'))
+	      	return false;
+
+	    	show_msg_with_toastr("info", msg_wait);
+
+	    	pi = $("#id_identifier").val();
+        p_at = $("#id_purchased_at").val();
+        p_when = $("#id_purchased_when").val();
+
+        data = {
+          identifier: pi,
+          purchased_at: p_at,
+          purchased_when: p_when
+        };
+
+        $.ajax({
+          method: "GET",
+          url: "/purchases/search/by-unique-purchase-user",
+          data: data
+        })
+        .done(function(result) {
+          toastr.clear();
+          if (result.exist) {
+            show_msg_with_toastr("error", result.msg);
+            $("section.content form button[type='submit']").attr("disabled", "true");
+          }
+          else
+          	$("section.content form button[type='submit']").removeAttr("disabled");
+        });
+	    }
+
+	    $("#id_identifier").change(function(){
+		  	verifyPurchaseData();		  	
+		  });
+
+		  $("#id_purchased_at").change(function(){
+		  	verifyPurchaseData();		  	
+		  });
+
+		  $("#id_purchased_when").change(function(){
+		  	verifyPurchaseData();		  	
+		  });
+	  });
+	</script>
+
+	{% if msg %}
+  <script type="text/javascript">
+    show_msg_with_toastr("{{level}}", "{{msg}}");
+  </script>
+	{% endif %}
+
+	{% if show_modal %}
+	  {% if modal_name == 'dlgSearchResults' %}
+	    {% include 'purchases/search-results.html' %}
+	  {% endif %}
+
+	  <script type="text/javascript">
+	    $(document).ready(function(){
+	      $("#{{modal_name}}").modal('show');
+	    });
+	  </script>
+	{% endif %}
+{% endblock %}
+
+{% block actions_js_search_forms %}
+{% endblock %}

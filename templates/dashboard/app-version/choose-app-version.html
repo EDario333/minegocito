@@ -1,0 +1,90 @@
+{% load i18n %}
+
+<div class="bg-gradient-primary modal fade" 
+id="dlgChooseAppVersion" tabindex="-1" role="dialog" aria-labelledby="lblHeader" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="lblHeader">
+          {% trans 'Choose your app version' %}
+        </h5>
+
+        <button class="close" type="button" 
+        data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">×</span>
+        </button>
+      </div>
+
+      <div class="modal-body">
+        <form class="user" method="post" 
+        action="/users/login/">
+
+          {% csrf_token %}
+
+          <p style="text-align: justify;">
+            {% trans 'You have a few licenses' %}.
+            {% trans 'Which do you want to start' %}.
+          </p>
+
+          {% for payment in payments %}
+            {% if payment.active %}
+              <div class="form-group">
+                <input type="radio" value="{{payment.id}}" 
+                onclick="$('#dlgChooseAppVersion #txtAppVersion').val('{{payment.app.name}}'); $('#dlgChooseAppVersion #btnSubmit').removeAttr('disabled'); $('#dlgChooseAppVersion #txtExpires').val('{{payment.get_expires_when}}' + ', ' + '{{payment.at}}');"
+                name="app-version" id="rad{{payment.id}}">
+
+                <label for="rad{{payment.id}}" 
+                style="font-weight: bolder; font-size: large;">
+                  {{payment.app.name}}
+                </label>
+
+                <br />
+                <strong>{% trans 'Payment date' %}:</strong>
+                {{payment.when}}, {{payment.at}}
+
+                <br />
+                <strong>{% trans 'Expires date' %}:</strong>
+                {{payment.get_expires_when}}, {{payment.at}}
+              </div>
+            {% endif %}
+          {% endfor %}
+
+          <input name="app-version" hidden="true" 
+          style="visibility: hidden;"
+          id="txtAppVersion" readonly="true">
+
+          <input name="expires" hidden="true" 
+          style="visibility: hidden;"
+          id="txtExpires" readonly="true">
+
+          <input name="email" value="{{email}}" 
+          readonly="true" hidden="true" 
+          style="visibility: hidden;">
+
+          <input name="password" value="{{password}}" 
+          readonly="true" hidden="true" 
+          style="visibility: hidden;">
+
+          <input type="checkbox" checked="true" 
+          name="skip-verification-payment" hidden="true" 
+          style="visibility: hidden;">
+
+          <button type="submit" 
+          disabled="true" id="btnSubmit" 
+          class="btn btn-primary btn-user btn-block">
+            {% trans 'Accept' %}
+          </button>
+        </form>
+      </div>
+
+      <div class="modal-footer">
+        <div class="text-center">
+          <a class="small" href="#" 
+          data-dismiss="modal">
+          	{% trans 'Cancel' %}
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

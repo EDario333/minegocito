@@ -1,0 +1,13 @@
+{% extends 'sales/add.html' %}
+
+{% load i18n %}
+
+{% block msg_pre_form %}
+	{% trans 'Enter your search criteria' %}.
+	{% trans 'The search results will include all the matching records with any of your search criteria' %}.
+{% endblock %}
+
+{% block global_vars_js %}
+<script type="text/javascript">
+</script>
+{% endblock %}

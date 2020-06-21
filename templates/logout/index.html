@@ -1,0 +1,261 @@
+{% extends 'base.html' %}
+
+{% load static i18n %}
+
+{% block title_suffix %}
+	{% if request.user and not has_rated or not email_sent %}
+		{% if not email_sent %}
+			{% trans 'Rate the app' %}
+		{% else %}
+			{% trans 'Rate later' %}
+		{% endif %}
+  {% endif %}
+{% endblock %}
+
+{% block content %}
+	{% if request.user and not has_rated or not email_sent %}
+	  <!-- Star rating -->
+	  <script src="{% static 'star-rating-svg/jquery.star-rating-svg.min.js' %}" type="text/javascript"></script>
+	  <link rel="stylesheet" href="{% static 'star-rating-svg/star-rating-svg.css' %}">
+
+	  <!-- Ajax form -->
+	  <script type="text/javascript" src="{% static 'js/jquery.form.min.js' %}">
+    </script>
+
+	  <script type="text/javascript">
+	    function verifyFeedback() {
+	      rating=$("#frmRating #rating").val();
+	      comments=$("#frmRating #txtComments").val();
+	      passed=rating.trim().length > 0 || comments.trim().length > 0;
+
+	      if (!passed) {
+	        toastr.clear();
+	        toastr["error"]("{% trans 'Rate the app or leave your comment' %}");
+	      }
+
+	      return passed;
+	    }
+	  </script>
+
+	  <section class="section">
+  		<div class="container">
+	  		<div class="row">
+			  	<div class="col-md-12">
+					  <form method="post" id="frmRating" 
+					    style="text-align: left;" 
+					    onsubmit="return verifyFeedback()" 
+					    action="/users/save-rating/">
+				      {% csrf_token %}
+
+				    	{% if not email_sent %}
+				    		<div class="heading text-md-center text-xs-center">
+						      <h2>
+				          	<small>
+				          		{% trans 'Rate the app' %}
+				          	</small>
+				          	{% trans 'Attention' %}
+				          </h2>
+			        	</div>
+
+						  	<p style="color: orange">
+								  {% trans 'We have detected that you already rated the app but the email was not send it' %}
+								</p>
+
+								<p class="form-row">
+									<button type="button" 
+					      	class="btn btn-default btnLogin">
+					      		No
+					      	</button>
+								</p>
+						  {% endif %}
+
+						  <div class="heading text-md-center text-xs-center">
+					      <h2>
+			          	<small>
+			          		{% trans 'Did you like the app' %}
+			          	</small>
+			          	{% trans 'Rate the app' %}
+			          </h2>
+		        	</div>
+
+				    	<div class="my-rating form-row"></div>
+
+				    	<div class="form-row">
+				        <label for="txtComments">
+				        	{% trans 'Comments' %}:
+				        </label>
+				      </div>
+
+				      <textarea id="txtComments" 
+				      class="form-control form-row" 
+				      cols="40" rows="10" 
+				      name="comments">{{comments}}</textarea>
+
+				      <input style="visibility: hidden;" 
+				      name="user" value="{{userid}}" hidden />
+
+				      <input style="visibility: hidden;" min="0" 
+				      max="5" maxlength="1" id="rating" 
+				      name="rating" value="" type="number" hidden />
+				      
+				      <p style="margin: 15px 0">
+				      	<button type="submit" id="btnSend"
+				      	class="btn btn-success">
+				      		<i class="fas fa-paper-plane"></i>
+				      		{% trans 'Send' %}
+				      	</button>
+
+					      {% if email_sent %}
+					      	<button type="button" id="btnSend"
+					      	class="btn btn-primary btnLogin">
+					      		{% trans 'Rate later' %}
+					      	</button>
+								{% endif %}
+							</p>
+
+							<!--
+							<h1>
+				      	{#% trans 'Donate title' %#}
+				      </h1>
+				    	-->
+
+				    	<!--
+				      <p>
+				      	{#% trans 'Donate msg' %#}
+				      </p>
+				    	-->
+
+				    	<!--
+				      <img src="{% static 'assets/stripe.png' %}" id="actDonate" 
+				      class="form-row" 
+				      style="cursor: pointer;" />
+
+				      <h1>
+					    	{#% trans 'Donate other mechanisms' %#}
+					    </h1>
+
+					    <p>
+					    	{#% trans 'Donate other mechanisms msg' %#}
+					    </p>
+							-->
+				      <span id="dummy"></span>
+				    </form>
+				  </div>
+
+			    <div class="col-md-12" 
+			    	id="secThanksForRate" 
+			    	style="visibility: hidden;" hidden>
+			    	<div class="heading text-md-center text-xs-center">
+				    	<h2>
+			        	<!--
+			        	<small>
+			        		{#% trans 'Did you like the app' %#}
+			        	</small>
+			        	-->
+			        	{% trans 'Thank you so much' %}
+			        </h2>
+			      </div>
+
+				    <p>
+				    	{% trans 'Your oppinion is very important and it will be considered' %}.
+				    </p>
+
+				    <p id="secEmailNotSendIt" 
+				    	style="visibility: hidden; color: red" hidden>
+						  {% trans 'Your feedback has saved but the email was not send it' %}:
+						  <br /><br />
+						  <span id="secEmailNotSendItReason"></span>
+						</p>
+
+						<button type="button" class="btn btn-primary btnLogin">
+		      		{% trans 'Log in again' %}
+		      	</button>
+			    </div>
+			  </div>
+			</div>
+		</section>
+
+    <script type="text/javascript">
+		  $(".my-rating").starRating({
+		    starSize: 5,
+		    starSize: 40,
+		    initialRating: "{{rating}}",
+	      useFullStars: true,
+	      disableAfterRate: false,
+		    callback: function(currentRating, $el){
+		    	$("#frmRating input[name='rating']").val(currentRating);
+		    }
+			});
+
+		  $("#frmRating input[name='user']").hide();
+
+			/*
+			$("#frmRating #actDonate").click(function() {
+				document.location.href="/donate-frm/";
+			});
+			*/
+
+		  var options = { 
+		    target:        '#frmRating #dummy',
+		    beforeSubmit:  showRequest,
+		    success:       showResponse 
+		  }; 
+
+		  function showRequest(formData, jqForm, options) {
+		  	toastr["info"]("{% trans 'Loading' %}");
+		    $("#frmRating #btnSend").attr("disabled", "");
+		  }
+
+		  function showResponse(responseText, statusText, xhr, $form)  {
+		    toastr.clear();
+		    //toastr[responseText.status](responseText.msg);
+		    if (responseText.status=="error") {
+		      $("#frmRating #btnSend").removeAttr("disabled");
+		      toastr[responseText.status](responseText.msg);
+		    }
+		    else {
+		    	$("#frmRating").remove();
+		    	$("#secThanksForRate").removeAttr("hidden");
+		    	$("#secThanksForRate").css("visibility", "visible");
+		    	$("#secThanksForRate").show();
+		    	if (responseText.status=="warning") {
+		    		$("#secEmailNotSendItReason").html(responseText.error);
+		    		$("#secEmailNotSendIt").removeAttr("hidden");
+			    	$("#secEmailNotSendIt").css("visibility", "visible");
+			    	$("#secEmailNotSendIt").show();
+		    	}
+		    }
+		  }
+
+		  $("#frmRating").ajaxForm(options);
+		</script>
+	{% else %}
+		<script type="text/javascript">
+			//document.location="/donate";
+			document.location="/";
+		</script>
+	{% endif %}
+
+	<script type="text/javascript">
+		$(".btnLogin").click(function() {
+			//document.location="/login/";
+			$("#dlgLogin").modal("show");
+		});
+	</script>
+{% endblock content %}
+
+{% block js_footer %}
+<script type="text/javascript">
+  $("ul.site-menu li").removeClass("active");
+  $(document).ready(function(){
+  });
+</script>
+{% endblock %}
+
+{% extends './base-auth.html' %}
+
+{% load static i18n %}
+
+{% block content %}
+
+{% endblock %}

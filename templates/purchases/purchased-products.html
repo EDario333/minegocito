@@ -1,0 +1,782 @@
+{% load static i18n %}
+
+<!-- Jquery DataTable Plugin Js -->
+<script src="{% static 'js/jquery-datatable/jquery.dataTables.js' %}"></script>
+<script src="{% static 'js/jquery-datatable/skin/bootstrap/js/dataTables.bootstrap.js' %}"></script>
+<script src="{% static 'js/jquery-datatable/extensions/export/dataTables.buttons.min.js' %}"></script>
+<script src="{% static 'js/jquery-datatable/extensions/export/buttons.flash.min.js' %}"></script>
+<script src="{% static 'js/jquery-datatable/extensions/export/jszip.min.js' %}"></script>
+<script src="{% static 'js/jquery-datatable/extensions/export/pdfmake.min.js' %}"></script>
+<script src="{% static 'js/jquery-datatable/extensions/export/vfs_fonts.js' %}"></script>
+<script src="{% static 'js/jquery-datatable/extensions/export/buttons.html5.min.js' %}"></script>
+<script src="{% static 'js/jquery-datatable/extensions/export/buttons.print.min.js' %}"></script>
+
+<!-- JQuery DataTable Css -->
+<link href="{% static 'js/jquery-datatable/skin/bootstrap/css/dataTables.bootstrap.css' %}" 
+rel="stylesheet">
+
+<style type="text/css">
+	table.dataTable thead tr th,
+	table.dataTable tbody tr td:last-child  {
+		text-align: center;
+	}
+
+	.centered-text-alignment {
+		text-align: center;
+	}
+
+	img.product-image {
+    width: 128px;
+    height: 128px;
+    margin: 0 0 10px 0;
+    border-radius: 10px;
+  }
+</style>
+
+<script type="text/javascript">
+	$("#btnWithSelections").hide();
+
+	/*
+	function saveProduct(product) {
+		show_msg_with_toastr("info","...");
+		var myFormData = new FormData();
+		//console.log(`txtFileProduct${product}`.files[0]);
+		img=$(`#txtFileProduct${product}`)[0].files[0];
+		if (img!=undefined && img!=null)
+			myFormData.append('img', img);
+
+		product_=$(`#txtProduct_obj${product}`).val();
+		brand=$(`#txtBrand_obj${product}`).val();
+		sku=$(`#txtSKUProduct${product}`).val();
+		pp=$(`#txtPurchasePriceProduct${product}`).val();
+		store=$(`#txtStore_obj${product}`).val();
+		//img=$(`#txtFileProduct${product}`).val();
+
+		let data={
+			original_product: product,
+			new_product: product_, brand: brand, sku: sku, 
+			purchase_price: pp, store: store, img: img
+		};
+
+		valid_csrftoken();
+
+		$.ajax({
+	    method: "POST",
+	    url: "/purchases/purchased-products/save/product/",
+	    //processData: false, // important
+  		//contentType: false, // important
+	    data: data
+	  })
+	  .done(function(result) {
+	  	toastr.clear();
+	  	show_msg_with_toastr(result.status,result.msg);
+	    console.log(result);
+	  });
+	}
+	*/
+</script>
+
+<br />
+<div class="row clearfix">
+	<div 
+	class="info-box hover-expand-effect col-lg-4 col-md-4 col-sm-6 col-xs-12">
+	  <div class="icon bg-indigo">
+	    <i class="material-icons">shopping_cart</i>
+	  </div>
+
+	  <div class="content">
+	    <div class="text">
+	    	{% trans 'Purchased'|upper %}
+	    </div>
+
+	    <div class="number">
+	    	{{purchase.purchased_products_counter}}
+			</div>
+	  </div>
+	</div>
+
+  <div 
+	class="info-box hover-expand-effect col-lg-4 col-md-4 col-sm-6 col-xs-12">
+	  <div class="icon bg-blue">
+	    <i class="material-icons">attach_money</i>
+	  </div>
+
+	  <div class="content">
+	    <div class="text">
+	    	{% trans 'Sold'|upper %}
+	    </div>
+
+	    <div class="number">
+	    	{{purchase.sold_products_counter}}
+			</div>
+	  </div>
+	</div>
+
+	<div 
+	class="info-box hover-expand-effect col-lg-4 col-md-4 col-sm-6 col-xs-12">
+	  <div class="icon bg-cyan">
+	    <i class="material-icons">location_city</i>
+	  </div>
+
+	  <div class="content">
+	    <div class="text">
+	    	{% trans 'Stored'|upper %}
+	    </div>
+
+	    <div class="number">
+	    	{{purchase.stored_products_counter}}
+			</div>
+	  </div>
+	</div>
+</div>
+
+{% if can_edit or can_delete %}
+	<p role="alert"
+	class="alert alert-danger alert-dismissible">
+		<button type="button" class="close" 
+		data-dismiss="alert" aria-label="Close"><span aria-hidden="true">×</span></button>
+		{% trans 'Danger msg sold products' %}
+	</p>
+
+	<p role="alert"
+	class="alert alert-warning alert-dismissible">
+		<button type="button" class="close" 
+		data-dismiss="alert" aria-label="Close"><span aria-hidden="true">×</span></button>
+		<!--
+		{% blocktrans count counter=products|length %}
+			Encontramos un producto asignado a un almacen (inventariado).
+		{% plural %}
+			Encontramos {{ counter }} productos que han sido asignados a un almacen (inventariados).
+		{% endblocktrans %}
+		-->
+		{% trans 'Warning msg stored products' %}
+	</p>
+{% endif  %}
+
+<div class="table-responsive">
+  <table class="table table-bordered table-striped table-hover dataTable js-exportable" 
+  id="tblPurchasedProducts">
+    <thead>
+      <tr style="text-align: center;">
+      	{% if can_edit or can_delete %}
+        	<th>
+        		&nbsp;&nbsp;&nbsp;&nbsp;
+        		<input type="checkbox" 
+      			class="select-all-products" 
+      			id="chkSelectAllProducts" />
+
+      			<label for="chkSelectAllProducts"></label>
+					</th>
+        {% endif %}
+
+        <th>{% trans 'Image' %}</th>
+        <th>{% trans 'Product' %}</th>
+        <th>{% trans 'Brand' %}</th>
+        <th>{% trans 'SKU' %}</th>
+        <th>{% trans 'Purchase price' %}</th>
+      	<th>{% trans 'In store' %}</th>
+      	<th>{% trans 'Sold' %}</th>
+      	<th>{% trans 'Stored' %}</th>
+
+      	{% if can_edit or can_delete %}
+        	<th>{% trans 'Options' %}</th>
+        {% endif  %}
+      </tr>
+    </thead>
+
+    <tbody>
+    	{% for pd in purchase.details %}
+    		{% for product in pd.products %}
+	    		<tr id="product{{product.id}}">
+	    			{% if can_edit or can_delete %}
+	    				{% if not product.sold %}
+			    			<td class="centered-text-alignment">
+		        			<input type="checkbox" 
+		        			class="select-product" 
+		        			id="chkProduct{{product.id}}" 
+		        			name="selectProduct{{product.id}}" />
+
+		        			<label for="chkProduct{{product.id}}"></label>
+		        		</td>
+		        	{% else %}
+		        		<td></td>
+	        		{% endif %}
+	      		{% endif %}
+
+	      		{% if can_edit and not product.sold %}
+	      			<td>
+	      				<img src="{{product.static_photo}}" 
+          			alt="photo" class="product-image" />
+	      				<br />
+
+	      				<input accept="image/*" 
+	      				name="image{{product.id}}" type="file" 
+	      				id="txtFileProduct{{product.id}}" />
+		          </td>
+
+	      			<td>
+	      				<input name="product{{product.id}}"
+	      				required="true" 
+	      				id="txtProduct{{product.id}}" 
+	      				placeholder="{% trans 'This field is mandatory' %}" 
+	      				class="form-control product" 
+	      				value="{{product.purchase_detail.product.name}}" />
+
+	      				<input hidden="" style="visibility: hidden;" 
+	      				name="product_obj{{product.id}}"
+	      				id="txtProduct_obj{{product.id}}" 
+	      				value="{{product.purchase_detail.product.id}}" />
+		          </td>
+
+		          <td>
+		          	<input name="brand{{product.id}}"
+	      				required="true" 
+	      				id="txtBrand{{product.id}}" 
+	      				placeholder="{% trans 'This field is mandatory' %}" 
+	      				class="form-control brand" 
+	      				value="{{product.purchase_detail.brand.name}}" />
+
+	      				<input type="hidden" 
+	      				name="brand_obj{{product.id}}"
+	      				id="txtBrand_obj{{product.id}}" 
+	      				value="{{product.purchase_detail.brand.id}}"
+	      				style="visibility: hidden;" hidden />
+		          </td>
+
+		          <td class="centered-text-alignment">
+		          	{% if product.sku is not None %}
+			          	<input name="sku{{product.id}}"
+		      				class="form-control" 
+		      				id="txtSKUProduct{{product.id}}" 
+		      				value="{{product.sku}}" />
+	      				{% else %}
+	      					<input name="sku{{product.id}}"
+	      					id="txtSKUProduct{{product.id}}" 
+		      				class="form-control" />
+	      				{% endif %}
+		          </td>
+
+		          <td>
+		          	<input id="txtPurchasePriceProduct{{product.id}}" 
+		          	name="purchase_price{{product.id}}"
+	      				class="form-control purchase-price price{{pd.id}}" 
+	      				placeholder="{% trans 'This field is mandatory' %}" 
+	      				value="{{pd.purchase_price}}" />
+		          </td>
+
+		          <td>
+		          	{% if product.stored %}
+			          	<input name="store{{product.id}}"
+		      				id="txtStore{{product.id}}" 
+		      				class="form-control store" 
+		      				value="{{product.in_store.store_with_shop_name}}" />
+
+		      				<input type="hidden"
+		      				style="visibility: hidden;"
+		      				name="store_obj{{product.id}}"
+		      				id="txtStore_obj{{product.id}}" 
+		      				value="{{product.in_store.id}}" 
+		      				hidden />
+		      			{% else %}
+			          	<input name="store{{product.id}}"
+		      				id="txtStore{{product.id}}" 
+		      				class="form-control store" />
+
+		      				<input type="hidden"
+		      				style="visibility: hidden;"
+		      				name="store_obj{{product.id}}"
+		      				id="txtStore_obj{{product.id}}"
+		      				hidden />
+		      			{% endif %}
+		          </td>
+
+	      		{% else %}
+	      			<td>
+	      				<img src="{{product.static_photo}}" 
+          			alt="photo" class="product-image" />
+		          </td>
+
+		          <td>
+		          	{{product.purchase_detail.product.name}}
+		          </td>
+
+		          <td>
+		          	{{product.purchase_detail.brand.name}}
+		          </td>
+
+		          <td class="centered-text-alignment">
+		          	{{product.sku}}
+		          </td>
+
+		          <td>
+		          	{{pd.purchase_price}}
+		          </td>
+
+		          <td>
+		          	{{product.in_store.store_with_shop_name}}
+		          </td>
+		        {% endif %}
+
+		        <td>
+		        	{% if product.sold %}
+          		<span class="label bg-blue" 
+          		style="border-radius: 5px">
+          			{% trans 'Yes' %}
+          		</span>
+	          	{% else %}
+          			No
+	          	{% endif %}
+		        </td>
+
+		        <td>
+	          	{% if product.stored %}
+	          		<span class="label bg-cyan"
+	          		style="border-radius: 5px">
+	          			{% trans 'Yes' %}
+	          		</td>
+	          	{% else %}
+          			No
+	          	{% endif %}
+          	</td>
+
+		        {% if can_edit or can_delete %}
+	          <td>
+	          	<!--
+	          	<a href="#" 
+	          	onclick="showDetails('{{product.id}}', 'products-stores', '{{can_edit}}', '{{can_delete}}', false, false, $('input[name=\'itm_menu\']').val());" 
+	          	data-placement="bottom"
+	          	data-toggle="tooltip" 
+	          	title="{% trans 'Details' %}" 
+	          	data-original-title="{% trans 'Details' %}"><i class="material-icons">zoom_in</i></a>
+	          	-->
+
+	          	{% if can_edit and not product.sold %}
+	          	<a href="#" class="save-product{{product.id}}" 
+	          	id="actSaveProduct{{product.id}}"
+	          	data-placement="top"
+	          	data-toggle="tooltip" 
+	          	onclick="saveProduct('{{product.id}}');" 
+	          	title="{% trans 'Save' %}" 
+	          	data-original-title="{% trans 'Save' %}">
+	          		<i class="material-icons">save</i>
+	          	</a>
+	          	<!--
+	          	<a href="#" data-placement="bottom"
+	          	data-toggle="tooltip"
+	          	onclick="showDetails('{{product.id}}', 'products-stores', '{{can_edit}}', '{{can_delete}}', true, false, $('input[name=\'itm_menu\']').val());"
+	          	title="{% trans 'Edit' %}" 
+	          	data-original-title="{% trans 'Edit' %}"><i class="material-icons">edit</i></a>
+	          	-->
+	          	{% endif  %}
+
+	          	{% if can_delete and not product.sold %}
+	          	<a href="#" data-placement="top"
+	          	data-toggle="tooltip" 
+	          	onclick="deleteProduct('{{product.id}}', 'edit_purchase');" 
+	          	title="{% trans 'Delete' %}" 
+	          	data-original-title="{% trans 'Delete' %}"><i class="material-icons">delete</i></a>
+	          	<!--
+	          	<a href="#" data-placement="top"
+	          	data-toggle="tooltip" 
+	          	onclick="showDetails('{{product.id}}', 'products-stores', '{{can_edit}}', '{{can_delete}}', false, true, $('input[name=\'itm_menu\']').val());" 
+	          	title="{% trans 'Delete' %}" 
+	          	data-original-title="{% trans 'Delete' %}"><i class="material-icons">delete</i></a>
+	          	-->
+	          	{% endif  %}
+	        	</td>
+	        	{% endif %}
+	      	</tr>
+	      {% endfor %}
+    	{% endfor %}
+    </tbody>
+  </table>
+</div>
+
+<script type="text/javascript">
+	toastr.clear();
+
+	//Widgets count plugin
+  //$('.count-to').countTo();
+
+	$('[data-toggle="tooltip"]').tooltip();
+
+	//Exportable table
+	$('#tblPurchasedProducts').DataTable({
+	  dom: 'Bfrtip',
+	  responsive: true,
+	  buttons: [
+	    'copy', 'csv', 'excel', 'pdf', 'print'
+	  ]
+	});
+
+	$.ajax({
+	  method: "GET",
+	  url: "/translator/many/",
+	  data: { msgs: "Show,entries,Search,Showing,to,of,Previous,Next,Copy,Print"}
+	})
+	.done(function(result) {
+	  result = result.split(',');
+
+	  if ($("#tblPurchasedProducts_length label")[0] != undefined) {
+	 		$("#tblPurchasedProducts_length label")[0].childNodes[0].textContent = result[0] + ": ";
+	  	$("#tblPurchasedProducts_length label")[0].childNodes[2].textContent = result[1];
+	  }
+
+	  $("#tblPurchasedProducts_filter label")[0].childNodes[0].textContent = result[2] + ": ";
+
+	  msg = $("#tblPurchasedProducts_info")[0].innerText;
+
+	  strings = msg.split(' ');
+
+	  msg = result[3];
+	  for (x = 0; x < strings.length; x++) {
+	    str = strings[x];
+	    if (str == "Showing")
+	      msg += ' ' + strings[x+1];
+	    else if (str == "to")
+	      msg += result[4] + ' ' + strings[x+1];
+	    else if (strings[x] == "of")
+	      msg += result[5] + ' ' + strings[x+1];
+	    else if (strings[x] == "entries")
+	      msg += result[1];
+	  }
+
+	  $("#tblPurchasedProducts_info")[0].innerText = msg;
+	  $("#tblPurchasedProducts_previous")[0].childNodes[0].textContent = result[6];
+	  $("#tblPurchasedProducts_next")[0].childNodes[0].textContent = result[7];
+
+	 	$("#tblPurchasedProducts_wrapper .dt-buttons a.buttons-copy span")[0].innerText = result[8];
+	 	$("#tblPurchasedProducts_wrapper .dt-buttons a.buttons-print span")[0].innerText = result[9];
+	});
+</script>
+
+{% if can_edit %}
+<button type="button" 
+id="btnWithSelections" hidden="true" 
+style="visibility: hidden;" 
+class="btn btn-primary waves-effect">
+	<i class="material-icons">save</i>
+	{% trans 'Save selections' %}
+</button>
+{% elif can_delete %}
+<button type="button" 
+id="btnWithSelections" hidden="true" 
+style="visibility: hidden;" 
+class="btn btn-primary waves-effect">
+	<i class="material-icons">delete</i>
+	{% trans 'Delete selections' %}
+</button>
+{% endif %}
+
+{% if can_edit or can_delete %}
+<script type="text/javascript">
+	var counter_selected = 0;
+
+	$("table#tblPurchasedProducts tbody tr").attr("style", "cursor: pointer");
+
+	$("table#tblPurchasedProducts input.select-product").change(function() {
+  	if (this.checked)
+  		counter_selected++;
+  	else
+  		counter_selected--;
+
+  	tope = $("input.select-product").length;
+
+  	if (counter_selected >= tope) {
+  		counter_selected = tope;
+  		$("#chkSelectAllProducts").attr("checked", "true");
+  		$("#btnWithSelections").removeAttr("hidden");
+  		$("#btnWithSelections").removeAttr("style");
+  		$("#btnWithSelections").show();
+  		$("#btnWithSelections").attr("style", "width: auto");
+  	}
+  	else if (counter_selected > 0) {
+  		$("#btnWithSelections").removeAttr("hidden");
+  		$("#btnWithSelections").removeAttr("style");
+  		$("#btnWithSelections").show();
+  		$("#btnWithSelections").attr("style", "width: auto");
+  		//$("#chkSelectAllProducts").removeAttr("checked");
+  	}
+  	else {
+  		$("#btnWithSelections").hide();
+  		$("#chkSelectAllProducts").removeAttr("checked");
+  		counter_selected = 0;
+  	}
+  });
+
+	$("table#tblPurchasedProducts thead tr th:nth-child(1)").removeClass("sorting_asc");
+
+  $("table#tblPurchasedProducts thead tr th:nth-child(1)").click(function(event) {
+  	$(this).removeClass();
+  	ctrl_cls = event.target.localName;
+  	if (ctrl_cls != "label" && 
+  		ctrl_cls != "input")
+  		event.preventDefault();
+  });
+
+  $("table#tblPurchasedProducts input#chkSelectAllProducts").click(function() {
+  	chks = $("table#tblPurchasedProducts input.select-product");
+  	tope = chks.length;
+  	for (x = 0; x < tope; x++)
+  		if ((this.checked && !chks[x].checked) ||
+  				(!this.checked && chks[x].checked))
+  			$(chks[x]).click();
+  		//if (chks[x].checked)
+  });
+
+  $("table#tblPurchasedProducts tbody tr").click(function(event) {
+  	ctrl_cls = event.target.type;
+  	if (ctrl_cls != "text" && 
+  		event.target.localName != "i") {
+  		product = this.id.substring("product".length);
+  		$("table#tblPurchasedProducts input#chkProduct" + product).click();
+  	}
+  });
+</script>
+
+{% if can_edit %}
+<script type="text/javascript" src="{% static 'js/jquery-ui-1.12.1/jquery-ui.min.js' %}"></script>
+
+<link href="{% static 'js/jquery-ui-1.12.1/jquery-ui.min.css' %}" rel="stylesheet">
+
+<script type="text/javascript">
+	$("table#tblPurchasedProducts input.product").autocomplete({
+    source: "/products/autocomplete/my-products/",
+    minLength: 1,
+  });
+
+	$("table#tblPurchasedProducts input.product").autocomplete("option", "appendTo", "#tblPurchasedProducts");
+
+	$("table#tblPurchasedProducts input.brand").autocomplete({
+    source: "/brands/autocomplete/my-brands/",
+    minLength: 1,
+  });
+
+	$("table#tblPurchasedProducts input.brand").autocomplete("option", "appendTo", "#tblPurchasedProducts");
+
+	$("table#tblPurchasedProducts input.store").autocomplete({
+    source: "/stores/autocomplete/my-stores/",
+    minLength: 1,
+  });
+
+	$("table#tblPurchasedProducts input.store").autocomplete("option", "appendTo", "#tblPurchasedProducts");
+
+	$("table#tblPurchasedProducts input.product").change(function() {
+		show_msg_with_toastr("info", msg_wait);
+
+		product=this.name.substr("product".length);
+		//alert(product);
+
+    $.ajax({
+      method: "GET",
+      url: "/products/search/by-name",
+      data: { product: this.value }
+    })
+    .done(function(result) {
+      toastr.clear();
+      if (result.exist != undefined && 
+          !result.exist || result.dropped)
+        $.ajax({
+          method: "GET",
+          url: "/translator/translate",
+          data: { msg: "Please enter a valid product"}
+        })
+        .done(function(result) {
+          show_msg_with_toastr("error", result);
+          $("table#tblPurchasedProducts input#txtProduct_obj" + product).val("");
+          $("#dlgViewDetails form button[type='submit']").attr("disabled", "");
+          $("table#tblPurchasedProducts #actSaveProduct" + product).hide();
+        });
+      else if (result.exist == undefined) {
+        show_msg_with_toastr(result.status, result.msg);
+      }
+      else {
+      	$("table#tblPurchasedProducts input#txtProduct_obj" + product).val(result.product);
+          $("#dlgViewDetails form button[type='submit']").removeAttr("disabled");
+          $("table#tblPurchasedProducts #actSaveProduct" + product).show();
+      }
+    });
+	});
+
+	$("table#tblPurchasedProducts input.brand").change(function() {
+		show_msg_with_toastr("info", msg_wait);
+
+		brand=this.name.substr("brand".length);
+
+    $.ajax({
+      method: "GET",
+      url: "/brands/search/by-name",
+      data: { brand: this.value }
+    })
+    .done(function(result) {
+      toastr.clear();
+      if (result.exist != undefined && 
+          !result.exist || result.dropped)
+        $.ajax({
+          method: "GET",
+          url: "/translator/translate",
+          data: { msg: "Please enter a valid brand"}
+        })
+        .done(function(result) {
+          show_msg_with_toastr("error", result);
+          $("table#tblPurchasedProducts input#txtBrand_obj" + brand).val("");
+          $("#dlgViewDetails form button[type='submit']").attr("disabled", "");
+          $("table#tblPurchasedProducts #actSaveProduct" + brand).hide();
+        });
+      else if (result.exist == undefined) {
+        show_msg_with_toastr(result.status, result.msg);
+      }
+      else {
+      	$("table#tblPurchasedProducts input#txtBrand_obj" + brand).val(result.brand);
+        $("#dlgViewDetails form button[type='submit']").removeAttr("disabled");
+        $("table#tblPurchasedProducts #actSaveProduct" + brand).show();
+      }
+    });
+	});
+
+	$("table#tblPurchasedProducts input.sku").change(function() {
+		sku=this.name.substr("sku".length);
+
+		if (this.value.trim().length < 1) {
+			$("#dlgViewDetails form button[type='submit']").removeAttr("disabled");
+      $("table#tblPurchasedProducts #actSaveProduct" + sku).show();
+			return false;
+		}
+
+		show_msg_with_toastr("info", msg_wait);
+		$.ajax({
+      method: "GET",
+      url: "/products/search/sku/",
+      data: { sku: this.value }
+    })
+    .done(function(result) {
+      toastr.clear();
+      if (result.exist)
+        $.ajax({
+          method: "GET",
+          url: "/translator/translate",
+          data: { msg: "The indicated SKU already exists" }
+        })
+        .done(function(result) {
+          show_msg_with_toastr("error", result);
+          $("#dlgViewDetails form button[type='submit']").attr("disabled", "");
+          $("table#tblPurchasedProducts #actSaveProduct" + sku).hide();
+        });
+      else {
+        $("#dlgViewDetails form button[type='submit']").removeAttr("disabled");
+        $("table#tblPurchasedProducts #actSaveProduct" + sku).show();
+      }
+    });
+	});
+
+	$("table#tblPurchasedProducts input.store").change(function() {
+		show_msg_with_toastr("info", msg_wait);
+
+		store=this.name.substr("store".length);
+		storename = this.value.substring(0, this.value.indexOf(" ["));
+
+    $.ajax({
+      method: "GET",
+      url: "/stores/search/by-name",
+      data: { store: storename }
+    })
+    .done(function(result) {
+      toastr.clear();
+      if (result.exist != undefined && 
+          !result.exist || result.dropped)
+        $.ajax({
+          method: "GET",
+          url: "/translator/translate",
+          data: { msg: "Please enter a valid store"}
+        })
+        .done(function(result) {
+          show_msg_with_toastr("error", result);
+          $("table#tblPurchasedProducts input#txtStore_obj" + store).val("");
+          $("#dlgViewDetails form button[type='submit']").attr("disabled", "");
+          $("table#tblPurchasedProducts #actSaveProduct" + store).hide();
+        });
+      else if (result.exist == undefined) {
+        show_msg_with_toastr(result.status, result.msg);
+      }
+      else {
+      	$("table#tblPurchasedProducts input#txtStore_obj" + store).val(result.store);
+        $("#dlgViewDetails form button[type='submit']").removeAttr("disabled");
+        $("table#tblPurchasedProducts #actSaveProduct" + store).show();
+      }
+    });
+	});
+
+	function saveProduct(product) {
+		show_msg_with_toastr("info", msg_wait);
+		valid_csrftoken();
+
+		//row=$("table#tblSoldProducts tbody tr#sd" + product);
+
+		/*
+		p=$("#txtProduct_obj"+product).val();
+		b=$("#txtBrand_obj"+product).val();
+		sku=$("#txtSKU"+product).val();
+		sp=$("#txtSalePrice"+product).val();
+		s=$("#txtStore_obj"+product).val();
+		image=$("#txtImage"+product)[0].files[0];
+		*/
+		p=$("#txtProduct_obj"+product);
+		b=$("#txtBrand_obj"+product);
+		sku=$("#txtSKUProduct"+product);
+		sp=$("#txtPurchasePriceProduct"+product);
+		s=$("#txtStore_obj"+product);
+		image=$("#txtFileProduct"+product)[0];
+		//console.log(image);
+
+		//data = FormData();
+
+		/*data = {
+			"product": p, "brand": b, "sku": sku,
+			"sale_price": sp, "store": s, "pk": product,
+			"image": image
+		};*/
+
+		data = new FormData();
+		data.append("original_product", product);
+		data.append("new_product", $(p).val());
+		data.append("brand", $(b).val());
+		data.append("sku", $(sku).val());
+		data.append("purchase_price", $(sp).val());
+		data.append("store", $(s).val());
+		data.append("image", image.files[0]);
+		data.append("pk", product);
+
+		/*let data={
+			original_product: product,
+			new_product: product_, brand: brand, sku: sku, 
+			purchase_price: pp, store: store, img: img
+		};*/
+
+		$.ajax({
+      method: "POST",
+      url: "/purchases/purchased-products/save/product/",
+      //contentType: 'multipart/form-data',
+      //data: data, 
+      contentType: false,
+      data: data, processData: false
+    })
+    .done(function(result) {
+    	toastr.clear();
+      show_msg_with_toastr(result.status, result.msg);
+    });
+	}
+
+	$("#btnWithSelections").click(function() {
+  	chks = $("table#tblPurchasedProducts input.select-product:checked");
+  	tope = chks.length-1;
+  	for (x=0;x<tope;x++) {
+  		product=chks[x].id.substring("chkProduct".length);
+  		$("table#tblPurchasedProducts .save-product" + product).click();
+  	}
+  	alert("salgo");
+  });
+</script>
+{% endif %}	<!-- can_edit -->
+{% endif %}	<!-- can_edit or can_delete -->
+
+<div id="divViewDetails"></div>

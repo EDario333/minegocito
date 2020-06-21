@@ -1,0 +1,70 @@
+{% load static i18n %}
+
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+    <title>
+    	{% block title %}
+        {% trans 'App name' %}
+      {% endblock %}
+
+      ::
+      {% block title_suffix %}
+        {% trans 'Home' %}
+      {% endblock %}
+      ::
+    </title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Mukta:300,400,700"> 
+    <link rel="stylesheet" href="{% static 'shoppers-gh-pages/fonts/icomoon/style.css' %}">
+
+    <link rel="stylesheet" href="{% static 'shoppers-gh-pages/css/bootstrap.min.css' %}">
+    <link rel="stylesheet" href="{% static 'shoppers-gh-pages/css/magnific-popup.css' %}">
+    <link rel="stylesheet" href="{% static 'shoppers-gh-pages/css/jquery-ui.css' %}">
+    <link rel="stylesheet" href="{% static 'shoppers-gh-pages/css/owl.carousel.min.css' %}">
+    <link rel="stylesheet" href="{% static 'shoppers-gh-pages/css/owl.theme.default.min.css' %}">
+
+    <link rel="stylesheet" href="{% static 'shoppers-gh-pages/css/aos.css' %}">
+
+    <link rel="stylesheet" href="{% static 'shoppers-gh-pages/css/style.css' %}">
+
+    {% block extra_css %}
+		{% endblock extra_css %}
+
+		{% block extra_js %}
+		{% endblock extra_js %}
+  </head>
+
+  <body>
+	  <div class="site-wrap">
+	    {% include 'assets/header.html' %}
+	    {% include 'home/slider.html' %}
+	    {% include 'home/features.html' %}
+	    {% include 'home/customers.html' %}
+	    {% include 'home/top-sales.html' %}
+	    {% include 'home/big-sale.html' %}
+	    {% include 'assets/footer.html' %}
+	  </div>
+
+	  <script src="{% static 'shoppers-gh-pages/js/jquery-3.3.1.min.js' %}"></script>
+
+	  <script src="{% static 'shoppers-gh-pages/js/jquery-ui.js' %}"></script>
+
+	  <script src="{% static 'shoppers-gh-pages/js/popper.min.js' %}"></script>
+
+	  <script src="{% static 'shoppers-gh-pages/js/bootstrap.min.js' %}"></script>
+
+	  <script src="{% static 'shoppers-gh-pages/js/owl.carousel.min.js' %}"></script>
+
+	  <script src="{% static 'shoppers-gh-pages/js/jquery.magnific-popup.min.js' %}"></script>
+
+	  <script src="{% static 'shoppers-gh-pages/js/aos.js' %}"></script>
+
+	  <script src="{% static 'shoppers-gh-pages/js/main.js' %}"></script>
+
+	  {% block extra_js_footer %}
+		{% endblock %}
+  </body>
+</html>

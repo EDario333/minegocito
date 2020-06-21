@@ -1,0 +1,22 @@
+{% extends 'brands/generic-form.html' %}
+
+{% load i18n %}
+
+{% block msg_pre_form %}
+	{% trans 'Enter your search criteria' %}.
+	{% trans 'The search results will include all the matching records with any of your search criteria' %}.
+{% endblock %}
+
+{% block actions_js %}
+	{% if show_modal %}
+	  {% if modal_name == 'dlgSearchResults' %}
+	    {% include 'brands/search-results.html' %}
+	  {% endif %}
+
+	  <script type="text/javascript">
+	    $(document).ready(function(){
+	      $("#{{modal_name}}").modal('show');
+	    });
+	  </script>
+	{% endif %}
+{% endblock %}

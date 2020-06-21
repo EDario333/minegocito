@@ -1,0 +1,30 @@
+{% load static i18n %}
+
+<div class="container-fluid">
+  <div class="card">
+    <div class="header bg-red">
+      <h2>
+        {% trans 'Advanced version' %}
+      </h2>
+    </div>
+
+    <div class="body">
+      <p>
+        {% trans 'Advanced version limited only to one thousand brands per user' %}
+      </p>
+
+      <button class="btn btn-primary waves-effect" 
+      onclick="showMainPanel()" 
+      type="button">
+        <i class="material-icons">done</i>
+        {% trans 'Accept' %}
+      </button>
+    </div>
+  </div>
+</div>
+
+<script type="text/javascript">
+  $(document).ready(function(){
+    $("div.menu a#{{itm_menu}}").parent().addClass("active");
+  });
+</script>

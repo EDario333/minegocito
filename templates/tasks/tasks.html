@@ -1,0 +1,210 @@
+{% load i18n static %}
+
+<li class="dropdown user-tasks">
+  <a href="javascript:void(0);" class="dropdown-toggle" 
+  data-toggle="dropdown" role="button">
+    <i class="material-icons">
+      flag
+    </i>
+
+    <span class="label-count">{{tasks|length}}</span>
+  </a>
+
+  <ul class="dropdown-menu">
+    <li class="header">
+      {% trans 'Tasks'|upper %}
+    </li>
+
+    <li class="body">
+      <ul class="menu tasks">
+        {% for itm in tasks %}
+          <li>
+            <a href="javascript:void(0);"
+            data-placement="bottom"
+            data-toggle="tooltip"
+            onclick="gotoTask('#{{itm.task.url}}', '{{itm.percent}}', '{{itm.id}}', this)" 
+            title="{% trans 'Goto' %}" 
+            data-original-title="{% trans 'Goto' %}">
+              <h4>
+                {{itm.task.name}}
+                <small>{{itm.percent}}%</small>
+              </h4>
+
+              <div class="progress">
+                {% if itm.percent <= 20 %}
+                  <div class="progress-bar bg-red" 
+                  role="progressbar" 
+                  aria-valuenow="{{itm.percent}}" 
+                  aria-valuemin="0" 
+                  aria-valuemax="100" 
+                  style="width: {{itm.percent}}%">
+                  </div>
+                {% elif itm.percent <= 40 %}
+                  <div class="progress-bar bg-cyan" 
+                  role="progressbar" 
+                  aria-valuenow="{{itm.percent}}" 
+                  aria-valuemin="0" 
+                  aria-valuemax="100" 
+                  style="width: {{itm.percent}}%">
+                  </div>
+                {% elif itm.percent <= 60 %}
+                  <div class="progress-bar bg-teal" 
+                  role="progressbar" 
+                  aria-valuenow="{{itm.percent}}" 
+                  aria-valuemin="0" 
+                  aria-valuemax="100" 
+                  style="width: {{itm.percent}}%">
+                  </div>
+                {% elif itm.percent <= 80 %}
+                  <div class="progress-bar bg-orange" 
+                  role="progressbar" 
+                  aria-valuenow="{{itm.percent}}" 
+                  aria-valuemin="0" 
+                  aria-valuemax="100" 
+                  style="width: {{itm.percent}}%">
+                  </div>
+                {% else %}
+                  <div class="progress-bar bg-purple" 
+                  role="progressbar" 
+                  aria-valuenow="{{itm.percent}}" 
+                  aria-valuemin="0" 
+                  aria-valuemax="100" 
+                  style="width: {{itm.percent}}%">
+                  </div>
+                {% endif %}
+              </div>
+            </a>
+          </li>
+        {% endfor %}
+      </ul>
+    </li>
+
+    <li class="footer">
+      <a href="javascript:void(0);" 
+      class="view-all-tasks" 
+      onclick="showAllTasks()">
+        {% trans 'View all tasks' %}
+      </a>
+    </li>
+  </ul>
+</li>
+
+<script src="{% static 'js/bootbox/bootbox.min.js' %}"></script>
+
+<script type="text/javascript">
+  $('[data-toggle="tooltip"]').tooltip();
+
+  function refreshTasks() {
+    $("li.user-tasks").load("/tasks/retrieve-user-tasks/");
+  }
+
+  setInterval(refreshTasks, 5000);
+  // setTimeout(refreshTasks, 3000);
+
+  function gotoTask(lnk, percent, task, invoker) {
+    txt=$(lnk)[0].innerText.trim().toUpperCase();
+    var msg_wait;
+
+    $.ajax({
+      method: "GET",
+      url: "/translator/translate/",
+      data: {msg: "Please wait"}
+    })
+    .done(function(result) {
+      msg_wait=result;
+    });
+
+    if (!txt.includes("AGREGAR"))
+      $.ajax({
+        method: "GET",
+        url: "/translator/translate/",
+        data: {msg: "You do not have permission to perform this request"}
+      })
+      .done(function(result) {
+        show_msg_with_toastr("error", result);
+      });
+    else
+      if (percent<100)
+        $(lnk).click();
+      else {
+        show_msg_with_toastr("info", msg_wait);
+
+        $.ajax({
+          method: "GET",
+          url: "/translator/many/",
+          data: {msgs: "Title dlg task already done,Msg dlg task already done,Btn goto anyway dlg task already done,Btn remove this task dlg task already done,Cancel"}
+        })
+        .done(function(result) {
+          result=result.split(",");
+          title=result[0];
+          msg=result[1];
+          btn_go=result[2]+", " +result[3];
+          btn_remove_task=result[4]+", " +result[5];
+          btn_cancel=result[6];
+          msg_wait=result[7];
+          var dialog = bootbox.dialog({
+            title: title,
+            message: msg,
+            size: 'large',
+            buttons: {
+              cancel: {
+                label: btn_cancel,
+                className: 'btn-default',
+                callback: function(){
+                  toastr.clear();
+                }
+              },
+              noclose: {
+                label: btn_remove_task,
+                className: 'btn-warning',
+                callback: function(){
+                  toastr.clear();
+                  show_msg_with_toastr("info", msg_wait);
+
+                  $.ajax({
+                    method: "GET",
+                    url: "/tasks/remove-from-alerts/",
+                    data: {task: task}
+                  })
+                  .done(function(result) {
+                    toastr.clear();
+                    if (result.status=="success")
+                      $(invoker).parent().remove();
+                    else
+                      show_msg_with_toastr(result.status, result.msg);
+                  });
+                  // return false;
+                }
+              },
+              ok: {
+                label: btn_go,
+                className: 'btn-primary',
+                callback: function(){
+                  $(lnk).click();
+                }
+              }
+            }
+          });
+          toastr.clear();
+        });
+      }
+
+    return false;
+  }
+
+  function showAllTasks() {
+    show_msg_with_toastr("info", msg_wait);
+
+    $.ajax({
+      method: "GET",
+      url: "/tasks/"
+    })
+    .done(function(result) {
+      $("div.menu li.active").removeClass("active");
+      $("section.content").html(result);
+      toastr.clear();
+    });
+
+    return false;
+  };
+</script>

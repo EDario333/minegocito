@@ -1,0 +1,136 @@
+{% load static i18n %}
+
+<style type="text/css">
+  #secBckMostVisitedShop h1, #secBckMostVisitedShop p {
+    background-color: black;
+    color: white;
+    border-radius: 5px;
+    padding: 0 0 0 10px;
+  }
+</style>
+
+<div class="site-blocks-cover" 
+id="secBckMostVisitedShop" 
+data-aos="fade">
+  <div class="container">
+    <div class="row align-items-start align-items-md-center justify-content-end">
+      <div class="col-md-5 text-center text-md-left pt-5 pt-md-0">
+
+        <h1 class="mb-2">
+        	{% trans 'Most visited' %}
+        </h1>
+
+        <div class="intro-text text-center text-md-left" id="secDescription">
+          <p class="mb-4" id="secMostVisitedShopDesc">
+          	<div class="preloader pl-size-xs">
+              <div class="spinner-layer pl-red-grey">
+                <div class="circle-clipper left">
+                  <div class="circle"></div>
+                </div>
+                <div class="circle-clipper right">
+                  <div class="circle"></div>
+                </div>
+              </div>
+            </div>
+          </p>
+
+          <a href="#" id="lnkVisitShop" 
+          class="btn btn-sm btn-primary">
+          	{% trans 'Details' %}
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="{% static 'shoppers-gh-pages/js/jquery-3.3.1.min.js' %}"></script>
+
+<script src="{% static 'toastr/toastr.min.js' %}" 
+type="text/javascript"></script>
+
+<link href="{% static 'toastr/toastr.min.css' %}" rel="stylesheet" type="text/css">
+
+<script src="{% static 'js/app.js' %}"></script>
+
+<div id="divViewDetails"></div>
+
+<script type="text/javascript">
+  var msg_wait;
+  var msg_addr;
+  var msg_city;
+
+  $.ajax({
+    method: "GET",
+    url: "/translator/many/",
+    data: {msgs: "Please wait,Address line 1,City"}
+  })
+  .done(function(result) {
+    result = result.split(',');
+    msg_wait = result[0];
+    msg_addr = result[1] + result[2] + result[3];
+    msg_city = result[4];
+  });
+
+  function showDetails(shop) {
+    show_msg_with_toastr("info", msg_wait);
+
+    $.ajax({
+      method: "GET",
+      url: "/shops/view-details",
+      data: { shop: shop }
+    })
+    .done(function(result) {
+      $("div#divViewDetails").html(result);
+      $(".confirm-delete").remove();
+      $(".edit").remove();
+      $(".modal-content").css("width", "600px");
+      $("#dlgViewDetails table.tbl-view-details tbody tr td:first-child").addClass("right-alignment");
+      $("#dlgViewDetails").modal();
+
+      // $.ajax({
+      //   method: "GET",
+      //   url: "/shops/new-visit/",
+      //   data: { shop: shop }
+      // })
+      // .done(function(result) {
+      // });
+
+      toastr.clear();
+    });
+    return false;
+  }
+
+  $.ajax({
+    method: "GET",
+    url: "/home/retrieve-most-visited-shop/"
+  })
+  .done(function(result) {
+    if (result.status=="error") {
+      toastr.clear();
+      show_msg_with_toastr("error", "{{msg}}");
+    }
+    else if (result.status=="warning") {
+      $("#secBckMostVisitedShop").css("background-image", "url(/static/imgs/most-visited-shops-1.jpg)");
+      $("#secBckMostVisitedShop").css("cursor", "pointer");
+      $("#secBckMostVisitedShop h1").remove();
+      $("#secBckMostVisitedShop #secDescription").remove();
+
+      $("#secBckMostVisitedShop").click(function() {
+        $("#secMostVisitedShops #secShops a").click();
+      });
+    }
+    else {
+      $("#secBckMostVisitedShop").css("background-image", "url(" + result.shop_static_photo + ")");
+      // $("#secBckMostVisitedShop").css("width", "1900px");
+      // $("#secBckMostVisitedShop").css("height", "890px");
+      html="<span style='font-size: larger; font-weight: bold'>"
+      html+=result.shop_name + "</span><br />";
+      html+=msg_addr + ": " + result.shop_addr1 + "<br />";
+      html+=msg_city + ": " + result.shop_city;
+      $("#lnkVisitShop").attr("onclick", "showDetails('" + result.shop_id +"'); return false;" );
+      $("#secMostVisitedShopDesc").html(html);
+      toastr.clear();
+    }
+  });
+</script>

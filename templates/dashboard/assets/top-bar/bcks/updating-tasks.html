@@ -1,0 +1,100 @@
+{% load i18n %}
+
+<style type="text/css">
+  ul li.user-tasks ul {
+    list-style-type: none;
+    padding: 3px;
+    margin: 0;
+    line-height: 1px;
+  }
+</style>
+
+<a href="javascript:void(0);" class="dropdown-toggle" 
+data-toggle="dropdown" role="button">
+  <i class="material-icons">
+  	flag
+  </i>
+
+  <span class="label-count">{{tasks|length}}</span>
+</a>
+
+<ul class="dropdown-menu">
+  <li class="header">
+  	{% trans 'Tasks'|upper %}
+	</li>
+
+	<li class="body">
+    <ul class="menu tasks">
+      {% for itm in tasks %}
+        <li>
+          <a href="javascript:void(0);"
+          data-placement="bottom"
+          data-toggle="tooltip" 
+          onclick="gotoTask('#{{itm.task.url}}', '{{itm.percent}}', '{{itm.id}}', this)" 
+          title="{% trans 'Goto' %}" 
+          data-original-title="{% trans 'Goto' %}">
+	          <h4>
+              {{itm.task.name}}
+              <small>{{itm.percent}}%</small>
+	          </h4>
+
+	          <div class="progress">
+              {% if itm.percent <= 20 %}
+                <div class="progress-bar bg-red" 
+                role="progressbar" 
+                aria-valuenow="{{itm.percent}}" 
+                aria-valuemin="0" 
+                aria-valuemax="100" 
+                style="width: {{itm.percent}}%">
+                </div>
+              {% elif itm.percent <= 40 %}
+                <div class="progress-bar bg-cyan" 
+                role="progressbar" 
+                aria-valuenow="{{itm.percent}}" 
+                aria-valuemin="0" 
+                aria-valuemax="100" 
+                style="width: {{itm.percent}}%">
+                </div>
+              {% elif itm.percent <= 60 %}
+                <div class="progress-bar bg-teal" 
+                role="progressbar" 
+                aria-valuenow="{{itm.percent}}" 
+                aria-valuemin="0" 
+                aria-valuemax="100" 
+                style="width: {{itm.percent}}%">
+                </div>
+              {% elif itm.percent <= 80 %}
+                <div class="progress-bar bg-orange" 
+                role="progressbar" 
+                aria-valuenow="{{itm.percent}}" 
+                aria-valuemin="0" 
+                aria-valuemax="100" 
+                style="width: {{itm.percent}}%">
+                </div>
+              {% else %}
+                <div class="progress-bar bg-purple" 
+                role="progressbar" 
+                aria-valuenow="{{itm.percent}}" 
+                aria-valuemin="0" 
+                aria-valuemax="100" 
+                style="width: {{itm.percent}}%">
+                </div>
+              {% endif %}
+	          </div>
+          </a>
+        </li>
+      {% endfor %}
+    </ul>
+	</li>
+
+  <li class="footer">
+    <a href="javascript:void(0);" class="actViewAllTasks">
+      {% trans 'View all tasks' %}
+    </a>
+  </li>
+</ul>
+
+<script type="text/javascript">
+  $('[data-toggle="tooltip"]').tooltip();
+  // registerDashboardActions();
+</script>

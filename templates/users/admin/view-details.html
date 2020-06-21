@@ -1,0 +1,504 @@
+{% load static i18n %}
+
+<style type="text/css">
+	div#modalViewDetails {
+		width: 35%;
+	}
+
+  table.tbl-view-details {
+    width: 100%;
+  }
+
+  table.tbl-view-details tbody tr td:first-child  {
+    /* text-align: right; */
+    font-weight: bold;
+    width: 100%;
+  }
+
+  .right-alignment {
+    text-align: right;
+  }
+
+  .hidden {
+    visibility: hidden;
+  }
+</style>
+
+{% if can_edit and can_edit|upper == 'TRUE' %}
+<script src="{% static 'js/dashboard/view-details/edit-functions.js' %}"></script>
+{% endif %}
+
+{% if can_delete and can_delete|upper == 'TRUE' %}
+<script src="{% static 'js/dashboard/view-details/delete-functions.js' %}"></script>
+{% endif %}
+
+<div class="bg-gradient-primary modal fade" 
+id="dlgViewDetails" tabindex="-1" role="dialog" 
+aria-labelledby="lblHeader" aria-hidden="true">
+  <div class="modal-dialog my-modal" 
+  role="document" id="modalViewDetails">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="lblHeader">
+          {% trans 'User details' %}
+        </h5>
+
+        <button class="close" type="button" 
+        data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">×</span>
+        </button>
+      </div>
+      <hr />
+
+      <div class="modal-body">
+        <div class="card hidden confirm-delete">
+          <div class="body bg-blue-grey">
+            <h4>
+              <!-- 
+                <i class="material-icons">warning</i> 
+              -->
+              {% trans 'Are you sure do you want to remove this' %}
+            </h4>
+
+            <form action="/users/admin/confirmed-delete" 
+              method="post" class="confirm-delete">
+              {% csrf_token %}
+
+              <label for="txtReasonToDrop">
+                {% trans 'Aditionally you can specify the reason to remove this' %}
+              </label>
+              <textarea cols="10" id="txtReasonToDrop" 
+              name="reason" class="form-control"></textarea>
+
+              <input type="text" name="user" 
+              value="{{user.id}}" hidden="true" 
+              style="visibility: hidden;"/>
+              <input type="text" name="itm_menu" 
+              value="{{itm_menu}}" hidden="true" 
+              style="visibility: hidden;" />
+              <br />
+
+              <button class="btn btn-default" 
+              type="submit">
+                {% trans 'Delete' %}
+              </button>
+
+              <button class="btn btn-default" 
+              type="button" onclick="cancelDelete()">
+                {% trans 'Cancel' %}
+              </button>
+            </form>
+          </div>
+        </div>
+
+        <p class="hidden edit">
+          {% trans 'Fields marked are mandatory' %}.
+        </p>
+
+      	<div class="table-responsive">
+          <form method="post" class="update" 
+          action="/users/admin/update/">
+            {% csrf_token %}
+
+            <input type="text" 
+            readonly="true" 
+            value="{{user.id}}" 
+            hidden="true" 
+            style="visibility: hidden;"
+            name="user">
+
+            <input hidden="true" 
+            style="visibility: hidden;"
+            name="module" 
+            value="my_admin_module">
+
+            <table class="table-bordered table-striped tbl-view-details" 
+            style="white-space: nowrap;">
+              <tbody>
+                {% if can_edit and can_edit|upper == 'TRUE' %}
+                  <tr class="hidden edit">
+                    <td>
+                      <label for="txtFirstName">
+                        *&nbsp;{% trans 'First name' %}:
+                      </label>
+                    </td>
+                  </tr>
+
+                  <tr class="hidden edit">
+                    <td>
+                      <input id="txtFirstName" 
+                      type="text" required="true" 
+                      class="form-control" 
+                      value="{{user.first_name}}" 
+                      name="first_name">
+                    </td>
+                  </tr>
+                {% endif %}
+
+                <tr class="view">
+                  <td>
+                    {% trans 'First name' %}:
+                  </td>
+
+                  <td>
+                    {{user.first_name}}
+                  </td>
+                </tr>
+
+                {% if can_edit and can_edit|upper == 'TRUE' %}
+                  <tr class="hidden edit">
+                    <td>
+                      <label for="txtMiddleName">
+                        {% trans 'Middle name' %}:
+                      </label>
+                    </td>
+                  </tr>
+
+                  <tr class="hidden edit">
+                    <td>
+                      <input id="txtMiddleName" 
+                      type="text" 
+                      class="form-control" 
+                      value="{{user.middle_name}}" 
+                      name="middle_name">
+                    </td>
+                  </tr>
+                {% endif %}
+
+                <tr class="view">
+                  <td>
+                    {% trans 'Middle name' %}:
+                  </td>
+
+                  <td>
+                    {{user.middle_name}}
+                  </td>
+                </tr>
+
+                {% if can_edit and can_edit|upper == 'TRUE' %}
+                  <tr class="hidden edit">
+                    <td>
+                      <label for="txtLastName">
+                        *&nbsp;{% trans 'Last name' %}:
+                      </label>
+                    </td>
+                  </tr>
+
+                  <tr class="hidden edit">
+                    <td>
+                      <input id="txtLastName" 
+                      type="text" required="true"
+                      class="form-control" 
+                      value="{{user.last_name}}" 
+                      name="last_name">
+                    </td>
+                  </tr>
+                {% endif %}
+
+                <tr class="view">
+                  <td>
+                    {% trans 'Last name' %}:
+                  </td>
+
+                  <td>
+                    {{user.last_name}}
+                  </td>
+                </tr>
+
+                {% if can_edit and can_edit|upper == 'TRUE' %}
+                  <tr class="hidden edit">
+                    <td>
+                      <label for="txtMothersLastName">
+                        {% trans 'Mothers last name' %}:
+                      </label>
+                    </td>
+                  </tr>
+
+                  <tr class="hidden edit">
+                    <td>
+                      <input id="txtMothersLastName" 
+                      type="text" 
+                      class="form-control" 
+                      value="{{user.mothers_last_name}}" 
+                      name="mothers_last_name">
+                    </td>
+                  </tr>
+                {% endif %}
+
+                <tr class="view">
+                  <td>
+                    {% trans 'Mothers last name' %}:
+                  </td>
+
+                  <td>
+                    {{user.mothers_last_name}}
+                  </td>
+                </tr>
+
+                {% if can_edit and can_edit|upper == 'TRUE' %}
+                  <tr class="hidden edit">
+                    <td>
+                      <label for="txtEmail">
+                        *&nbsp;{% trans 'Email' %}:
+                      </label>
+                    </td>
+                  </tr>
+
+                  <tr class="hidden edit">
+                    <td>
+                      <input id="txtEmail" 
+                      type="text" required="true"
+                      class="form-control" 
+                      value="{{user.email}}" 
+                      name="email">
+                    </td>
+                  </tr>
+                {% endif %}
+
+                <tr class="view">
+                  <td>
+                    {% trans 'Email' %}:
+                  </td>
+
+                  <td>
+                    {{user.email}}
+                  </td>
+                </tr>
+
+                {% if can_edit and can_edit|upper == 'TRUE' %}
+                  <tr class="hidden edit">
+                    <td>
+                      {% trans 'Belongs to group' %}:
+                    </td>
+                  </tr>
+
+                  <tr class="hidden edit">
+                    <td>
+                      <p id="divUserGroup">
+                        {% if user.groups.all|length > 0 %}
+                          {% for group in user.groups.all %}
+                            {{group}}
+                          {% endfor %}
+                        {% else %}
+                          {% trans 'None male' %}
+                        {% endif %}
+                      </p>
+
+                      <a href="#" id="actAssignGroup">
+                        <i class="material-icons">
+                          group_add
+                        </i>
+                        {% trans 'Change group' %}
+                      </a>
+
+                      <input type="text"
+                      hidden="true" 
+                      style="visibility: hidden;" 
+                      readonly="true" 
+                      name="usergroup">
+                    </td>
+                  </tr>
+                {% endif %}
+
+                <tr class="view">
+                  <td>
+                    {% trans 'Belongs to group' %}:
+                  </td>
+
+                  <td>
+                    {% if user.groups.all|length > 0 %}
+                      {% for group in user.groups.all %}
+                        {{group}}
+                      {% endfor %}
+                    {% else %}
+                      {% trans 'None male' %}
+                    {% endif %}
+                  </td>
+                </tr>
+
+                {% if can_edit and can_edit|upper == 'TRUE' %}
+                  <tr class="hidden edit">
+                    <td>
+                      {% trans 'Permissions' %}:
+                    </td>
+                  </tr>
+
+                  <tr class="hidden edit">
+                    <td>
+                      <a href="#" 
+                      class="permissions change-permissions">
+                        <i class="material-icons">
+                          done_all
+                        </i>
+                        {% trans 'Change permissions' %}
+                      </a>
+
+                      <input
+                      hidden="true" 
+                      style="visibility: hidden;" 
+                      name="permissions">
+                    </td>
+                  </tr>
+                {% endif %}
+
+                <tr class="view">
+                  <td>
+                    {% trans 'Permissions' %}:
+                  </td>
+
+                  <td>
+                    <a href="#"
+                    class="permissions view-permissions">
+                      {% trans 'View permissions' %}
+                    </a>
+                  </td>
+                </tr>
+
+                <tr id="rowBtnSave" 
+                hidden="true" class="hidden">
+                  <td colspan="2">
+                    <button type="submit" 
+                    class="btn btn-primary">
+                      {% trans 'Save' %}
+                    </button>
+
+                    <button type="button" 
+                    onclick="cancelEdit()" 
+                    class="btn btn-primary btnCancelEdit">
+                      {% trans 'Cancel' %}
+                    </button>
+                  </td>
+                </tr>
+
+                {% if can_edit and can_edit|upper == 'TRUE' or can_delete and can_delete|upper == 'TRUE' %}
+                <tr class="view">
+                  <td>{% trans 'Options' %}:</td>
+
+                  <td>
+                  	{% if can_edit and can_edit|upper == 'TRUE' %}
+  	                	<a href="#" data-placement="bottom"
+  	                	data-toggle="tooltip"  
+                      onclick="editData();prepareEditFrm();" 
+                      id="actEditData"
+  	                	title="{% trans 'Edit' %}" 
+  	                	data-original-title="{% trans 'Edit' %}"><i class="material-icons">edit</i></a>
+                  	{% endif %}
+
+                  	{% if can_delete and can_delete|upper == 'TRUE' %}
+  	                	<a href="#" data-placement="top"
+  	                	data-toggle="tooltip" 
+                      id="actDelete" 
+                      onclick="confirmDelete()" 
+  	                	title="{% trans 'Delete' %}" 
+  	                	data-original-title="{% trans 'Delete' %}"><i class="material-icons">delete</i></a>
+                  	{% endif %}
+                  </td>
+                </tr>
+                {% endif %}
+              </tbody>
+            </table>
+          </form>
+        </div>
+      </div>
+      <hr />
+
+      <div class="modal-footer">
+      	<button type="button" class="btn btn-primary" 
+      	data-dismiss="modal">
+      		<!--<i class="material-icons">clear</i>-->
+      		{% trans 'Back' %}
+      	</button>
+
+        <input name="user" 
+        value="{{user.id}}" hidden="true" 
+        style="visibility: hidden;"/>
+
+        <div id="divAjaxResults"></div>
+      </div>
+    </div>
+	</div>
+</div>
+
+<script type="text/javascript">
+  function on_close_dlgViewDetails() {
+    $('#dlgViewDetails').on('hidden.bs.modal', 
+      function () {
+        $('#dlgSearchResults').focus();
+        toastr.clear();
+      });
+  }
+
+	$(document).ready(function(){
+		toastr.clear();
+
+    itm_menu = $("div.menu li.active a")[0].id;
+    $("#dlgViewDetails input[name='itm_menu']").val(itm_menu);
+
+		var msg_wait;
+
+	  $.ajax({
+	    method: "GET",
+	    url: "/translator/translate/",
+	    data: { msg: "Please wait"}
+	  })
+	  .done(function(result) {
+	    msg_wait = result;
+	  });
+
+		$('[data-toggle="tooltip"]').tooltip();
+  });
+</script>
+
+{% if can_delete and can_delete|upper == 'TRUE' %}
+<script type="text/javascript">
+  function prepareDeleteFrm() {
+    options = { 
+      target:        'section.content .container-fluid',
+      beforeSubmit:  showRequest,
+      success:       showResponse
+    }; 
+
+    function showRequest(formData, jqForm, options) { 
+      show_msg_with_toastr("info", msg_wait);
+      return true;
+    }
+ 
+    function showResponse(responseText, statusText, xhr, $form)  { 
+      $("#dlgViewDetails").modal("hide");
+      $("#dlgSearchResults").modal("hide");
+    }
+
+    $("#dlgViewDetails form.confirm-delete").ajaxForm(options);
+  }
+</script>
+{% endif %}
+
+{% if can_edit and can_edit|upper == 'TRUE' %}
+<script type="text/javascript">
+  function prepareEditFrm() {
+    $("#dlgViewDetails table.tbl-view-details tbody tr td:first-child").removeClass("right-alignment");
+
+    options = { 
+      target:        '#dlgViewDetails #divAjaxResults',
+      beforeSubmit:  showRequest,  
+      success:       showResponse
+    }; 
+
+    function showRequest(formData, jqForm, options) { 
+      $('#dlgViewDetails form.update button[type="submit"]').attr("disabled", "true");
+      show_msg_with_toastr("info", msg_wait);
+      return true;
+    }
+ 
+    function showResponse(responseText, statusText, xhr, $form)  { 
+      toastr.clear();
+      if (statusText == "success")
+        show_msg_with_toastr(responseText.status, responseText.msg);
+      $('#dlgViewDetails form.update button[type="submit"]').removeAttr("disabled");
+    }
+
+    $("#dlgViewDetails form.update").ajaxForm(options);  }
+</script>
+{% endif %}
+
+<div id="divViewDetails"></div>

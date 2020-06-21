@@ -1,0 +1,449 @@
+{% load i18n %}
+
+<h3>{% trans 'Advanced config'%}</h3>
+
+<h4>{% trans 'Shops' %}</h4>
+<input type="checkbox" class="chkAllShops_users" 
+id="chkAllShops_users" checked="" />
+
+<label for="chkAllShops_users" id="lblAllShops_users">
+	{% trans 'All female' %}
+</label>
+
+{% for shop in shops %}
+	<br />
+
+	<input type="checkbox" class="chkShop_users" 
+	id="chkShop_users{{shop.id}}" checked="" />
+
+	<label for="chkShop_users{{shop.id}}">
+		{{shop.name}}&nbsp;[{% trans 'Admin' %}={{shop.admin.first_name}}&nbsp;{{shop.admin.last_name}};&nbsp;email={{shop.admin.email}}]
+	</label>
+{% endfor %}
+
+<h4>{% trans 'Products' %}</h4>
+<input type="checkbox"
+id="chkAllProducts_users" checked="" />
+
+<label for="chkAllProducts_users" 
+id="lblAllProducts_users">
+	{% trans 'All male' %}
+</label>
+
+{% for product in products %}
+	<br />
+
+	<input type="checkbox" class="chkProduct_users" 
+	id="chkProduct_users{{product.id}}" checked="" />
+
+	<label for="chkProduct_users{{product.id}}">
+		{{product.name}}
+	</label>
+{% endfor %}
+
+<h4>{% trans 'Brands' %}</h4>
+<input type="checkbox"
+id="chkAllBrands_users" checked="" />
+
+<label for="chkAllBrands_users" id="lblAllBrands_users">
+	{% trans 'All female' %}
+</label>
+
+{% for brand in brands %}
+	<br />
+
+	<input type="checkbox" class="chkBrand_users" 
+	id="chkBrand_users{{brand.id}}" checked="" />
+
+	<label for="chkBrand_users{{brand.id}}">
+		{{brand.name}}
+	</label>
+{% endfor %}
+
+<h4>{% trans 'Providers' %}</h4>
+<input type="checkbox"
+id="chkAllProviders_users" checked="" />
+
+<label for="chkAllProviders_users" 
+id="lblAllProviders_users">
+	{% trans 'All male' %}
+</label>
+
+{% for provider in providers %}
+	<br />
+
+	<input type="checkbox" class="chkProvider_users" 
+	id="chkProvider_users{{provider.id}}" checked="" />
+
+	<label for="chkProvider_users{{provider.id}}">
+		{{provider.name}}&nbsp;[RFC={{provider.rfc}}]
+	</label>
+{% endfor %}
+<br />
+
+<button type="button" onclick="applyCfg_users(this)" 
+class="btn btn-primary waves-effect">
+	{% trans 'Accept' %}
+</button>
+
+<script type="text/javascript">
+	var msg_wait;
+	var msg_all_female;
+  var msg_all_male;
+	var msg_none_female;
+  var msg_none_male;
+  var selected_shops=[];
+  var selected_products=[];
+  var selected_brands=[];
+  var selected_providers=[];
+
+  $.ajax({
+    method: "GET",
+    url: "/translator/many/",
+    data: {msgs: "Please wait,All female,All male,None female,None male"}
+  })
+  .done(function(result) {
+    result = result.split(',');
+    msg_wait = result[0];
+    msg_all_female = result[1];
+    msg_all_male = result[2];
+    msg_none_female = result[3];
+    msg_none_male = result[4];
+  });
+
+  function applyCfg_users(invoker) {
+  	show_msg_with_toastr("info", msg_wait);
+
+  	if (selected_shops.length<1) {
+      $.ajax({
+        method: "GET",
+        url: "/translator/translate/",
+        data: {msg: "Please select at least one shop"}
+      })
+      .done(function(result) {
+        toastr.clear();
+        show_msg_with_toastr("error", result);
+      });
+      return false;
+    }
+
+    if (selected_products.length<1) {
+      $.ajax({
+        method: "GET",
+        url: "/translator/translate/",
+        data: {msg: "Please select at least one product"}
+      })
+      .done(function(result) {
+        toastr.clear();
+        show_msg_with_toastr("error", result);
+      });
+      return false;
+    }
+
+    if (selected_brands.length<1) {
+      $.ajax({
+        method: "GET",
+        url: "/translator/translate/",
+        data: {msg: "Please select at least one brand"}
+      })
+      .done(function(result) {
+        toastr.clear();
+        show_msg_with_toastr("error", result);
+      });
+      return false;
+    }
+
+    if (selected_providers.length<1) {
+      $.ajax({
+        method: "GET",
+        url: "/translator/translate/",
+        data: {msg: "Please select at least one provider"}
+      })
+      .done(function(result) {
+        toastr.clear();
+        show_msg_with_toastr("error", result);
+      });
+      return false;
+    }
+
+		$(invoker).parent().hide(); 
+		$("#secPurchasesByUsers .actCfg").show(); 
+		$("#secPurchasesByUsers form button[type='submit']").removeAttr("disabled");
+		$("#secPurchasesByUsers .form-control").removeAttr("disabled");
+		$("#secPurchasesByUsers .hide-me-on-config").show();
+		$("#secPurchasesByUsers .btns").show();
+		toastr.clear();
+	}
+
+  // ***************************************
+  // ************** SHOPS ******************
+  // ***************************************
+  function getInitialSelectedShops() {
+	  chks=$("#secPurchasesByUsers .chkShop_users");
+	  tope=chks.length;
+
+		for (x=0;x<tope;x++)
+			selected_shops.push(chks[x].id.substr("chkShop_users".length));
+	}
+
+	getInitialSelectedShops();
+
+	$("#secPurchasesByUsers .chkAllShops_users").change(function(event) {
+		chks=$("#secPurchasesByUsers .chkShop_users");
+		tope=chks.length;
+		for (x=0;x<tope;x++)
+			if (chks[x].checked!=this.checked)
+				//$(chks[x]).click();
+				$(chks[x])[0].checked=!($(chks[x])[0].checked);
+
+		if (!this.checked) {
+			$("#secPurchasesByUsers #lblAllShops_users").html(msg_all_female);
+			selected_shops=[];
+		}
+		else {
+			$("#secPurchasesByUsers #lblAllShops_users").html(msg_none_female);
+			getInitialSelectedShops();
+		}
+	})
+
+	$("#secPurchasesByUsers .chkShop_users").change(function() {
+		shop=this.id.substr("chkShop_users".length);
+
+		if (!this.checked) {
+			$("#secPurchasesByUsers #chkAllShops_users").removeAttr("checked");
+			$("#secPurchasesByUsers #lblAllShops_users").html(msg_all_female);
+
+			selected_shops.pop(shop);
+		}
+		else {
+			if (selected_shops.indexOf(shop)==-1)
+				selected_shops.push(shop);
+			chks=$("#secPurchasesByUsers .chkShop_users");
+			tope=chks.length;
+
+			counter=0;
+
+			for (x=0;x<tope;x++)
+				if (chks[x].checked)
+					counter++;
+
+			if (counter==tope) {
+				//$("#chkAllShops_users").attr("checked", "true");
+				if (!($("#secPurchasesByUsers #chkAllShops_users")[0].checked))
+					$("#secPurchasesByUsers #chkAllShops_users").click();
+				$("#secPurchasesByUsers #lblAllShops_users").html(msg_none_female);
+			}
+			else
+				$("#secPurchasesByUsers #lblAllShops_users").html(msg_all_female);
+			//tope=chks.length;
+			//counter=0;
+			
+			/*for (x=0;x<tope;x++)
+				if (chks[x].checked)
+					counter++;
+			*/
+		}
+		// console.log(selected_shops);
+	})
+
+	// ***************************************
+  // ************ PRODUCTS *****************
+  // ***************************************
+	function getInitialSelectedProducts() {
+	  chks=$("#secPurchasesByUsers .chkProduct_users");
+	  tope=chks.length;
+
+		for (x=0;x<tope;x++)
+			selected_products.push(chks[x].id.substr("chkProduct_users".length));
+	}
+
+	getInitialSelectedProducts();
+
+	$("#secPurchasesByUsers #chkAllProducts_users").change(function(event) {
+		if ($(event).hasClass("chkProduct_users"))
+			return true;
+
+		chks=$("#secPurchasesByUsers .chkProduct_users");
+		tope=chks.length;
+		for (x=0;x<tope;x++) {
+			//console.log(chks[x]);
+			if (chks[x].checked!=this.checked)
+				// if (chks[x].checked)
+				// 	$(chks[x]).removeAttr("checked");
+				// else
+					//$(chks[x])[0].click();
+					$(chks[x])[0].checked=!($(chks[x])[0].checked);
+		}
+
+		if (!this.checked) {
+			$("#secPurchasesByUsers #lblAllProducts_users").html(msg_all_male);
+			selected_products=[];
+		}
+		else {
+			$("#secPurchasesByUsers #lblAllProducts_users").html(msg_none_male);
+			getInitialSelectedProducts();
+		}
+	})
+
+	$("#secPurchasesByUsers .chkProduct_users").change(function(event) {
+		//console.log(event);
+		product=this.id.substr("chkProduct_users".length);
+
+		if (!this.checked) {
+			$("#secPurchasesByUsers #chkAllProducts_users").removeAttr("checked");
+			$("#secPurchasesByUsers #lblAllProducts_users").html(msg_all_male);
+
+			selected_products.pop(product);
+		}
+		else {
+			if (selected_products.indexOf(product)==-1)
+				selected_products.push(product);
+			chks=$("#secPurchasesByUsers .chkProduct_users");
+			tope=chks.length;
+
+			counter=0;
+
+			for (x=0;x<tope;x++)
+				if (chks[x].checked)
+					counter++;
+
+			if (counter==tope) {
+				if (!($("#secPurchasesByUsers #chkAllProducts_users")[0].checked))
+					$("#secPurchasesByUsers #chkAllProducts_users").click();
+				$("#secPurchasesByUsers #lblAllProducts_users").html(msg_none_male);
+			}
+			else
+				$("#secPurchasesByUsers #lblAllProducts_users").html(msg_all_male);
+		}
+		//alert(selected_products);
+	})
+
+	// ***************************************
+  // ************* BRANDS ******************
+  // ***************************************
+	function getInitialSelectedBrands() {
+	  chks=$("#secPurchasesByUsers .chkBrand_users");
+	  tope=chks.length;
+
+		for (x=0;x<tope;x++)
+			selected_brands.push(chks[x].id.substr("chkBrand_users".length));
+	}
+	
+	getInitialSelectedBrands();
+
+	$("#secPurchasesByUsers #chkAllBrands_users").change(function() {
+		chks=$("#secPurchasesByUsers .chkBrand_users");
+		tope=chks.length;
+		selected_brands=[];
+		for (x=0;x<tope;x++)
+			if (chks[x].checked!=this.checked) {
+				//$(chks[x]).click();
+				$(chks[x])[0].checked=!($(chks[x])[0].checked);
+			}
+
+		if (!this.checked) {
+			$("#secPurchasesByUsers #lblAllBrands_users").html(msg_all_female);
+			selected_brands=[];
+		}
+		else {
+			$("#secPurchasesByUsers #lblAllBrands_users").html(msg_none_female);
+			getInitialSelectedBrands();
+		}
+	})
+
+	$("#secPurchasesByUsers .chkBrand_users").change(function() {
+		brand=this.id.substr("chkBrand_users".length);
+
+		if (!this.checked) {
+			$("#secPurchasesByUsers #chkAllBrands_users").removeAttr("checked");
+			$("#secPurchasesByUsers #lblAllBrands_users").html(msg_all_female);
+
+			selected_brands.pop(brand);
+		}
+		else {
+			if (selected_brands.indexOf(brand)==-1)
+				selected_brands.push(brand);
+			chks=$("#secPurchasesByUsers .chkBrand_users");
+			tope=chks.length;
+
+			counter=0;
+
+			for (x=0;x<tope;x++)
+				if (chks[x].checked)
+					counter++;
+
+			if (counter==tope) {
+
+				if (!($("#secPurchasesByUsers #chkAllBrands_users")[0].checked))
+					$("#secPurchasesByUsers #chkAllBrands_users").click();
+				$("#secPurchasesByUsers #lblAllBrands_users").html(msg_none_female);
+			}
+			else
+				$("#secPurchasesByUsers #lblAllBrands_users").html(msg_all_female);
+		}
+	})
+
+	// ***************************************
+  // ************ PROVIDERS ****************
+  // ***************************************
+	function getInitialSelectedProviders() {
+	  chks=$("#secPurchasesByUsers .chkProvider_users");
+	  tope=chks.length;
+
+		for (x=0;x<tope;x++)
+			selected_providers.push(chks[x].id.substr("chkProvider_users".length));
+	}
+	
+	getInitialSelectedProviders();
+
+	$("#secPurchasesByUsers #chkAllProviders_users").change(function() {
+		chks=$("#secPurchasesByUsers .chkProvider_users");
+		tope=chks.length;
+		selected_providers=[];
+		for (x=0;x<tope;x++)
+			if (chks[x].checked!=this.checked) {
+				$(chks[x])[0].checked=!($(chks[x])[0].checked);
+			}
+
+		if (!this.checked) {
+			$("#secPurchasesByUsers #lblAllProviders_users").html(msg_all_male);
+			selected_providers=[];
+		}
+		else {
+			$("#secPurchasesByUsers #lblAllProviders_users").html(msg_none_male);
+			getInitialSelectedProviders();
+		}
+	})
+
+	$("#secPurchasesByUsers .chkProvider_users").change(function() {
+		brand=this.id.substr("chkProvider_users".length);
+
+		if (!this.checked) {
+			$("#secPurchasesByUsers #chkAllProviders_users").removeAttr("checked");
+			$("#secPurchasesByUsers #lblAllProviders_users").html(msg_all_male);
+
+			selected_providers.pop(brand);
+		}
+		else {
+			if (selected_providers.indexOf(brand)==-1)
+				selected_providers.push(brand);
+			chks=$("#secPurchasesByUsers .chkProvider_users");
+			tope=chks.length;
+
+			counter=0;
+
+			for (x=0;x<tope;x++)
+				if (chks[x].checked)
+					counter++;
+
+			if (counter==tope) {
+
+				if (!($("#secPurchasesByUsers #chkAllProviders_users")[0].checked))
+					$("#secPurchasesByUsers #chkAllProviders_users").click();
+				$("#secPurchasesByUsers #lblAllProviders_users").html(msg_none_male);
+			}
+			else
+				$("#secPurchasesByUsers #lblAllProviders_users").html(msg_all_male);
+		}
+	})
+</script>

@@ -1,0 +1,88 @@
+{% load static i18n %}
+
+<div class="bg-gradient-primary modal fade" 
+id="dlgAssignPermissions" tabindex="-1" role="dialog" 
+aria-labelledby="lblHeader" aria-hidden="true"
+onfocus='$("#dlgLogin #txtEmail").focus();'>
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="lblHeader">
+          {% trans 'Assign permissions' %}
+        </h5>
+
+        <button class="close" type="button" 
+        data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">×</span>
+        </button>
+      </div>
+      <hr />
+
+      <div class="modal-body">
+        <div class="col-sm-12" id="divPermissions">
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <div class="col-sm-12">
+        <button class="btn btn-primary waves-effect" 
+        type="button" id="actAccept">
+          {% trans 'Accept' %}
+        </button>
+
+        <button class="btn btn-secondary waves-effect" 
+        id="actCancel"
+        type="button" data-dismiss="modal">
+          {% trans 'Cancel' %}
+        </button>
+      </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script type="text/javascript">
+  var all_permissions_granted = false;
+
+  $(document).ready(function(){
+    /*
+    $.ajax({
+      method: "GET",
+      url: "/permissions/get-all-permissions/"
+    })
+    .done(function(result) {
+      toastr.clear();
+      if (result.status == "success") {
+        $("#dlgAssignPermissions #divPermissions").html(result.html);
+      }
+      else
+        show_msg_with_toastr(result.level, result.msg);
+    });
+    */
+
+    $("#dlgAssignPermissions #actAccept").click(function() {
+      permissions_obj = $("#dlgAssignPermissions input[name='permissions']:checked");
+      //console.log(permissions_obj);
+      tope = permissions_obj.length;
+      permissions = "";
+      for (x = 0; x < tope; x++) {
+        perm = permissions_obj[x].id;
+        perm = perm.substr("permission".length);
+        permissions += perm;
+        if (x < tope-1)
+          permissions += ",";
+      }
+
+      $("form input[name='permissions']").val(permissions);
+      permissions_assigned = true;
+      $("#dlgAssignPermissions").modal("hide");
+    });
+
+    $("#dlgAssignPermissions #actCancel").click(function() {
+      permissions = $("form input[name='permissions']").val();
+      if (all_permissions_granted)
+        if (permissions.length < 1)
+          $("#dlgAssignPermissions div#divPermissions #actSelectNone").click();
+    });
+  });
+</script>

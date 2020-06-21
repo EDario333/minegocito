@@ -1,0 +1,330 @@
+{% load static i18n %}
+
+<!-- Jquery DataTable Plugin Js -->
+<script src="{% static 'js/jquery-datatable/jquery.dataTables.js' %}"></script>
+<script src="{% static 'js/jquery-datatable/skin/bootstrap/js/dataTables.bootstrap.js' %}"></script>
+<script src="{% static 'js/jquery-datatable/extensions/export/dataTables.buttons.min.js' %}"></script>
+<script src="{% static 'js/jquery-datatable/extensions/export/buttons.flash.min.js' %}"></script>
+<script src="{% static 'js/jquery-datatable/extensions/export/jszip.min.js' %}"></script>
+<script src="{% static 'js/jquery-datatable/extensions/export/pdfmake.min.js' %}"></script>
+<script src="{% static 'js/jquery-datatable/extensions/export/vfs_fonts.js' %}"></script>
+<script src="{% static 'js/jquery-datatable/extensions/export/buttons.html5.min.js' %}"></script>
+<script src="{% static 'js/jquery-datatable/extensions/export/buttons.print.min.js' %}"></script>
+
+<!-- JQuery DataTable Css -->
+<link href="{% static 'js/jquery-datatable/skin/bootstrap/css/dataTables.bootstrap.css' %}" 
+rel="stylesheet">
+
+<style type="text/css">
+	table.dataTable thead tr th,
+	table.dataTable tbody tr td:last-child  {
+		text-align: center;
+	}
+
+	.centered-text-alignment {
+		text-align: center;
+	}
+</style>
+
+<script type="text/javascript">
+	$("#btnWithSelections").hide();
+</script>
+
+<script src="{% static 'js/dashboard/search-results/before-load-html.js' %}"></script>
+
+{% block msg_pre_form %}
+	{% if stored %}
+		<p>
+			{% blocktrans count counter=products|length %}
+				Encontramos un producto asignado a un almacen (inventariado).
+			{% plural %}
+				Encontramos {{ counter }} productos que han sido asignados a un almacen (inventariados).
+			{% endblocktrans %}
+		</p>
+	{% else %}
+		<p>
+			{% blocktrans count counter=products|length %}
+				Encontramos un producto sin ser asignado a un almacen (sin inventariar).
+			{% plural %}
+				Encontramos {{ counter }} productos que no han sido asignados a un almacen (sin inventariar).
+			{% endblocktrans %}
+		</p>
+	{% endif %}
+{% endblock %}
+
+<!-- And this form!? o.O Please debug -->
+<form>
+	{% csrf_token %}
+</form>
+
+<div class="table-responsive">
+  <table class="table table-bordered table-striped table-hover dataTable js-exportable" 
+  id="tblResults">
+    <thead>
+      <tr style="text-align: center;">
+      	{% if not stored or can_delete %}
+        	<th>
+        		&nbsp;&nbsp;&nbsp;&nbsp;
+        		<input type="checkbox" 
+      			class="select-all-products" 
+      			id="chkSelectAllProducts" />
+
+      			<label for="chkSelectAllProducts"></label>
+					</th>
+        {% endif %}
+
+        <th>{% trans 'Product' %}</th>
+        <th>{% trans 'Brand' %}</th>
+        <th>{% trans 'SKU' %}</th>
+        <th>{% trans 'Purchased at' %}</th>
+        <th>{% trans 'Purchased when' %}</th>
+        <th>{% trans 'Purchase ID' %}</th>
+
+        {% if stored %}
+        	<th>{% trans 'In store' %}</th>
+        {% else %}
+        	<th>{% trans 'Assign store' %}</th>
+        {% endif %}
+
+        <th>{% trans 'Options' %}</th>
+      </tr>
+    </thead>
+
+    <tbody>
+    	{% if stored %}
+	    	{% for product in products %}
+	    		<tr id="product{{product.id}}">
+	    			{% if can_delete %}
+		    			<td class="centered-text-alignment">
+	        			<input type="checkbox" 
+	        			class="select-product" 
+	        			id="chkProduct{{product.id}}" 
+	        			name="selectProduct{{product.id}}" />
+
+	        			<label for="chkProduct{{product.id}}"></label>
+	        		</td>
+        		{% endif %}
+
+	          <td>
+	          	{{product.purchase_detail.product.name}}
+	          </td>
+
+	          <td>
+	          	{{product.purchase_detail.brand.name}}
+	          </td>
+
+	          <td class="centered-text-alignment">
+	          	{{product.sku}}
+	          </td>
+
+	          <td class="centered-text-alignment">
+	          	{{product.purchase_detail.purchase.purchased_at}}
+	          </td>
+
+	          <td class="centered-text-alignment">
+	          	{{product.purchase_detail.purchase.purchased_when}}
+	          </td>
+
+	          <td class="centered-text-alignment">
+	          	{{product.purchase_detail.purchase.identifier}}
+	          </td>
+
+	          <td>
+	          	{{product.in_store.name}}
+	          </td>
+
+	          <td>
+	          	<a href="#" 
+	          	onclick="showDetails('{{product.id}}', 'products-stores', '{{can_edit}}', '{{can_delete}}', false, false, $('input[name=\'itm_menu\']').val());" 
+	          	data-placement="bottom"
+	          	data-toggle="tooltip" 
+	          	title="{% trans 'Details' %}" 
+	          	data-original-title="{% trans 'Details' %}"><i class="material-icons">zoom_in</i></a>
+
+	          	{% if can_edit %}
+	          	<a href="#" data-placement="bottom"
+	          	data-toggle="tooltip"
+	          	onclick="showDetails('{{product.id}}', 'products-stores', '{{can_edit}}', '{{can_delete}}', true, false, $('input[name=\'itm_menu\']').val());"
+	          	title="{% trans 'Edit' %}" 
+	          	data-original-title="{% trans 'Edit' %}"><i class="material-icons">edit</i></a>
+	          	{% endif  %}
+
+	          	{% if can_delete %}
+	          	<a href="#" data-placement="top"
+	          	data-toggle="tooltip" 
+	          	onclick="showDetails('{{product.id}}', 'products-stores', '{{can_edit}}', '{{can_delete}}', false, true, $('input[name=\'itm_menu\']').val());" 
+	          	title="{% trans 'Delete' %}" 
+	          	data-original-title="{% trans 'Delete' %}"><i class="material-icons">delete</i></a>
+	          	{% endif  %}
+          	</td>
+        	</tr>
+      	{% endfor %}
+      {% else %}
+      	{% for product in products %}
+	    		<tr id="product{{product.id}}">
+	    			<td class="centered-text-alignment">
+        			<input type="checkbox" 
+        			class="select-product" 
+        			id="chkProduct{{product.id}}" 
+        			name="selectProduct{{product.id}}" />
+
+        			<label for="chkProduct{{product.id}}"></label>
+        		</td>
+
+	          <td>
+	          	{{product.purchase_detail.product.name}}
+	          </td>
+
+	          <td>
+	          	{{product.purchase_detail.brand.name}}
+	          </td>
+
+	          <td class="centered-text-alignment">
+	          	<input name="sku{{product.id}}"
+	          	class="form-control" 
+	          	value="{{product.sku}}">
+	          </td>
+
+	          <td class="centered-text-alignment">
+	          	{{product.purchase_detail.purchase.purchased_at}}
+	          </td>
+
+	          <td class="centered-text-alignment">
+	          	{{product.purchase_detail.purchase.purchased_when}}
+	          </td>
+
+	          <td class="centered-text-alignment">
+	          	{{product.purchase_detail.purchase.identifier}}
+	          </td>
+
+	          <td class="centered-text-alignment">
+	          	<input class="store form-control" 
+	          	name="store{{product.id}}" />
+
+	          	<input hidden="hidden" 
+	          	style="visibility: hidden;" 
+	          	name="store_obj{{product.id}}" />
+	          </td>
+
+	          <td>
+	          	<a href="#" 
+	          	onclick="showDetails('{{product.id}}', 'products-stores', '{{can_edit}}', '{{can_delete}}', false, false, $('input[name=\'itm_menu\']').val());" 
+	          	data-placement="bottom"
+	          	data-toggle="tooltip" 
+	          	title="{% trans 'Details' %}" 
+	          	data-original-title="{% trans 'Details' %}"><i class="material-icons">zoom_in</i></a>
+
+	          	{% if can_edit %}
+	          	<a href="#" data-placement="bottom"
+	          	data-toggle="tooltip"
+	          	onclick="showDetails('{{product.id}}', 'products-stores', '{{can_edit}}', '{{can_delete}}', true, false, $('input[name=\'itm_menu\']').val());"
+	          	title="{% trans 'Edit' %}" 
+	          	data-original-title="{% trans 'Edit' %}"><i class="material-icons">edit</i></a>
+	          	{% endif  %}
+
+	          	{% if can_delete %}
+	          	<a href="#" data-placement="top"
+	          	data-toggle="tooltip" 
+	          	onclick="showDetails('{{product.id}}', 'products-stores', '{{can_edit}}', '{{can_delete}}', false, true, $('input[name=\'itm_menu\']').val());" 
+	          	title="{% trans 'Delete' %}" 
+	          	data-original-title="{% trans 'Delete' %}"><i class="material-icons">delete</i></a>
+	          	{% endif  %}
+
+	          	<a href="#" data-placement="top"
+	          	data-toggle="tooltip" 
+	          	class="save-product{{product.id}}" 
+	          	onclick="updateProduct('{{product.id}}');" 
+	          	title="{% trans 'Save' %}" 
+	          	data-original-title="{% trans 'Save' %}"><i class="material-icons">save</i></a>
+          	</td>
+        	</tr>
+      	{% endfor %}
+      {% endif %}
+    </tbody>
+  </table>
+</div>
+
+<script src="{% static 'js/dashboard/search-results/after-load-html.js' %}"></script>
+
+{% if not stored %}
+<button type="button" 
+id="btnWithSelections" hidden="true" 
+style="visibility: hidden;" 
+class="btn btn-primary waves-effect">
+	<i class="material-icons">save</i>
+	{% trans 'Save selections' %}
+</button>
+{% elif can_delete %}
+<button type="button" 
+id="btnWithSelections" hidden="true" 
+style="visibility: hidden;" 
+class="btn btn-primary waves-effect">
+	<i class="material-icons">delete</i>
+	{% trans 'Delete selections' %}
+</button>
+{% endif %}
+
+{% if not stored or can_delete %}
+<script type="text/javascript">
+	var counter_selected = 0;
+
+	$("table#tblResults tbody tr").attr("style", "cursor: pointer");
+
+	$("table#tblResults input.select-product").change(function() {
+  	if (this.checked)
+  		counter_selected++;
+  	else
+  		counter_selected--;
+
+  	tope = $("input.select-product").length;
+
+  	if (counter_selected >= tope) {
+  		counter_selected = tope;
+  		$("#chkSelectAllProducts").attr("checked", "true");
+  	}
+  	else if (counter_selected > 0) {
+  		$("#btnWithSelections").removeAttr("hidden");
+  		$("#btnWithSelections").removeAttr("style");
+  		$("#btnWithSelections").show();
+  		$("#btnWithSelections").attr("style", "width: auto");
+  		//$("#chkSelectAllProducts").removeAttr("checked");
+  	}
+  	else {
+  		$("#btnWithSelections").hide();
+  		$("#chkSelectAllProducts").removeAttr("checked");
+  		counter_selected = 0;
+  	}
+  });
+
+	$("table#tblResults thead tr th:nth-child(1)").removeClass("sorting_asc");
+
+  $("table#tblResults thead tr th:nth-child(1)").click(function(event) {
+  	$(this).removeClass();
+  	ctrl_cls = event.target.localName;
+  	if (ctrl_cls != "label" && 
+  		ctrl_cls != "input")
+  		event.preventDefault();
+  });
+
+  $("table#tblResults input#chkSelectAllProducts").click(function() {
+  	chks = $("table#tblResults input.select-product");
+  	tope = chks.length;
+  	for (x = 0; x < tope; x++)
+  		if ((this.checked && !chks[x].checked) ||
+  				(!this.checked && chks[x].checked))
+  			$(chks[x]).click();
+  		//if (chks[x].checked)
+  });
+
+  $("table#tblResults tbody tr").click(function(event) {
+  	ctrl_cls = event.target.type;
+  	if (ctrl_cls != "text" && 
+  		event.target.localName != "i") {
+  		product = this.id.substring("product".length);
+  		$("table#tblResults input#chkProduct" + product).click();
+  	}
+  });
+</script>
+{% endif %}
+
+<div id="divViewDetails"></div>

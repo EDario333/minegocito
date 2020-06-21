@@ -1,0 +1,139 @@
+{% load static i18n %}
+
+{% if msg %}
+  <script type="text/javascript">
+    $(document).ready(function(){
+      show_msg_with_toastr("{{level}}", "{{msg}}");
+      if ($("section.content form input")[0] != undefined)
+        $("section.content form input")[0].focus();
+    });
+  </script>
+{% endif %}
+
+<!--
+<script type="text/javascript">
+  var msg_wait;
+  var missed_query;
+
+  $.ajax({
+    method: "GET",
+    url: "/translator/many/",
+    data: { msgs: "Please wait,Please enter at least one search criteria"}
+  })
+  .done(function(result) {
+    result = result.split(',');
+    msg_wait = result[0];
+    missed_query = result[1];
+  });
+
+  function view_all(url, action) {
+    show_msg_with_toastr("info", msg_wait);
+    $("section.content form button[type='submit']").attr("disabled", "true");
+    url = url + "?itm_menu={{itm_menu}}&user={{user}}";
+
+    if (action.toUpperCase() == 'EDIT')
+      url = url + "&edit=true";
+    else if (action.toUpperCase() == 'DELETE')
+      url = url + "&delete=true";
+
+    $.ajax({
+      method: "GET",
+      url: url
+    })
+    .done(function(result) {
+      $("section.content").html(result);
+      //toastr.clear();
+      return false;
+    });
+  }
+</script>
+
+
+<style type="text/css">
+  .btn {
+    width: 120px;
+    margin: 0 0 10px 0;
+  }
+</style>
+-->
+
+<div class="container-fluid">
+  <!--
+  <div class="block-header" style="margin: 0 0 15px -15px">
+    <h2>
+      {{form.title|upper}}
+  	</h2>
+  </div>
+  -->
+
+  <div class="row clearfix">
+    <div class="card">
+      <div class="header">
+        <h2>
+          {% block frm_title %}
+          {% endblock %}
+        </h2>
+      </div>
+
+      <div class="body">
+        {% block additional_msg %}
+        {% endblock %}
+
+        <p>
+          {% block msg_pre_form %}
+          {% endblock %}
+        </p>
+
+        <input hidden="true" 
+        style="visibility: hidden;" 
+        name="user" 
+        value="{{user}}"
+        id="txtEmailHid">
+
+        <input hidden="true" 
+        style="visibility: hidden;" 
+        name="product_obj">
+
+        <input hidden="true" 
+        style="visibility: hidden;" 
+        name="brand_obj">
+
+        <input hidden="true" 
+        style="visibility: hidden;" 
+        name="shop_obj">
+
+        <input hidden="true" 
+        style="visibility: hidden;" 
+        name="store_obj">
+
+        <input hidden="true" 
+        style="visibility: hidden;" 
+        name="app_version" 
+        value="{{app_version}}">
+
+        <input hidden="true" 
+        style="visibility: hidden;" 
+        name="itm_menu" 
+        value="{{itm_menu}}">
+
+        {% block tbl_results %}
+        {% endblock %}
+      </div>
+    </div>
+  </div>
+</div>
+
+<script type="text/javascript" src="{% static 'js/jquery-ui-1.12.1/jquery-ui.min.js' %}"></script>
+
+<link href="{% static 'js/jquery-ui-1.12.1/jquery-ui.min.css' %}" rel="stylesheet">
+
+<script type="text/javascript" src="{% static 'js/jquery.form.min.js' %}"></script>
+
+<script type="text/javascript">
+  $(document).ready(function(){
+    $("div.menu a#{{itm_menu}}").parent().addClass("active");
+  });
+</script>
+
+{% block actions_js %}
+{% endblock %}

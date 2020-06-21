@@ -1,0 +1,83 @@
+{% load i18n tasksapp_tags notifsapp_tags %}
+
+<nav class="navbar">
+  <div class="container-fluid">
+	  <div class="navbar-header">
+      <a href="javascript:void(0);" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar-collapse" aria-expanded="false"></a>
+
+      <a href="javascript:void(0);" class="bars"></a>
+
+      <a class="navbar-brand" href="#" 
+      onclick="showMainPanel(); return false;">
+	      {% trans 'App name' %}
+    	</a>
+
+      <span
+      id="tutorialStep1"
+      data-toggle="popover-x" 
+      data-placement="right right-top"
+      data-target="#ftt-Step1">
+      </span>
+	  </div>
+
+	  <div class="collapse navbar-collapse" 
+	  id="navbar-collapse">
+	    <ul class="nav navbar-nav navbar-right">
+
+	      <!-- Call Search -->
+	      <li>
+	      	<a href="javascript:void(0);" 
+          class="js-search" data-close="true">
+	      		<i class="material-icons">
+	      			search
+	      		</i>
+	      	</a>
+          <span
+            id="tutorialStep2"
+            data-toggle="popover-x" 
+            data-placement="bottom"
+            data-target="#ftt-Step2">
+          </span>
+	      </li>
+
+        <!-- Notifications -->
+        {% if my_user.show_notifications %}
+          {% user_notifications %}
+          <span
+          id="tutorialStep3"
+          data-toggle="popover-x" 
+          data-placement="bottom"
+          data-target="#ftt-Step3">
+          </span>
+        {% endif %}
+
+        <!-- Tasks -->
+        {% if my_user.show_tasks %}
+          {% user_tasks %}
+          <span
+          id="tutorialStep4"
+          data-toggle="popover-x" 
+          data-placement="left left-top"
+          data-target="#ftt-Step4">
+          </span>
+        {% endif %}
+	        
+        <li class="pull-right">
+        	<a href="javascript:void(0);" 
+        	class="js-right-sidebar" 
+        	data-close="true">
+        		<i class="material-icons">
+        			more_vert
+        		</i>
+        	</a>
+          <span
+            id="tutorialStep5"
+            data-toggle="popover-x" 
+            data-placement="left left-top"
+            data-target="#ftt-Step5">
+          </span>
+        </li>
+      </ul>
+    </div>
+  </div>
+</nav>

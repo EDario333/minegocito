@@ -1,0 +1,612 @@
+{% extends 'base.html' %}
+
+{% load static i18n %}
+
+{% block title_suffix %}
+  {% trans 'Shops' %}
+{% endblock %}
+
+{% block content %}
+<!-- 
+<script type="text/javascript">
+  
+</script>
+ -->
+<div class="bg-light py-3">
+  <div class="container">
+    <div class="row">
+      <div class="col-md-12 mb-0">
+        <a href="/">{% trans 'Home' %}</a>
+        <span class="mx-2 mb-0">/</span> 
+        <strong class="text-black">
+          {% trans 'Shops' %}
+        </strong>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="site-section">
+  <div class="container">
+
+    <div class="row mb-5">
+      <div class="col-md-9 order-2">
+
+        <div class="row">
+          <div class="col-md-12 mb-5">
+            <div class="float-md-left mb-4">
+              <h2 class="text-black h5">
+                {% trans 'All Shops' %}
+              </h2>
+            </div>
+
+            {% if shops|length > 0 %}
+              <div class="d-flex">
+                <div class="dropdown mr-1 ml-md-auto">
+                  <button type="button" class="btn btn-secondary btn-sm dropdown-toggle" 
+                  id="dropdownMenuOffset" 
+                  data-toggle="dropdown" 
+                  aria-haspopup="true" 
+                  aria-expanded="false">
+                    {% trans 'Latest' %}
+                  </button>
+
+                  <div class="dropdown-menu" 
+                  aria-labelledby="dropdownMenuOffset">
+                    {% for cat in categories %}
+                      <a class="dropdown-item category-filter-latest" 
+                      href="#{{cat.category}}" id="lnkLatestCat{{cat.category.id}}">
+                        {{cat.category}}
+                      </a>
+                    {% endfor %}
+                  </div>
+                </div>
+
+                <div class="btn-group">
+                  <button type="button" 
+                  class="btn btn-secondary btn-sm dropdown-toggle" 
+                  id="dropdownMenuReference" 
+                  data-toggle="dropdown">
+                    {% trans 'Order by' %}
+                  </button>
+
+                  <div class="dropdown-menu" 
+                  aria-labelledby="dropdownMenuReference">
+  <!--                   
+                    <a class="dropdown-item" href="#">
+                      {% trans 'Relevance' %}
+                    </a>
+   -->
+                    <a class="dropdown-item ascending-ordering" 
+                    href="#a-z">
+                      {% trans 'Name ascending' %}
+                    </a>
+
+                    <a class="dropdown-item descending-ordering" 
+                    href="#z-a">
+                      {% trans 'Name descending' %}
+                    </a>
+  <!-- 
+                    <div class="dropdown-divider"></div>
+
+                    <a class="dropdown-item" href="#">
+                      {% trans 'Lower price' %}
+                    </a>
+
+                    <a class="dropdown-item" href="#">
+                      {% trans 'Higher price' %}
+                    </a>
+   -->
+                  </div>
+                </div>
+              </div>
+            {% endif %}
+          </div>
+        </div>
+
+        <div class="row mb-5" id="secShops">
+          {% if shops|length > 0 %}
+            {% for shop in shops %}
+              <div class="col-sm-6 col-lg-4 mb-4" 
+              data-aos="fade-up">
+                <div class="block-4 text-center border">
+                  <figure class="block-4-image">
+                    <a href="#" data-placement="bottom"
+                      data-toggle="tooltip" 
+                      title="{% trans 'Click to display details' %}" 
+                      data-original-title="{% trans 'Click to display details' %}"
+                      onclick="showDetails('{{shop.shop.id}}'); return false;">
+                      <img src="{{shop.shop.static_photo}}" 
+                      alt="{{shop.shop.name}}" class="img-fluid">
+                    </a>
+                  </figure>
+
+                  <div class="block-4-text p-4">
+                    <h3>
+                      <a href="#" data-placement="bottom"
+                      data-toggle="tooltip" 
+                      title="{% trans 'Click to display details' %}" 
+                      data-original-title="{% trans 'Click to display details' %}"
+                      onclick="showDetails('{{shop.shop.id}}'); return false;">
+                        {{shop.shop.name}}
+                      </a>
+                    </h3>
+
+                    <p class="mb-0">
+                      {% for cat in shop.categories %}
+                        {{cat}}&nbsp;
+                      {% endfor %}
+                    </p>
+
+                    <p class="text-primary font-weight-bold">
+                      {{shop.shop.city.display_name}}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            {% endfor %}
+          {% else %}
+            <div class="item">
+              <div class="text-center">
+                <a href="#" data-dismiss="modal" data-toggle="modal"
+                data-target="#dlgCreateUserAccount">
+                  <figure class="block-4-image">
+                    <img src="{% static 'imgs/most-visited-shops-2.jpg' %}" 
+                    alt="{% trans 'Create user account' %}" 
+                    class="img-fluid rounded">
+                  </figure>
+                </a>
+              </div>
+            </div>
+          {% endif %}
+        </div>
+
+        <!-- <div class="row" data-aos="fade-up">
+          <div class="col-md-12 text-center">
+            <div class="site-block-27">
+              <ul>
+                <li><a href="#">&lt;</a></li>
+                <li class="active"><span>1</span></li>
+                <li><a href="#">2</a></li>
+                <li><a href="#">3</a></li>
+                <li><a href="#">4</a></li>
+                <li><a href="#">5</a></li>
+                <li><a href="#">&gt;</a></li>
+              </ul>
+            </div>
+          </div>
+        </div> -->
+      </div>
+
+      <div class="col-md-3 order-1 mb-5 mb-md-0">
+        <div class="border p-4 rounded mb-4">
+          <h3 class="mb-3 h6 text-uppercase text-black d-block">
+            {% trans 'Categories' %}
+          </h3>
+
+          <ul class="list-unstyled mb-0">
+            {% for cat in categories %}
+              <li class="mb-1">
+                <a href="#{{cat.category.name}}" 
+                id="lnkCat{{cat.category.id}}" 
+                class="d-flex category-filter">
+                  <span>{{cat.category}}</span> 
+                  <span class="text-black ml-auto">
+                    {{cat.counter}}
+                  </span>
+                </a>
+              </li>
+            {% endfor %}
+          </ul>
+        </div>
+
+        <div class="border p-4 rounded mb-4">
+          <div class="mb-4">
+            <h3 onclick="$('#city_filter').focus()" 
+            style="cursor: default;" 
+            class="mb-3 h6 text-uppercase text-black d-block">
+              {% trans 'Filter by city' %}
+            </h3>
+
+            <input type="text" name="city_filter" id="city_filter" 
+            class="form-control pl-0 bg-white" />
+
+            <input name="city_obj" id="city_obj" hidden="" 
+            style="visibility: hidden;" />
+<!-- 
+            <div id="slider-range" class="border-primary"></div>
+
+            <input type="text" name="text" id="amount" 
+            class="form-control border-0 pl-0 bg-white" disabled="" />
+ -->
+          </div>
+
+          <div class="mb-4">
+            <h3 class="mb-3 h6 text-uppercase text-black d-block">
+              {% trans 'Brands' %}
+            </h3>
+
+            {% for brand in brands %}
+              <label for="chkBrand{{brand.brand.id}}" class="d-flex">
+                <input type="checkbox" id="chkBrand{{brand.brand.id}}" 
+                class="mr-2 mt-1 brand"> 
+
+                <span class="text-black">
+                  {{brand.brand.name}} ({{brand.counter}})
+                </span>
+              </label>
+            {% endfor %}
+          </div>
+
+          <div class="mb-4">
+            <h3 class="mb-3 h6 text-uppercase text-black d-block">
+              {% trans 'Products' %}
+            </h3>
+
+            {% for product in products %}
+              <label for="chkProduct{{product.product.id}}" class="d-flex">
+                <input type="checkbox" id="chkProduct{{product.product.id}}" 
+                class="mr-2 mt-1 product"> 
+
+                <span class="text-black">
+                  {{product.product.name}} ({{product.counter}})
+                </span>
+              </label>
+            {% endfor %}
+          </div>
+
+          <div class="mb-4">
+            <h3 class="mb-3 h6 text-uppercase text-black d-block">
+              {% trans 'Search type' %}
+            </h3>
+
+            <label for="chkSearchAnd" class="d-flex">
+              <input type="checkbox" id="chkSearchAnd" 
+              class="mr-2 mt-1" checked="" name="match-all"> 
+
+              <span class="text-black">
+                {% trans 'Match all' %}
+              </span>
+            </label>
+
+            <span>
+              {% trans 'The selected filters must be match all at the same time' %}
+            </span>
+          </div>
+
+          <input type="button" class="btn btn-primary btn-lg btn-block" 
+          value="{% trans 'Apply filters' %}" id="btnApplyFilters">
+<!-- 
+          <div class="mb-4">
+            <h3 class="mb-3 h6 text-uppercase text-black d-block">
+              Color
+            </h3>
+
+            <a href="#" class="d-flex color-item align-items-center">
+              <span class="bg-danger color d-inline-block rounded-circle mr-2"></span>
+              <span class="text-black">
+                Red (2,429)
+              </span>
+            </a>
+
+            <a href="#" class="d-flex color-item align-items-center">
+              <span class="bg-success color d-inline-block rounded-circle mr-2"></span> <span class="text-black">
+                Green (2,298)
+              </span>
+            </a>
+
+            <a href="#" class="d-flex color-item align-items-center">
+              <span class="bg-info color d-inline-block rounded-circle mr-2"></span>
+              <span class="text-black">
+                Blue (1,075)
+              </span>
+            </a>
+
+            <a href="#" class="d-flex color-item align-items-center">
+              <span class="bg-primary color d-inline-block rounded-circle mr-2"></span> <span class="text-black">
+                Purple (1,075)
+              </span>
+            </a>
+          </div>
+-->
+        </div>
+      </div>
+    </div>
+<!-- 
+    <div class="row">
+      <div class="col-md-12">
+        <div class="site-section site-blocks-2">
+            <div class="row justify-content-center text-center mb-5">
+              <div class="col-md-7 site-section-heading pt-4">
+                <h2>{% trans 'Categories' %}</h2>
+              </div>
+            </div>
+
+            <div class="row">
+              <div class="col-sm-6 col-md-6 col-lg-4 mb-4 mb-lg-0" data-aos="fade" data-aos-delay="">
+                <a class="block-2-item" href="#">
+                  <figure class="image">
+                    <img src="{% static 'shoppers-gh-pages/images/women.jpg' %}" alt="" 
+                    class="img-fluid">
+                  </figure>
+
+                  <div class="text">
+                    <span class="text-uppercase">
+                      Collections
+                    </span>
+
+                    <h3>Women</h3>
+                  </div>
+                </a>
+              </div>
+
+              <div class="col-sm-6 col-md-6 col-lg-4 mb-5 mb-lg-0" data-aos="fade" 
+              data-aos-delay="100">
+                <a class="block-2-item" href="#">
+                  <figure class="image">
+                    <img src="{% static 'shoppers-gh-pages/images/children.jpg' %}" alt="" 
+                    class="img-fluid">
+                  </figure>
+
+                  <div class="text">
+                    <span class="text-uppercase">
+                      Collections
+                    </span>
+
+                    <h3>Children</h3>
+                  </div>
+                </a>
+              </div>
+
+              <div class="col-sm-6 col-md-6 col-lg-4 mb-5 mb-lg-0" data-aos="fade" 
+              data-aos-delay="200">
+                <a class="block-2-item" href="#">
+                  <figure class="image">
+                    <img src="{% static 'shoppers-gh-pages/images/men.jpg' %}" alt="" class="img-fluid">
+                  </figure>
+
+                  <div class="text">
+                    <span class="text-uppercase">
+                      Collections
+                    </span>
+
+                    <h3>Men</h3>
+                  </div>
+                </a>
+              </div>
+            </div>
+        </div>
+      </div>
+    </div>
+ -->
+  </div>
+</div>
+
+<div id="divViewDetails"></div>
+{% endblock content %}
+
+{% block js_footer %}
+<script type="text/javascript" src="{% static 'js/jquery-ui-1.12.1/jquery-ui.min.js' %}"></script>
+
+<link href="{% static 'js/jquery-ui-1.12.1/jquery-ui.min.css' %}" rel="stylesheet">
+
+<script type="text/javascript">
+  $("ul.site-menu li").removeClass("active");
+  $("ul.site-menu li#navShops").addClass("active");
+
+  var msg_wait;
+
+  $.ajax({
+    method: "GET",
+    url: "/translator/translate/",
+    data: { msg: "Please wait"}
+  })
+  .done(function(result) {
+    msg_wait = result;
+  });
+
+  function showDetails(shop) {
+    show_msg_with_toastr("info", msg_wait);
+
+    $.ajax({
+      method: "GET",
+      url: "/shops/view-details",
+      data: { shop: shop }
+    })
+    .done(function(result) {
+      $("div#divViewDetails").html(result);
+      $(".confirm-delete").remove();
+      $(".edit").remove();
+      $(".modal-content").css("width", "600px");
+      $("#dlgViewDetails table.tbl-view-details tbody tr td:first-child").addClass("right-alignment");
+      $("#dlgViewDetails").modal();
+
+      $.ajax({
+        method: "GET",
+        url: "/shops/new-visit/",
+        data: { shop: shop }
+      })
+      .done(function(result) {
+      });
+
+      toastr.clear();
+    });
+    return false;
+  }
+
+  $(document).ready(function(){
+    $('[data-toggle="tooltip"]').tooltip();
+
+    $("#city_filter").autocomplete({
+      source: "{% url 'cities-autocomplete' %}",
+      minLength: 1,
+    });
+
+    $("#city_filter").change(function() {
+      show_msg_with_toastr("info", msg_wait);
+      $.ajax({
+        method: "GET",
+        url: "{% url 'search-city-by-name' %}",
+        data: {name: this.value}
+      })
+      .done(function(result) {
+        toastr.clear();
+        if (!result.exist) {
+          if ($("#city_filter").val().trim().length>0) {
+            $.ajax({
+              method: "GET",
+              url: "/translator/translate",
+              data: { msg: "Please enter a valid city"}
+            })
+            .done(function(result) {
+              show_msg_with_toastr("error", result);
+              $("#city_obj").val("");
+              $("#btnApplyFilters").attr("disabled", "");
+            })
+          }
+          else {
+            $("input[name='city_obj']").val(result.city);
+            $("#btnApplyFilters").removeAttr("disabled");
+          }
+        }
+        else {
+          $("input[name='city_obj']").val(result.city);
+          $("#btnApplyFilters").removeAttr("disabled");
+        }
+        // if (!result.exist)
+        //   $.ajax({
+        //     method: "GET",
+        //     url: "/translator/translate",
+        //     data: { msg: "Please enter a valid city"}
+        //   })
+        //   .done(function(result) {
+        //     show_msg_with_toastr("error", result);
+        //     $("#city_obj").val("");
+        //     $("#btnApplyFilters").attr("disabled", "");
+        //   });
+        // else {
+        //   $("input[name='city_obj']").val(result.city);
+        // }
+      });
+    });
+
+    $("#btnApplyFilters").click(function() {
+      show_msg_with_toastr("info", msg_wait);
+      $(this).attr("disabled", "");
+
+      city=$("#city_obj").val();
+      if (city.trim().length<1)
+        city=-1;
+
+      brands_dummy=$("input.brand");
+      brands=[];
+      tope=brands_dummy.length;
+      for (x=0;x<tope;x++)
+        if (brands_dummy[x].checked)
+          brands.push(brands_dummy[x].id.substr("chkBrand".length));
+
+      products_dummy=$("input.product");
+      products=[];
+      tope=products_dummy.length;
+      for (x=0;x<tope;x++)
+        if (products_dummy[x].checked)
+          products.push(products_dummy[x].id.substr("chkProduct".length));
+
+      // $("#secShops").load("/shops/apply-filters-shops-home/?brands="+brands+"&products="+products+"&city="+city, function(result) {
+      //   alert(result);
+      //   if (result.status=="error")
+      //     show_msg_with_toastr("error", result.msg);
+      //   else
+      //     toastr.clear();
+      // });
+
+      match_all=$("#chkSearchAnd")[0].checked;
+
+      $.ajax({
+        method: "GET",
+        url: "/shops/apply-filters-shops-home/",
+        data: {city: city, brands: brands, products: products, match_all: match_all}
+      })
+      .done(function(result) {
+        toastr.clear();
+        if (result.status=="error")
+          show_msg_with_toastr("error", result.msg);
+        else
+          $("#secShops").html(result);
+        $("#btnApplyFilters").removeAttr("disabled");
+      });
+      return false;
+    });
+
+    $("a.category-filter").click(function() {
+      show_msg_with_toastr("info", msg_wait);
+      cat=$(this)[0].id.substr("lnkCat".length);
+
+      $.ajax({
+        method: "GET",
+        url: "/shops/apply-filters-shops-home/",
+        data: {category: cat}
+      })
+      .done(function(result) {
+        toastr.clear();
+        if (result.status=="error")
+          show_msg_with_toastr("error", result.msg);
+        else
+          $("#secShops").html(result);
+      });
+    });
+
+    $("a.category-filter-latest").click(function() {
+      show_msg_with_toastr("info", msg_wait);
+      cat=$(this)[0].id.substr("lnkLatestCat".length);
+
+      $.ajax({
+        method: "GET",
+        url: "/shops/apply-filters-shops-home/",
+        data: {category: cat, news_first: true}
+      })
+      .done(function(result) {
+        toastr.clear();
+        if (result.status=="error")
+          show_msg_with_toastr("error", result.msg);
+        else
+          $("#secShops").html(result);
+      });
+    });
+
+    $("a.ascending-ordering").click(function() {
+      show_msg_with_toastr("info", msg_wait);
+
+      $.ajax({
+        method: "GET",
+        url: "/shops/apply-filters-shops-home/",
+        data: {ordering: "ascending"}
+      })
+      .done(function(result) {
+        toastr.clear();
+        if (result.status=="error")
+          show_msg_with_toastr("error", result.msg);
+        else
+          $("#secShops").html(result);
+      });
+    });
+
+    $("a.descending-ordering").click(function() {
+      show_msg_with_toastr("info", msg_wait);
+
+      $.ajax({
+        method: "GET",
+        url: "/shops/apply-filters-shops-home/",
+        data: {ordering: "descending"}
+      })
+      .done(function(result) {
+        toastr.clear();
+        if (result.status=="error")
+          show_msg_with_toastr("error", result.msg);
+        else
+          $("#secShops").html(result);
+      });
+    });
+  });
+</script>
+{% endblock %}

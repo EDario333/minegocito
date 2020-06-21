@@ -1,0 +1,467 @@
+{% load static i18n %}
+
+{% if msg %}
+  <script type="text/javascript">
+    $(document).ready(function(){
+      show_msg_with_toastr("{{level}}", "{{msg}}");
+      if ($("section.content form input")[0] != undefined)
+        $("section.content form input")[0].focus();
+    });
+  </script>
+{% endif %}
+
+<script type="text/javascript">
+  var msg_wait;
+  var missed_query;
+
+  $.ajax({
+    method: "GET",
+    url: "/translator/many/",
+    data: { msgs: "Please wait,Please enter at least one search criteria"}
+  })
+  .done(function(result) {
+    result = result.split(',');
+    msg_wait = result[0];
+    missed_query = result[1];
+  });
+
+  function view_all(url, action) {
+    show_msg_with_toastr("info", msg_wait);
+    $("section.content form button[type='submit']").attr("disabled", "true");
+    url = url + "?itm_menu={{itm_menu}}&user={{user}}";
+
+    if (action.toUpperCase() == 'EDIT')
+      url = url + "&edit=true";
+    else if (action.toUpperCase() == 'DELETE')
+      url = url + "&delete=true";
+
+    $.ajax({
+      method: "GET",
+      url: url
+    })
+    .done(function(result) {
+      $("section.content").html(result);
+      //toastr.clear();
+      return false;
+    });
+  }
+</script>
+
+<style type="text/css">
+  .btn {
+    width: 120px;
+    margin: 0 0 10px 0;
+  }
+</style>
+
+<div class="container-fluid">
+  <!--
+  <div class="block-header" style="margin: 0 0 15px -15px">
+    <h2>
+      {{form.title|upper}}
+  	</h2>
+  </div>
+  -->
+
+  <div class="row clearfix">
+    <div class="card">
+      <div class="header">
+        <h2>
+          {{form.title|upper}}
+        </h2>
+      </div>
+
+      <div class="body">
+        <p>
+          {% block msg_pre_form %}
+          {% endblock %}
+        </p>
+
+        <form action="{{form.action}}" method="post"
+        onreset="$('section.content form input')[0].focus();">
+          {{form.as_table}}
+          {% csrf_token %}
+
+          <a id="actNewContactPerson" href="#">
+            <i class="material-icons">person_add</i>
+            {% trans 'Add contact person' %}
+          </a>
+
+          <div id="secContactPerson" class="row"></div>
+
+          <!-- <a href="#" 
+          id="actRemoveContactPersons" hidden="true" 
+          style="visibility: hidden;">
+            <i class="material-icons">
+              delete
+            </i>
+            {% trans 'Remove all' %}  
+          </a> -->
+
+          <div id="secContactPersons"
+          style="margin: 0 0 0 5px" 
+          class="table-responsive row">
+            {% include 'providers/contact-persons.html' %}
+          </div>
+
+          <!-- <a href="#" 
+          id="actRemoveContactPersons">
+            <i class="material-icons">
+              delete
+            </i>
+            {% trans 'Remove all' %}  
+          </a> -->
+
+          {% if 'AGREGAR' not in form.title|upper %}
+            <p style="margin: 10px 0 0 0">
+              {% if 'EDITAR' in form.title|upper %}
+                <a href="#" class="act-list-all"
+                onclick="view_all('/providers/list-all', 'edit'); return false;" >
+                  {% trans 'View all' %}
+                </a>
+              {% elif 'ELIMINAR' in form.title|upper %}
+                <a href="#" class="act-list-all"
+                onclick="view_all('/providers/list-all', 'delete'); return false;" >
+                  {% trans 'View all' %}
+                </a>
+              {% else %}
+                <a href="#" class="act-list-all"
+                onclick="view_all('/providers/list-all', 'search'); return false;" >
+                  {% trans 'View all' %}
+                </a>
+              {% endif %}
+            </p>
+
+            <!--
+            <p>
+              <a href="#" 
+              class="act-search-config">
+                {% trans 'Search config' %}
+              </a>
+            </p>
+            -->
+          {% endif %}
+
+          <input hidden="true" style="visibility: hidden;" 
+          name="user" value="{{user}}" id="txtEmailHid" />
+
+          <input hidden="true" style="visibility: hidden;" 
+          type="text" name="city_obj" id="txtCityHid" />
+
+          <input hidden="true" style="visibility: hidden;" 
+          type="text" name="user_obj" id="txtUserHid" />
+
+          <!-- <input hidden="true" 
+          style="visibility: hidden;" 
+          type="text" name="shop_obj" id="txtShopHid"> -->
+
+          <input hidden="true" style="visibility: hidden;" 
+          type="text" name="app_version" value="{{app_version}}" />
+
+          <input hidden="true" style="visibility: hidden;" 
+          type="text" name="itm_menu" value="{{itm_menu}}" />
+          <br />
+
+          <button class="btn btn-primary waves-effect"
+          type="submit">
+            <i class="material-icons">
+              {{form.icon_btn_submit}}
+            </i>
+            {{form.btn_label}}
+          </button>
+
+          <button class="btn btn-warning waves-effect"
+          type="reset">
+            <i class="material-icons">clear_all</i>
+            {% trans 'Clean all' %}
+          </button>
+
+          <button class="btn btn-default waves-effect act-cancel-form" type="button">
+            <i class="material-icons">cancel</i>
+            {% trans 'Cancel' %}
+          </button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script type="text/javascript" src="{% static 'js/jquery-ui-1.12.1/jquery-ui.min.js' %}"></script>
+
+<link href="{% static 'js/jquery-ui-1.12.1/jquery-ui.min.css' %}" rel="stylesheet">
+
+<script type="text/javascript" src="{% static 'js/jquery.form.min.js' %}"></script>
+
+<script type="text/javascript" src="{% static 'js/jquery-ui-1.12.1/datepicker-es.js' %}"></script>
+
+<script type="text/javascript">
+  $(document).ready(function(){
+    $("#secContactPersons").hide();
+    //$("#actRemoveContactPersons").hide();
+
+    var options = { 
+      target:        'section.content',
+      beforeSubmit:  showRequest,
+      success:       showResponse 
+    }; 
+
+    $(".act-cancel-form").click(function() {
+      showMainPanel();
+    });
+
+    function prepareContactsPersonDataForSubmit(addTo) {
+      fns=$("#tblContactPersons tbody tr td.first-name");
+      mns=$("#tblContactPersons tbody tr td.middle-name");
+      lns=$("#tblContactPersons tbody tr td.last-name");
+      mlns=$("#tblContactPersons tbody tr td.mothers-last-name");
+      genders=$("#tblContactPersons tbody tr td span.gender");
+      dobs=$("#tblContactPersons tbody tr td span.dob");
+      emails=$("#tblContactPersons tbody tr td span.email");
+      cities=$("#tblContactPersons tbody tr td span.city");
+      addrs1=$("#tblContactPersons tbody tr td span.addr1");
+      addrs2=$("#tblContactPersons tbody tr td span.addr2");
+      cps=$("#tblContactPersons tbody tr td span.cell_phone");
+      hps=$("#tblContactPersons tbody tr td span.home_phone");
+      ops=$("#tblContactPersons tbody tr td span.other_phone");
+
+      tope_p = fns.length;
+      cps_objs = [];
+      //brands_vals = [];
+
+      for (x = 0; x < tope_p; x++) {
+        //product = products[x].innerHTML;
+        cp_obj = {
+          //"id": product,
+          "first-name": fns[x].innerHTML,
+          "middle-name": mns[x].innerHTML,
+          "last-name": lns[x].innerHTML,
+          "mothers-last-name": mlns[x].innerHTML,
+          "gender": genders[x].innerHTML,
+          "dob": dobs[x].innerHTML,
+          "email": emails[x].innerHTML,
+          "city": cities[x].innerHTML,
+          "addr1": addrs1[x].innerHTML,
+          "addr2": addrs2[x].innerHTML,
+          "cp": cps[x].innerHTML,
+          "hp": hps[x].innerHTML,
+          "op": ops[x].innerHTML,
+        };
+        //alert(product_obj);
+        cps_objs.push(cp_obj);
+      }
+
+      cps_objs = {
+        "name": "contact_persons",
+        "type": "text", 
+        "required": true,
+        "value": JSON.stringify(cps_objs)
+      };
+
+      addTo.push(cps_objs);
+      //$("section.content form").ajaxSubmit(options);
+      //var queryString = $.param(formData); 
+      /*console.log(queryString);
+      console.log(formData);*/
+      //return false;
+    }
+
+    function showRequest(formData, jqForm, options) { 
+      show_msg_with_toastr("info", msg_wait);
+      $("section.content form button[type='submit']").attr("disabled", "true");
+
+      module_name = $(".container-fluid .card .header h2")[0].innerHTML;
+      module_name = module_name.toUpperCase();
+     
+      if (module_name.includes('AGREGAR')) {
+        /*
+        city = $("input[name='city_obj']").val().trim();
+        uas = $("input[name='user_obj']").val().trim();
+
+        if (city.length < 1 || uas.length < 1) {
+          if (city.length < 1)
+            $.ajax({
+              method: "GET",
+              url: "/translator/translate",
+              data: { msg: "Please enter a valid city"}
+            })
+            .done(function(result) {
+              show_msg_with_toastr("error", result);
+              $("input[name='city_obj']").val("");
+              $("section.content form button[type='submit']").attr("disabled", "true");
+            });
+
+          if (uas.length < 1)
+            $.ajax({
+              method: "GET",
+              url: "/translator/translate",
+              data: {msg: "Please enter a valid user"}
+            })
+            .done(function(result) {
+              show_msg_with_toastr("error", result);
+              $("input[name='user_obj']").val("");
+              $("section.content form button[type='submit']").attr("disabled", "true");
+            });
+
+          toastr.clear();
+          return false;
+        }
+        */
+        prepareContactsPersonDataForSubmit(formData);
+      }
+      //else if (module_name.includes('BUSCAR')) {
+      else {
+        prepareContactsPersonDataForSubmit(formData);
+
+        inputs = $('section.content form input.validate');
+        tope = inputs.length;
+        x = -1;
+        disable_btn = false;
+        counter_failed = 0;
+
+        while (++x < tope)
+          if (!validField(inputs[x]))
+            counter_failed++;
+
+        if (counter_failed == tope)
+          disable_btn = true;
+
+        toastr.clear();
+
+        if (disable_btn) {
+          //$("section.content form button[type='submit']").attr("disabled", "true");
+          $("section.content form button[type='submit']").removeAttr("disabled");
+          show_msg_with_toastr("error", missed_query);
+        }
+        else {
+          //$("section.content form button[type='submit']").removeAttr("disabled");
+        }
+
+        return !disable_btn;
+      }
+
+      toastr.clear();
+      return true; 
+    }
+ 
+    function showResponse(responseText, statusText, xhr, $form)  { 
+      $(".page-loader-wrapper").remove();
+    }
+/*
+    $("#actNewContactPerson").click(function() {
+      show_msg_with_toastr("info", msg_wait);
+      $("#secContactPerson").load("/providers/new-contact-person/", 
+        function() { 
+          toastr.clear();
+          $("#secContactPerson #id_last_name").focus();
+        }
+      );
+      return false;
+    });
+*/
+    $("input[name='city']").autocomplete({
+      source: "{% url 'cities-autocomplete' %}",
+      minLength: 1,
+    });
+
+    $("input[name='city']").change(function(){
+      show_msg_with_toastr("info", msg_wait);
+
+      /*if (this.value=='') {
+        $("input[name='city_obj']").val('');
+        $("section.content form button[type='submit']").removeAttr("disabled");
+        toastr.clear();
+        return true;
+      }*/
+
+      $.ajax({
+        method: "GET",
+        url: "{% url 'search-city-by-name' %}",
+        data: { name: this.value}
+      })
+      .done(function(result) {
+        toastr.clear();
+        if (!result['exist'])
+          $.ajax({
+            method: "GET",
+            url: "/translator/translate",
+            data: { msg: "Please enter a valid city"}
+          })
+          .done(function(result) {
+            show_msg_with_toastr("error", result);
+            $("input[name='city_obj']").val("");
+            $("section.content form button[type='submit']").attr("disabled", "true");
+          });
+        else {
+          $("input[name='city_obj']").val(result["city"]);
+          $("section.content form button[type='submit']").removeAttr("disabled");
+        }
+      });
+    });
+/*
+    $("input[name='admin']").change(function(){
+      show_msg_with_toastr("info", msg_wait);
+      email = this.value.substring(this.value.indexOf("[email=") + "[email=".length, this.value.indexOf("]"));
+      $.ajax({
+        method: "GET",
+        url: "{% url 'search-user-by-email' %}",
+        data: { email: email}
+      })
+      .done(function(result) {
+        toastr.clear();
+        if (!result['exist'])
+          $.ajax({
+            method: "GET",
+            url: "/translator/translate",
+            data: { msg: "Please enter a valid user"}
+          })
+          .done(function(result) {
+            show_msg_with_toastr("error", result);
+            $("input[name='user_obj']").val("");
+            $("section.content form button[type='submit']").attr("disabled", "true");
+          });
+        else {
+          $("input[name='user_obj']").val(result["user"]);
+          $("section.content form button[type='submit']").removeAttr("disabled");
+        }
+      });
+    });
+
+    $("input[name='shop']").change(function(){
+      show_msg_with_toastr("info", msg_wait);
+      shopname = this.value.substring(0, this.value.indexOf(" ["));
+      $.ajax({
+        method: "GET",
+        url: "/shops/search/by-name",
+        data: { shopname: shopname}
+      })
+      .done(function(result) {
+        toastr.clear();
+        if (result['exist'] != undefined && 
+          !result['exist'])
+          $.ajax({
+            method: "GET",
+            url: "/translator/translate",
+            data: { msg: "Please enter a valid shop"}
+          })
+          .done(function(result) {
+            show_msg_with_toastr("error", result);
+            $("input[name='shop_obj']").val("");
+            $("section.content form button[type='submit']").attr("disabled", "true");
+          });
+        else if (result['exist'] == undefined) {
+          show_msg_with_toastr(result.status, result.msg);
+        }
+        else {
+          $("input[name='shop_obj']").val(result.shop);
+          $("section.content form button[type='submit']").removeAttr("disabled");
+        }
+      });
+    });
+*/
+    $("section.content form").ajaxForm(options);
+    $("div.menu a#{{itm_menu}}").parent().addClass("active");
+  });
+</script>
+
+{% block actions_js %}
+{% endblock %}

@@ -1,0 +1,398 @@
+{% load static i18n %}
+
+<!-- Jquery DataTable Plugin Js -->
+<script src="{% static 'js/jquery-datatable/jquery.dataTables.js' %}"></script>
+<script src="{% static 'js/jquery-datatable/skin/bootstrap/js/dataTables.bootstrap.js' %}"></script>
+<script src="{% static 'js/jquery-datatable/extensions/export/dataTables.buttons.min.js' %}"></script>
+<script src="{% static 'js/jquery-datatable/extensions/export/buttons.flash.min.js' %}"></script>
+<script src="{% static 'js/jquery-datatable/extensions/export/jszip.min.js' %}"></script>
+<script src="{% static 'js/jquery-datatable/extensions/export/pdfmake.min.js' %}"></script>
+<script src="{% static 'js/jquery-datatable/extensions/export/vfs_fonts.js' %}"></script>
+<script src="{% static 'js/jquery-datatable/extensions/export/buttons.html5.min.js' %}"></script>
+<script src="{% static 'js/jquery-datatable/extensions/export/buttons.print.min.js' %}"></script>
+
+<!-- JQuery DataTable Css -->
+<link href="{% static 'js/jquery-datatable/skin/bootstrap/css/dataTables.bootstrap.css' %}" 
+rel="stylesheet">
+
+<style type="text/css">
+  table.dataTable thead tr th,
+  table.dataTable tbody tr td:last-child  {
+    text-align: center;
+  }
+
+  table.dataTable tbody tr td {
+    vertical-align: middle;
+  }
+
+  table.dataTable tbody tr td:nth-child(n+2):nth-child(-n+4) {
+    cursor: pointer;
+  }
+
+  .centered-text-alignment {
+    text-align: center;
+  }
+
+  .already-read-it {
+    color: #17d417;
+  }
+
+  .not-read-it {
+    color: #fd7f7e; 
+  }
+</style>
+
+<script src="{% static 'js/dashboard/search-results/before-load-html.js' %}"></script>
+
+<script type="text/javascript">
+  var msg_wait;
+  var msg_continue1;
+  var msg_continue2;
+
+  $.ajax({
+    method: "GET",
+    url: "/translator/many/",
+    data: {msgs: "Please wait,This operation cannot be undone,Prompt are you sure to continue"}
+  })
+  .done(function(result) {
+    result=result.split(",");
+    msg_wait=result[0];
+    msg_continue1=result[1];
+    msg_continue2=result[2];
+  });
+
+  function markAsUnRead(dom_element, notif) {
+    show_msg_with_toastr("info", msg_wait);
+    $.ajax({
+      method: "GET",
+      url: "/notifications/mark-as-unread/",
+      data: { notif: notif }
+    })
+    .done(function(result) {
+      if (result.status != "success") {
+        toastr.clear();
+        show_msg_with_toastr(result.status, result.msg);
+      }
+      else {
+        $(dom_element).hide();
+        $("#actRead"+notif).show();
+        $("#iconNotifRead"+notif).removeClass("already-read-it");
+        $("#iconNotifRead"+notif).addClass("not-read-it");
+        $("#iconNotifRead"+notif).html("close");
+        toastr.clear();
+      }
+    });
+  }
+
+  function _deleteNotification(notification, invoker) {
+    show_msg_with_toastr("info", msg_wait);
+
+    $.ajax({
+      method: "GET",
+      url: "/notifications/remove-notification-completely/",
+      data: {notification: notification}
+    })
+    .done(function(result) {
+      toastr.clear();
+      show_msg_with_toastr(result.status, result.msg);
+      if (result.status=="success") {
+        $(invoker).parent().parent().hide();
+        $("#chkNotification"+notification).remove();
+        $(invoker).parent().parent().remove();
+        rows=$("#tblResults tbody tr");
+        if (rows.length<1)
+          $("#lnkHome").click();
+      }
+    });
+  }
+
+  function deleteNotification(notification, invoker, requestConfirm) {
+    if (requestConfirm) {
+      bootbox.confirm({
+        title: msg_continue1,
+        message: msg_continue2,
+        backdrop: true,
+        buttons: {
+          cancel: {
+            label: '<i class="material-icons">close</i> No'
+          },
+          confirm: {
+            label: '<i class="material-icons">check</i> Sí'
+          }
+        },
+        callback: function(result) {
+          if (result) {
+            _deleteNotification(notification, invoker);
+          }
+        }
+      });
+    }
+    else
+      _deleteNotification(notification, invoker);
+  }
+</script>
+
+<div class="container-fluid">
+  <div class="row clearfix">
+    <div class="card">
+      <div class="header">
+        <h2>{% trans 'Notifications' %}</h2>
+      </div>
+
+      <div class="body">
+        <div class="table-responsive">
+          <table class="table table-bordered table-striped table-hover dataTable js-exportable" 
+          id="tblResults">
+            <thead>
+              <tr style="text-align: center;">
+                <th>
+                  &nbsp;&nbsp;&nbsp;&nbsp;
+                  <input type="checkbox" 
+                  class="select-all-notifications" 
+                  id="chkSelectAllNotifications" />
+
+                  <label for="chkSelectAllNotifications"></label>
+                </th>
+
+                <th>{% trans 'Date' %}</th>
+                <th>{% trans 'Hour' %}</th>
+                <th>{% trans 'Notification' %}</th>
+                <th>{% trans 'Already read it female' %}</th>
+                <th>{% trans 'Options' %}</th>
+              </tr>
+            </thead>
+
+            <tbody>
+              {% for notification in notifications %}
+                <tr id="notification{{notification.id}}">
+                  <td class="centered-text-alignment">
+                    <input type="checkbox" 
+                    class="select-notification" 
+                    id="chkNotification{{notification.id}}" 
+                    name="selectNotification{{notification.id}}" />
+
+                    <label for="chkNotification{{notification.id}}"></label>
+                  </td>
+
+                  <td class="centered-text-alignment">
+                    {{notification.created_when_fmt_mx}}
+                  </td>
+
+                  <td class="centered-text-alignment">
+                    {{notification.created_at}}
+                  </td>
+
+                  <td>
+                    {{notification.notification.name}}
+                  </td>
+
+                  <td class="centered-text-alignment">
+                    {% if notification.done %}
+                      <i id="iconNotifRead{{notification.id}}" 
+                      class="material-icons already-read-it">check</i>
+                    {% else %}
+                      <i id="iconNotifRead{{notification.id}}" 
+                      class="material-icons not-read-it">close</i>
+                    {% endif %}
+                  </td>
+
+                  <td>
+                    {% if not notification.done %}
+                      <span class="default-behaviour">
+                        <a href="#" data-placement="bottom"
+                        data-toggle="tooltip" 
+                        id="actRead{{notification.id}}" 
+                        onclick="markAsRead(this, '{{notification.id}}', 'main page'); return false;" 
+                        title="{% trans 'Mark as read' %}" 
+                        data-original-title="{% trans 'Mark as read' %}"><i class="material-icons">done_all</i></a>
+
+                        <a href="#" data-placement="bottom"
+                        data-toggle="tooltip" class="actUnRead" 
+                        id="actUnRead{{notification.id}}" 
+                        hidden="" style="visibility: hidden;" 
+                        onclick="markAsUnRead(this, '{{notification.id}}'); return false;" 
+                        title="{% trans 'Mark as unread' %}" 
+                        data-original-title="{% trans 'Mark as unread' %}"><i class="material-icons">undo</i></a>
+                      </span>
+                    {% else %}
+                      <span class="other-behaviour">
+                        <a href="#" data-placement="bottom"
+                        data-toggle="tooltip" 
+                        id="actUnRead{{notification.id}}" 
+                        onclick="markAsUnRead(this, '{{notification.id}}'); return false;" 
+                        title="{% trans 'Mark as unread' %}" 
+                        data-original-title="{% trans 'Mark as unread' %}"><i class="material-icons">undo</i></a>
+
+                        <a href="#" data-placement="bottom"
+                        data-toggle="tooltip" class="actRead" 
+                        hidden="" style="visibility: hidden;" 
+                        id="actRead{{notification.id}}" 
+                        onclick="markAsRead(this, '{{notification.id}}', 'main page'); return false;" 
+                        title="{% trans 'Mark as read' %}" 
+                        data-original-title="{% trans 'Mark as read' %}"><i class="material-icons">done_all</i></a>
+                      </span>
+                    {% endif %}
+
+                    <a href="#" data-placement="bottom"
+                    data-toggle="tooltip" class="actUnRead" 
+                    id="actUnRead{{notification.id}}" 
+                    hidden="" style="visibility: hidden;" 
+                    onclick="markAsUnRead(this, '{{notification.id}}')" 
+                    title="{% trans 'Mark as unread' %}" 
+                    data-original-title="{% trans 'Mark as unread' %}"><i class="material-icons">undo</i></a>
+
+                    <a href="#" data-placement="bottom"
+                    data-toggle="tooltip" 
+                    onclick="deleteNotification('{{notification.id}}', this, true);" 
+                    title="{% trans 'Delete' %}" 
+                    data-original-title="{% trans 'Delete' %}"><i class="material-icons">delete</i></a>
+                  </td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+
+        <button type="button" id="btnMarkAsReadSelected" 
+        hidden="" style="visibility: hidden; width: 181px" 
+        class="btn btn-primary waves-effect">
+          <i class="material-icons">done_all</i>
+          {% trans 'Mark as read the selections' %}
+        </button>
+
+        <button type="button" id="btnMarkAsUnReadSelected" 
+        hidden="" style="visibility: hidden; width: 181px" 
+        class="btn btn-primary waves-effect">
+          <i class="material-icons">reply_all</i>
+          {% trans 'Mark as unread the selections' %}
+        </button>
+
+        <button type="button" id="btnDeleteSelected" 
+        hidden="" style="visibility: hidden;" 
+        class="btn btn-warning waves-effect">
+          <i class="material-icons">delete</i>
+          {% trans 'Delete selections' %}
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="{% static 'js/dashboard/search-results/after-load-html.js' %}"></script>
+
+<script type="text/javascript">
+  $("#tblResults_info").remove();
+  $("#btnDeleteSelected").hide();
+  $("#btnDeleteSelected").removeAttr("hidden");
+  $("#btnDeleteSelected").css("visibility", "visible");
+  $("#btnMarkAsReadSelected").hide();
+  $("#btnMarkAsReadSelected").removeAttr("hidden");
+  $("#btnMarkAsReadSelected").css("visibility", "visible");
+  $("#btnMarkAsUnReadSelected").hide();
+  $("#btnMarkAsUnReadSelected").removeAttr("hidden");
+  $("#btnMarkAsUnReadSelected").css("visibility", "visible");
+  $(".actUnRead").hide();
+  $(".actUnRead").removeAttr("hidden");
+  $(".actUnRead").css("visibility", "visible");
+  $(".actRead").hide();
+  $(".actRead").removeAttr("hidden");
+  $(".actRead").css("visibility", "visible");
+  var counter_selected=0;
+
+  $("#chkSelectAllNotifications").click(function() {
+    chks=$(".select-notification");
+    tope=chks.length;
+    for (x=0;x<tope;x++)
+      if ((this.checked && !chks[x].checked) ||
+          (!this.checked && chks[x].checked))
+        $(chks[x]).click();
+  });
+
+  $(".select-notification").change(function(event) {
+  //$("table#tblResults tbody tr").click(function() {
+    if (this.checked)
+      counter_selected++;
+    else {
+      counter_selected--;
+      $("#chkSelectAllNotifications").removeAttr("checked");
+    }
+
+    tope = $(".select-notification").length;
+
+    if (counter_selected >= tope) {
+      counter_selected = tope;
+      $("#chkSelectAllNotifications")[0].checked=true;
+      $("#btnDeleteSelected").show();
+      $("#btnMarkAsReadSelected").show();
+      $("#btnMarkAsUnReadSelected").show();
+    }
+    else if (counter_selected > 0) {
+      $("#btnDeleteSelected").show();
+      $("#btnMarkAsReadSelected").show();
+      $("#btnMarkAsUnReadSelected").show();
+    }
+    else {
+      $("#btnDeleteSelected").hide();
+      $("#btnMarkAsReadSelected").hide();
+      $("#btnMarkAsUnReadSelected").hide();
+      $("#chkSelectAllNotifications").removeAttr("checked");
+      counter_selected = 0;
+    }
+  });
+
+  $("table#tblResults tbody tr td:nth-child(n+2):nth-child(-n+4)").click(function() {
+    // if (event.originalEvent.originalTarget.nodeName=="TD") {
+    notification=$(this).parent()[0].id.substr("notification".length);
+    $("#chkNotification"+notification).click();
+    // }
+    // else
+    //   event.preventDefault();
+  });
+
+  $("#btnDeleteSelected").click(function() {
+    bootbox.confirm({
+      title: msg_continue1,
+      message: msg_continue2,
+      backdrop: true,
+      buttons: {
+        cancel: {
+          label: '<i class="material-icons">close</i> No'
+        },
+        confirm: {
+          label: '<i class="material-icons">check</i> Sí'
+        }
+      },
+      callback: function(result) {
+        if (result) {
+          chks=$(".select-notification:checked");
+          tope=chks.length;
+          for (x=0;x<tope;x++)
+            deleteNotification(chks[x].id.substr("chkNotification".length), chks[x], false);
+          $("#btnDeleteSelected").hide();
+          $("#btnMarkAsReadSelected").hide();
+          $("#btnMarkAsUnReadSelected").hide();
+        }
+      }
+    });
+  });
+
+  $("#btnMarkAsReadSelected").click(function() {
+    chks=$(".select-notification:checked");
+    tope=chks.length;
+    for (x=0;x<tope;x++) {
+      notif=chks[x].id.substr("chkNotification".length);
+      markAsRead($("#actRead"+notif),notif,'main page');
+    }
+    // $("#btnMarkAsReadSelected").hide();
+  });
+
+  $("#btnMarkAsUnReadSelected").click(function() {
+    chks=$(".select-notification:checked");
+    tope=chks.length;
+    for (x=0;x<tope;x++) {
+      notif=chks[x].id.substr("chkNotification".length);
+      markAsUnRead($("#actUnRead"+notif),notif);
+    }
+    // $("#btnMarkAsUnReadSelected").hide();
+  });
+</script>

@@ -1,0 +1,235 @@
+{% load i18n static %}
+
+<div class="bg-gradient-primary modal fade" 
+id="dlgAddProduct" tabindex="-1" role="dialog" 
+aria-labelledby="lblHeader" aria-hidden="true"
+onfocus='$("#dlgAddProduct #txtProduct").focus();'>
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="lblHeader">
+          {% trans 'Add product to purchase' %}
+        </h5>
+
+        <button class="close" type="button" 
+        data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">×</span>
+        </button>
+      </div>
+      <hr />
+
+      <div class="modal-body">
+				<label for="txtProduct">
+					*&nbsp;{% trans 'Product' %}:
+				</label>
+
+				<input name="product_obj" id="product_obj" 
+        hidden="" style="visibility: hidden;" />
+
+				<input name="product" 
+				next-target="txtBrand" 
+				class="form-control" type="text" 
+				style="margin: 0 0 10px 0" 
+				id="txtProduct" />
+
+				<label for="txtBrand">
+					*&nbsp;{% trans 'Brand' %}:
+				</label>
+
+				<input name="brand_obj" id="brand_obj"
+        hidden="" style="visibility: hidden;" />
+
+				<input name="brand" 
+				next-target="txtPurchasePrice"
+				class="form-control" 
+				style="margin: 0 0 10px 0" 
+				id="txtBrand" />
+
+				<label for="txtPurchasePrice">
+					*&nbsp;{% trans 'Purchase price' %}:
+				</label>
+
+				<input name="purchase_price" 
+				class="form-control" value="0.01" 
+				next-target="txtQuantity"
+				type="number" min="0.01" step="0.01" 
+				style="margin: 0 0 10px 0" 
+				id="txtPurchasePrice" />
+
+				<label for="txtQuantity">
+					*&nbsp;{% trans 'Quantity' %}:
+				</label>
+
+				<input name="quantity" 
+				class="form-control" value="1" 
+				type="number" min="1" step="1" 
+				next-target="txtDescription"
+				style="margin: 0 0 10px 0" 
+				id="txtQuantity" />
+
+				<label for="txtDescription">
+					{% trans 'Description' %}:
+				</label>
+
+				<textarea name="description" 
+				class="form-control" cols="50" 
+				style="margin: 0 0 10px 0" 
+				id="txtDescription"></textarea>
+
+				<label for="txtNotes">
+					{% trans 'Notes or comments' %}:
+				</label>
+
+				<textarea name="notes" 
+				class="form-control" 
+				style="margin: 0 0 10px 0" 
+				id="txtNotes"></textarea>
+      </div>
+
+      <div class="modal-footer">
+        <button type="button" id="btnAccept" 
+        class="btn btn-primary waves-effect">
+          {% trans 'Accept' %}
+        </button>
+
+        <button class="btn btn-secondary waves-effect" 
+        type="button" data-dismiss="modal">
+          {% trans 'Cancel' %}
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script type="text/javascript" src="{% static 'js/jquery-ui-1.12.1/jquery-ui.min.js' %}"></script>
+
+<link href="{% static 'js/jquery-ui-1.12.1/jquery-ui.min.css' %}" rel="stylesheet">
+
+<script type="text/javascript">	
+	var msg_not_a_number;
+	var msg_valid_product;
+	var msg_valid_brand;
+	var msg_valid_pp;
+	var msg_valid_quantity;
+	var msg_added_product;
+
+  $.ajax({
+    method: "GET",
+    url: "/translator/many/",
+    data: { msgs: "Please enter a valid number,Please enter a valid product,Please enter a valid brand,Please enter a valid purchase price,Please enter a valid quantity,Product was added to the current purchase"}
+  })
+  .done(function(result) {
+  	result = result.split(',');
+		msg_not_a_number = result[0];
+		msg_valid_product = result[1];
+		msg_valid_brand = result[2];
+		msg_valid_pp = result[3];
+		msg_valid_quantity = result[4];
+		msg_added_product = result[5];
+  });
+
+	$("#dlgAddProduct input[name='product']").autocomplete({
+    source: "/products/autocomplete/my-products",
+    minLength: 1,
+  });
+
+  $("#dlgAddProduct input[name='brand']").autocomplete({
+    source: "/brands/autocomplete/my-brands",
+    minLength: 1,
+  });
+
+  $("#dlgAddProduct input[name='quantity']").focus(function(){
+  	this.oldValue = this.value;
+  });
+
+  $("#dlgAddProduct input[name='product']").autocomplete("option", "appendTo", "#dlgAddProduct .modal-body");
+
+  $("#dlgAddProduct input[name='brand']").autocomplete("option", "appendTo", "#dlgAddProduct .modal-body");
+
+  $("#dlgAddProduct #btnAccept").click(function(){
+  	show_msg_with_toastr("info", msg_wait);
+    product = $("#dlgAddProduct #product_obj");
+    brand = $("#dlgAddProduct #brand_obj");
+    purchase_price = $("#dlgAddProduct #txtPurchasePrice");
+    quantity = $("#dlgAddProduct #txtQuantity");
+
+    valid = true;
+
+    if (!validField(product)) {
+    	valid = false;
+    	show_msg_with_toastr("error", msg_valid_product);
+    }
+
+    if (!validField(brand)) {
+    	valid = false;
+    	show_msg_with_toastr("error", msg_valid_brand);
+    }
+
+    if (!validField(purchase_price)) {
+    	valid = false;
+    	show_msg_with_toastr("error", msg_valid_pp);
+    }
+
+    if (!validField(quantity)) {
+    	valid = false;
+    	show_msg_with_toastr("error", msg_valid_quantity);
+    }
+
+    if (valid) {
+    	toastr.clear();
+    	$("#tblProductDetails #rowEmptyTable").remove();
+    	show_msg_with_toastr("info", msg_added_product);
+    }
+  });
+
+  $("#dlgAddProduct input[name='purchase_price']").focus(function(){
+  	this.oldValue = this.value;
+  });
+
+  $("#dlgAddProduct input[name='purchase_price']").change(function(){
+  	show_msg_with_toastr("info", msg_wait);
+
+  	val = parseFloat($(this).val());
+  	if (isNaN(val) || val <= 0) {
+  		toastr.clear();
+  		show_msg_with_toastr("error", msg_not_a_number);
+  		this.value = this.oldValue;
+  		//$("#dlgAddProduct #btnAccept").attr("disabled", "true");
+  		//reloadProductsDetailsSection(0);
+  	}
+  	/*
+  	else {
+  		$("#dlgAddProduct #btnAccept").removeAttr("disabled");
+  		toastr.clear();
+  	}
+  	*/
+  });
+
+  $("#dlgAddProduct input[name='quantity']").focus(function(){
+  	this.oldValue = this.value;
+  });
+
+  $("#dlgAddProduct input[name='quantity']").change(function(event){
+  	show_msg_with_toastr("info", msg_wait);
+
+  	val = parseFloat($(this).val());
+  	if (isNaN(val) || val <= 0) {
+  		toastr.clear();
+  		show_msg_with_toastr("error", msg_not_a_number);
+  		this.value = this.oldValue;
+  		//$("#dlgAddProduct #btnAccept").attr("disabled", "true");
+  		//reloadProductsDetailsSection(0);
+  	}
+  	/*
+  	else {
+  		$("#dlgAddProduct #btnAccept").removeAttr("disabled");
+  		toastr.clear();
+  	}
+  	*/
+  });
+
+  $("#dlgAddProduct input").keyup(function(event) {
+  	if (event.which == 13)
+  		$("#" + $(event.target).attr("next-target")).focus();
+  });
+</script>

@@ -1,0 +1,875 @@
+{% load static i18n %}
+
+{% if msg %}
+  <script type="text/javascript">
+    $(document).ready(function(){
+      show_msg_with_toastr("{{level}}", "{{msg}}");
+      if ($("section.content form input")[0] != undefined)
+        $("section.content form input")[0].focus();
+    });
+  </script>
+{% endif %}
+
+<!--
+{# block global_vars_js #}
+{# endblock #}
+-->
+
+<script type="text/javascript">
+  var msg_wait;
+  var missed_query;
+  var counter_products = 0;
+  var first_time_loaded = true;
+
+  $.ajax({
+    method: "GET",
+    url: "/translator/many/",
+    data: { msgs: "Please wait,Please enter at least one search criteria"}
+  })
+  .done(function(result) {
+    result = result.split(',');
+    msg_wait = result[0];
+    missed_query = result[1];
+  });
+
+  //var subtotal = 0;
+  //var total = 0;
+  //var all_products_in_store=false;
+
+  function refreshTotal() {
+    prices=$("#tblProductDetails tbody tr td .sale-price");
+    tope=prices.length;
+    total=0;
+    for (x=0;x<tope;x++) {
+      total=parseFloat(total)+parseFloat(prices[x].innerHTML);
+      //alert(parseFloat(prices[x].innerHTML).toFixed(2));
+    }
+
+    //alert(total);
+    $(".sale-total").html(parseFloat(total).toFixed(2));
+    $("#parSecTotal").removeAttr("hidden");
+    $("#parSecTotal").css("visibility", "visible");
+    $("#parSecTotal").show();
+  }
+
+  //$("#btnRemoveProducts").hide();
+  //$("form .global-store").hide();
+  $("#tblProductDetails tfoot").hide();
+
+  function view_all(url, action) {
+    show_msg_with_toastr("info", msg_wait);
+    $("section.content form button[type='submit']").attr("disabled", "true");
+    url = url + "?itm_menu={{itm_menu}}&user={{user}}";
+
+    if (action.toUpperCase() == 'EDIT')
+      url = url + "&edit=true";
+    else if (action.toUpperCase() == 'DELETE')
+      url = url + "&delete=true";
+
+    $.ajax({
+      method: "GET",
+      url: url
+    })
+    .done(function(result) {
+      $("section.content").html(result);
+      //toastr.clear();
+      return false;
+    });
+  }
+</script>
+
+<style type="text/css">
+  .btn {
+    width: 120px;
+    margin: 0 0 10px 0;
+  }
+</style>
+
+<div class="container-fluid">
+  <!--
+  <div class="block-header" style="margin: 0 0 15px -15px">
+    <h2>
+      {{form.title|upper}}
+  	</h2>
+  </div>
+  -->
+
+  <div class="row clearfix">
+    <div class="card">
+      <div class="header">
+        <h2>
+          {{form.title|upper}}
+        </h2>
+      </div>
+
+      <div class="body">
+        <p>
+          {% block msg_pre_form %}
+          {% endblock %}
+        </p>
+
+        <div class="row">
+          <div class="col-sm-6">
+            <fieldset>
+              <legend>
+                {% trans 'Products details' %}
+                <i id="actShowAssistance" 
+                style="float: right; font-size: inherit; cursor: pointer;" 
+                data-placement="top"
+                data-toggle="tooltip" 
+                title="{% trans 'Help' %}" 
+                data-original-title="{% trans 'Help' %}" onclick="$('#divSecHelp').load('/sales/dlg-help-add-sale/')" 
+                class="material-icons">help_outline</i>
+              </legend>
+
+              <div id="divSecHelp"></div>
+<!--
+              <div id="secHelp" 
+              class="alert bg-blue-grey alert-dismissible" role="alert">
+                <button type="button" 
+                class="close" 
+                data-hide="alert" 
+                show-icon-onclose="#actShowAssistance"
+                aria-label="Close">
+                  <span aria-hidden="true">×</span>
+                </button>
+
+                <p style="text-align: justify;">
+                  {% trans 'Msg shortcut for product details in new sale' %}
+                </p>
+
+                <button style="margin: 10px 0 0 0" 
+                class="btn bg-green btn-xs waves-effect"
+                data-hide="alert"
+                show-icon-onclose="#actShowAssistance"
+                type="button">
+                  {# trans 'Got it' #}
+                </button>
+              </div>
+-->
+
+              <label for="txtSKU" id="lblSKU">
+                {% trans 'SKU or product name' %}:
+              </label>
+
+              <input name="sku" 
+              required="true" 
+              class="form-control" 
+              id="txtSKU" />
+              <br />
+
+              <!--
+              {# include 'sales/dlg-add-product.html' #}
+              -->
+              <div id="divProductDetails" 
+              class="row"></div>
+<!--
+              <button type="button" 
+              id="btnAddProduct"
+              class="btn btn-primary waves-effect">
+                <i class="material-icons">
+                  add_shopping_cart
+                </i>
+                {% trans 'Add' %}  
+              </button>
+-->
+              <button type="button" 
+              id="btnRemoveProducts" hidden="true" 
+              style="visibility: hidden;" 
+              class="btn btn-warning waves-effect">
+                <i class="material-icons">
+                  remove_shopping_cart
+                </i>
+                {% trans 'Remove all' %}  
+              </button>
+
+              <div id="tblProductsInSale"
+              hidden="true" 
+              style="visibility: hidden;" 
+              class="table-responsive">
+                {% include 'sales/tbl-products-in-sale.html' %}
+              </div>
+            </fieldset>
+
+            <p id="parSecTotal" hidden="true" 
+              style="color: blue; visibility: hidden;
+              font-size: x-large; font-weight: bold;">
+              {% trans 'Total' %}:
+              $<span id="secTotal" 
+              class="sale-total">0.0</span>
+            </p>
+
+            {% if 'AGREGAR' not in form.title|upper %}
+            <p>
+              {% if 'EDITAR' in form.title|upper %}
+                <a href="#" class="act-list-all"
+                onclick="view_all('/sales/list-all', 'edit'); return false;" >
+                  {% trans 'View all' %}
+                </a>
+              {% elif 'ELIMINAR' in form.title|upper %}
+                <a href="#" class="act-list-all"
+                onclick="view_all('/sales/list-all', 'delete'); return false;" >
+                  {% trans 'View all' %}
+                </a>
+              {% else %}
+                <a href="#" class="act-list-all"
+                onclick="view_all('/sales/list-all', 'search'); return false;" >
+                  {% trans 'View all' %}
+                </a>
+              {% endif %}
+            </p>
+
+            <!--
+            <p>
+              <a href="#" 
+              class="act-search-config">
+                {% trans 'Search config' %}
+              </a>
+            </p>
+            -->
+            {% endif %}
+
+            <button type="button"
+            class="btn btn-primary waves-effect submit">
+              <i class="material-icons">
+                {{form.icon_btn_submit}}
+              </i>
+              {{form.btn_label}}
+            </button>
+
+            <button 
+            class="btn btn-warning waves-effect reset-form" type="button">
+              <i class="material-icons">clear_all</i>
+              {% trans 'Clean all' %}
+            </button>
+
+            <button class="btn btn-default waves-effect act-cancel-form" 
+            type="button">
+              <i class="material-icons">cancel</i>
+              {% trans 'Cancel' %}
+            </button>
+          </div>
+
+          <div class="col-sm-6">
+            <form action="{{form.action}}" 
+            method="post" enctype='multipart/form-data'
+            onreset="$('section.content form input')[0].focus();">
+              {{form.as_table}}
+
+              {% csrf_token %}
+
+              <input hidden="true" 
+              style="visibility: hidden;" 
+              name="customer_obj" />
+
+              <input hidden="true" 
+              style="visibility: hidden;" 
+              name="app_version" 
+              value="{{app_version}}">
+
+              <input hidden="true" 
+              style="visibility: hidden;" 
+              name="itm_menu" 
+              value="{{itm_menu}}">
+
+              <input hidden="true" 
+              style="visibility: hidden;" 
+              name="user" 
+              value="{{user}}"
+              id="txtEmailHid">
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="divViewDetails"></div>
+
+<script type="text/javascript" src="{% static 'js/jquery-ui-1.12.1/jquery-ui.min.js' %}"></script>
+
+<link href="{% static 'js/jquery-ui-1.12.1/jquery-ui.min.css' %}" rel="stylesheet">
+
+<script type="text/javascript" src="{% static 'js/jquery-ui-1.12.1/datepicker-es.js' %}"></script>
+
+<script type="text/javascript" src="{% static 'js/jquery-timepicker/jquery.timepicker.min.js' %}"></script>
+
+<link href="{% static 'js/jquery-timepicker/jquery.timepicker.min.css' %}" rel="stylesheet">
+
+<script type="text/javascript" src="{% static 'js/jquery.form.min.js' %}"></script>
+
+<script type="text/javascript">
+  //var image_files = [];
+  var module_name;
+
+  $("#btnRemoveProducts").hide();
+
+  function addProductToSale(ppd,sku,product,brand,sp,invoker) {
+    skus=$("#tblProductDetails .sku");
+    tope=skus.length;
+    for (x=0;x<tope;x++) {
+      if (skus[x].innerHTML==sku) {
+        $.ajax({
+          method: "GET",
+          url: "/translator/translate/",
+          data: {msg: "Product already exists in the list of sold products"}
+        })
+        .done(function(result) {
+          toastr.clear();
+          show_msg_with_toastr("error", result);
+        });
+        return false;
+      }
+    }
+
+    if (invoker!=null&&invoker!=undefined)
+      $(invoker).parent().parent().remove();
+
+    rows=$("#tblResults tbody tr");
+    if (rows.length<1)
+      $('#cardProductDetails').hide();
+
+    html= "<tr id='" + ppd + "'>";
+
+    html+=  "<td sku=\"" + sku + "\" class='sku'>";
+    html+=    sku;
+    html+=  "</td>";
+
+    html+=  "<td>";
+    html+=    product;
+    html+=    "<span class='products' hidden='' style='visibility: hidden'>";
+    html+=    ppd;
+    html+=    "</span>";
+    html+=  "</td>";
+
+    html+=  "<td>";
+    html+=    brand;
+    html+=  "</td>";
+
+    html+=  "<td sale-price=\"" + sp + "\">$";
+    html+=    '<span class="sale-price">';
+    html+=      parseFloat(sp).toFixed(2);
+    html+=    '</span>';
+    html+=  "</td>";
+/*
+    html+=  "<td>";
+    html+=    "SUBTOTAL";
+    html+=  "</td>";
+*/
+    html+=  "<td>";
+    html+=    
+            '<a href="#" '+ 
+            'onclick="showProductDetails(' + ppd + ');return false;" ' +
+            'data-placement="bottom" ' +
+            'data-toggle="tooltip" ' +
+            "title=\"{% trans 'Details' %}\" " +
+            "data-original-title=\"{% trans 'Details' %}\"><i class=\"material-icons\">zoom_in</i></a>"+
+
+            '<a href="#" data-placement="bottom" ' +
+            'data-toggle="tooltip" ' +
+            'class="replaceme-by-add-to-list" ' +
+            'onclick="removeProductFromSale(' + ppd +
+            ",'" + sku + "','" + product + "','" + 
+            brand + "','" + sp + "'); " +
+            "return false;\" " +
+            "title=\"{% trans 'Remove from sale' %}\""+
+            " data-original-title=\"{% trans 'Remove from sale' %}\"><i class=\"material-icons\">remove_shopping_cart</i></a>";
+    html+=  "</td>";
+    html+="</tr>";
+
+    $("#tblProductDetails tbody").append(html);
+    $('#tblProductsInSale').removeAttr("hidden");
+    $('#tblProductsInSale').css("visibility", "visible");
+    $('#tblProductDetails').show();
+    //$('[data-toggle="tooltip"]').tooltip();
+    counter_products++;
+    refreshTotal();
+
+    $("#btnRemoveProducts").removeAttr("hidden");
+    $("#btnRemoveProducts").css("visibility", "visible");
+    $("#btnRemoveProducts").show();
+    $('#txtSKU').focus();
+  }
+
+  function showProductDetails(ppd) {
+    show_msg_with_toastr("info", msg_wait);
+    $("#divViewDetails").load("/sales/view-selected-product-details/?ppd="+ppd, function() {
+        $("#dlgViewDetails").modal("show");
+    });
+  }
+
+  function removeProductFromSale(ppd,sku,product,brand,sp) {
+    row=$("#tblProductDetails tr#"+ppd).html();
+    $("#tblProductDetails tr#"+ppd).remove();
+
+    $("#tblResults tbody").append('<tr id="'+ppd+'">'+row+'</tr>');
+
+    html=
+      '<a href="#" data-placement="bottom" ' +
+      'data-toggle="tooltip" ' +
+      'onclick="addProductToSale(' + ppd +
+      ",'"+ sku + "','" + product + "','" + 
+      brand + "','" + sp + "',this); return false;\"" +
+      " title=\"{% trans 'Add to sale' %}\" " +
+      "data-original-title=\"{% trans 'Add to sale' %}\"><i class=\"material-icons\">add_shopping_cart</i></a>";
+
+    $("#tblResults tbody tr#"+ppd+" td a.replaceme-by-add-to-list").parent().append(html);
+    $("#tblResults tbody tr#"+ppd+" td a.replaceme-by-add-to-list").remove();
+    $("#cardProductDetails").show();
+
+    rows=$("#tblProductDetails tbody tr");
+    if (rows.length<1) {
+      $("#tblProductDetails").hide();
+      $("#parSecTotal").hide();
+      counter_products=0;
+      $("#btnRemoveProducts").hide();
+    }
+    else {
+      counter_products--;
+      refreshTotal();
+    }
+  }
+
+  $("section.content #btnRemoveProducts").click(function() {
+    if (!confirm("¿Seguro que desea eliminar los productos de la lista?"))
+      return false;
+    /****************************
+    ESTA MEJORA TAMBIEN SE PUEDE 
+    IMPLEMENTAR EN ADD PURCHASE!
+    *****************************/
+    clearProductsLst();
+  });
+
+  $("section.content form button[type='reset']").click(function() {
+    if (!confirm("Perderá los datos capturados. ¿Seguro que desea continuar?")) {
+      return false;
+    }
+
+    /****************************
+    ESTA MEJORA TAMBIEN SE PUEDE 
+    IMPLEMENTAR EN ADD PURCHASE!
+    *****************************/
+    clearProductsLst();
+  });
+
+  /****************************
+  ESTA MEJORA TAMBIEN SE PUEDE 
+  IMPLEMENTAR EN ADD PURCHASE!
+  *****************************/
+  function clearProductsLst() {
+    $('#tblProductDetails tbody tr').remove();
+    item_counter = 0;
+    row_number = 0;
+    //subtotal = 0;
+    //total = 0;
+    counter_products = 0;
+    refreshTotal();
+    $('#tblProductDetails').hide();
+    $('#parSecTotal').hide();
+    $("#btnRemoveProducts").hide();
+    $('#cardProductDetails').remove();
+    $("#txtSKU").focus();
+  }
+
+  $(document).ready(function() {
+    $('[data-toggle="tooltip"]').tooltip();
+    //$('#secHelp').hide();
+    $('#tblProductDetails').hide();
+    $('#parSecTotal').hide();
+
+    $("#id_customer").focus(function() {
+      if (first_time_loaded)
+        $("#txtSKU").focus();
+      first_time_loaded=false;
+    });
+
+    $("#id_customer").autocomplete({
+      source: "/customers/autocomplete/my-customers/",
+      minLength: 3,
+    });
+
+    $("#id_customer").change(function() {
+      show_msg_with_toastr("info", msg_wait);
+      rfc=this.value.substr(this.value.indexOf('RFC=')+"RFC=".length);
+      rfc=rfc.substr(0, rfc.length-1);
+      $.ajax({
+        method: "GET",
+        url: "/customers/search/by-rfc/",
+        data: { rfc: rfc }
+      })
+      .done(function(result) {
+        toastr.clear();
+        if (!result.exist)
+          // $.ajax({
+          //   method: "GET",
+          //   url: "/translator/translate",
+          //   data: {msg: "Please enter a valid customer"}
+          // })
+          // .done(function(result) {
+          //   show_msg_with_toastr("error", result);
+          //   $("input[name='customer_obj']").val("");
+          //   $("section.content form button[type='submit']").attr("disabled", "true");
+          // });
+          $.ajax({
+            method: "GET",
+            url: "/translator/translate",
+            data: {msg: "The sale will be assigned to General Public"}
+          })
+          .done(function(result) {
+            show_msg_with_toastr("warning", result);
+            $("input[name='customer_obj']").val("");
+            //$("section.content form button[type='submit']").attr("disabled", "true");
+          });
+        else {
+          $("input[name='customer_obj']").val(result.customer);
+          //$("section.content form button[type='submit']").removeAttr("disabled");
+        }
+      });
+    });
+
+      //var product_added = false;
+/*
+      $("#chkAllProductsInStore").change(function() {
+        all_products_in_store=this.checked;
+
+        if (this.checked) {
+          $("form .global-store").show();
+          $("form #txtStore").attr("required", "true");
+          $("form #txtStore").focus();
+        }
+        else {
+          $("form .global-store").hide();
+          $("form #txtStore").removeAttr("required");
+        }
+      });
+*/
+
+      //$("#id_sold_at").timepicker({'scrollDefault': 'now', 'setTime': new Date(), 'timeFormat': 'H:i:s', 'step': 15});
+
+    $("#id_sold_at").timepicker({'scrollDefault': 'now', 'setTime': new Date(), 'timeFormat': 'H:i:s', 'step': 15, 'disableTextInput': true});
+    $("#id_sold_at").val(new Date().toLocaleTimeString());
+
+    $("#id_sold_when").datepicker({maxDate: "+0D",  showButtonPanel: true, changeMonth: true, changeYear: true});
+    $("#id_sold_when").datepicker("option", $.datepicker.regional["es"] );
+
+    $("#id_sold_when").attr("readonly", "readonly");
+
+    module_name = $(".container-fluid .card .header h2")[0].innerHTML;
+    module_name = module_name.toUpperCase();
+
+    $("#txtSKU").autocomplete({
+      source: "/sales/autocomplete/query-products/",
+      minLength: 3,
+    });
+
+    function searchQuery(query, sold) {
+      show_msg_with_toastr("info", msg_wait);
+      $("#divProductDetails").load("/sales/view-product-details/?info=" + query +
+        "&sold=" + sold);
+    }
+
+    $('#txtSKU').keydown(function(event) {
+      if (event.which == 113) { // F2 
+        sold=!module_name.includes('AGREGAR');
+        if (this.value.trim().length > 0) {
+          query=encodeURIComponent(this.value.trim());
+          searchQuery(query, sold);
+        }
+      }
+      else if (event.which == 27) { // ESC
+        this.value='';
+        $('#cardProductDetails').remove();
+      }
+      else if (event.which == 13) { // Enter
+        if (this.value.trim().length < 1)
+          return false;
+
+        show_msg_with_toastr("info", msg_wait);
+        sold=!module_name.includes('AGREGAR');
+
+        sku=$("#txtSKU").val().trim();
+        $.ajax({
+          method: "GET",
+          url: "/purchases/search/by-product-sku/",
+          data: { sku: sku, sold: sold }
+        })
+        .done(function(result) {
+          if (result.exist) {
+            product=JSON.parse(result.product);
+            $("#tblResults tbody tr td[sku='"+product.sku+"']").parent().remove();
+            //console.log(JSON.parse(result.product));
+            addProductToSale(product.ppd,product.sku,product.product,product.brand,product.sale_price,null);
+            toastr.clear();
+          }
+          else {
+            product=$("#txtSKU").val().trim();
+            $.ajax({
+              method: "GET",
+              url: "/purchases/search/by-product-name/",
+              data: { product: product, sold: sold }
+            })
+            .done(function(result) {
+              if (result.exist) {
+                if (result.multiple) {
+                  query=encodeURIComponent(product);
+                  searchQuery(query, sold);
+                  toastr.clear();
+                }
+                else {
+                  product=JSON.parse(result.product);
+                  $("#tblResults tbody tr td[sku='"+product.sku+"']").parent().remove();
+                  //console.log(JSON.parse(result.product));
+                  addProductToSale(product.ppd,product.sku,product.product,product.brand,product.sale_price,null);
+                  toastr.clear();
+                }
+              }
+              else {
+                $.ajax({
+                  method: "GET",
+                  url: "/translator/translate/",
+                  data: { msg: "SKU or product name does not exists" }
+                })
+                .done(function(result) {
+                  toastr.clear();
+                  show_msg_with_toastr("error", result);
+                });
+              }
+            });
+          }
+        });
+      }
+    });
+
+    var options = { 
+      target:        'section.content',
+      beforeSubmit:  showRequest,
+      success:       showResponse 
+    }; 
+/*
+    $("form #txtStore").autocomplete({
+      source: "/stores/autocomplete/my-stores/",
+      minLength: 1,
+    });
+
+    $("form #txtStore").change(function(){
+      show_msg_with_toastr("info", msg_wait);
+      obj = $(this);
+      storename = this.value.substr(0, this.value.indexOf(' ['))
+
+      $.ajax({
+        method: "GET",
+        url: "/stores/search/by-name/",
+        data: { store: storename }
+      })
+      .done(function(result) {
+        toastr.clear();
+        if (!result['exist'])
+          $.ajax({
+            method: "GET",
+            url: "/translator/translate",
+            data: { msg: "Please enter a valid store"}
+          })
+          .done(function(result) {
+            show_msg_with_toastr("error", result);
+            $("input[name='store_obj']").val("");
+            $(obj).val('');
+            //$("section.content form button[type='submit']").attr("disabled", "true");
+          });
+        else {
+          $("input[name='store_obj']").val(result.store);
+          //$("section.content form button[type='submit']").removeAttr("disabled");
+        }
+      });
+    });
+*/
+    $(".act-cancel-form").click(function() {
+      showMainPanel();
+    });
+
+    $("button.reset-form").click(function() {
+      if (confirm("Perderá los datos capturados, ¿Seguro que desea continuar?")) {
+        $("#txtSKU").val('');
+        $('#cardProductDetails').hide();
+        $('#tblProductDetails').hide();
+        $('#tblProductDetails tbody tr').remove();
+        $("#id_description").val('');
+        $("#id_notes").val('');
+        $("#parSecTotal").hide();
+        counter_products=0;
+        $("#txtSKU").focus();
+      }
+    });
+
+    $("button.submit").click(function() {
+      if (module_name.includes('AGREGAR')) {
+        show_msg_with_toastr("info", msg_wait);
+        products = $("#tblProductDetails tbody tr td .products");
+
+        if (products.length<1) {
+          $.ajax({
+            method: "GET",
+            url: "/translator/translate/",
+            data: {msg: "Please add at least one product to this sale"}
+          })
+          .done(function(result) {
+            toastr.clear();
+            show_msg_with_toastr("error", result);
+          });
+          return false;
+        }
+        toastr.clear();
+      }
+
+      $("section.content form").ajaxSubmit(options);
+    });
+
+    function prepareProductsDataForSubmit(addTo) {
+      toastr.clear();
+      show_msg_with_toastr("info", msg_wait);
+      products_objs = $("#tblProductDetails tbody tr .products");
+      description = $("#id_description").val();
+      notes = $("#id_notes").val();
+      products=[];
+
+      tope=products_objs.length;
+      for(x=0;x<tope;x++)
+        products.push(products_objs[x].innerHTML);
+
+      products = {
+        "name": "products",
+        "type": "text", 
+        "required": true,
+        "value": JSON.stringify(products)
+        //"value": JSON.stringify(products_objs)
+      };
+
+      addTo.push(products);
+      toastr.clear();
+      //$("section.content form").ajaxSubmit(options);
+      //var queryString = $.param(formData); 
+      /*console.log(queryString);
+      console.log(formData);*/
+      //return false;
+    }
+
+    function showRequest(formData, jqForm, options) { 
+      show_msg_with_toastr("info", msg_wait);
+      //$("section.content form button[type='submit']").attr("disabled", "true");
+/*
+      module_name = $(".container-fluid .card .header h2")[0].innerHTML;
+      module_name = module_name.toUpperCase();
+*/
+      if (module_name.includes('AGREGAR')) {
+        products = $("#tblProductDetails tbody tr td .products");
+
+        if (products.length < 1) {
+          $.ajax({
+            method: "GET",
+            url: "/translator/translate",
+            data: { msg: "Please add at least one product to this sale"}
+          })
+          .done(function(result) {
+            toastr.clear();
+            show_msg_with_toastr("error", result);
+            //$("section.content form button[type='submit']").removeAttr("disabled");
+          });
+
+          return false;
+        }
+        else {
+          prepareProductsDataForSubmit(formData);
+        }
+      }
+      //else if (module_name.includes('BUSCAR')) {
+      else {
+        inputs = $('section.content form input.validate');
+        tope = inputs.length;
+        x = -1;
+        disable_btn = false;
+        counter_failed = 0;
+
+        while (++x < tope)
+          if (!validField(inputs[x]))
+            counter_failed++;
+
+        if (counter_failed == tope)
+          disable_btn = true;
+
+        toastr.clear();
+
+        if (disable_btn) {
+          //$("section.content form button[type='submit']").attr("disabled", "true");
+          $("section.content form button[type='submit']").removeAttr("disabled");
+          show_msg_with_toastr("error", missed_query);
+        }
+        else {
+          //$("section.content form button[type='submit']").removeAttr("disabled");
+          prepareProductsDataForSubmit(formData);
+        }
+
+        return !disable_btn;
+      }
+
+      return true; 
+    }
+ 
+    function showResponse(responseText, statusText, xhr, $form)  { 
+      //$(".page-loader-wrapper").remove();
+      $("#txtSKU").focus();
+    }
+ 
+    
+/*
+    $("input[name='shop']").change(function(){
+      show_msg_with_toastr("info", msg_wait);
+      shopname = this.value.substring(0, this.value.indexOf(" ["));
+      $.ajax({
+        method: "GET",
+        url: "/shops/search/by-name",
+        data: { shopname: shopname}
+      })
+      .done(function(result) {
+        toastr.clear();
+        if (result['exist'] != undefined && 
+          !result['exist'] || result.dropped)
+          $.ajax({
+            method: "GET",
+            url: "/translator/translate",
+            data: { msg: "Please enter a valid shop"}
+          })
+          .done(function(result) {
+            show_msg_with_toastr("error", result);
+            $("input[name='shop_obj']").val("");
+            $("section.content form button[type='submit']").attr("disabled", "true");
+          });
+        else if (result['exist'] == undefined) {
+          show_msg_with_toastr(result.status, result.msg);
+        }
+        else {
+          $("input[name='shop_obj']").val(result.shop);
+          $("section.content form button[type='submit']").removeAttr("disabled");
+        }
+      });
+    });
+*/
+
+    $("section.content form").ajaxForm(options);
+    $("div.menu a#{{itm_menu}}").parent().addClass("active");
+  });
+</script>
+
+{% if show_modal %}
+  {% if modal_name == 'dlgSearchResults' %}
+    {% include 'sales/search-results.html' %}
+  {% endif %}
+
+  <script type="text/javascript">
+    $(document).ready(function(){
+      $("#{{modal_name}}").modal('show');
+    });
+  </script>
+{% endif %}
+
+{% block actions_js %}
+{% endblock %}

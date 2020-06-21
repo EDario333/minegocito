@@ -1,0 +1,32 @@
+{% extends 'base.html' %}
+
+{% block extra_js_footer %}
+  {% if show_modal %}
+    {% if modal_name == 'dlgUserAccountConfirmed' %}
+      {% include 'users/user-account-confirmed.html' %}
+    {% elif modal_name == 'dlgDeleteUserAccount' %}
+      {% include 'users/delete-user-account.html' %}
+    {% elif modal_name == 'dlgNewsLetter' %}
+      {% include 'newsletter/delete-user-account.html' %}
+    {% elif modal_name == 'dlgChooseAppVersion' %}
+      {% include 'dashboard/app-version/choose-app-version.html' %}
+      <script type="text/javascript">
+        $(document).ready(function(){
+          //console.log($("#{{modal_name}}"));
+          $("section.content").hide();
+          $("nav.navbar").hide();
+          $("section.laterals-bars").hide();
+        });
+      </script>
+    {% elif modal_name == 'dlgResetPassword' %}
+      {% include 'users/reset-password.html' %}
+    {% endif %}
+
+    <script type="text/javascript">
+      $(document).ready(function(){
+        //console.log($("#{{modal_name}}"));
+        $("#{{modal_name}}").modal('show');
+      });
+    </script>
+  {% endif %}
+{% endblock %}

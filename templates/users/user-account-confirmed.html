@@ -1,0 +1,58 @@
+{% load i18n %}
+
+<div class="modal" 
+onfocus="$('#dlgUserAccountConfirmed #txtEmail').focus()" 
+id="dlgUserAccountConfirmed" tabindex="-1" role="dialog" aria-labelledby="lblHeader" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="lblHeader">
+          {% trans 'User account confirmed' %}
+        </h5>
+
+        <button class="close" type="button" 
+        data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">×</span>
+        </button>
+      </div>
+
+      <div class="modal-body">
+        <h6>
+          {% trans 'You can login right now' %}
+        </h6>
+
+        <form action="/users/login" method="post">
+          {% csrf_token %}
+
+          <div class="form-group">
+            <input type="email" name="email" 
+            class="form-control" 
+            placeholder="{% trans 'Email address' %}*" required="true" id="txtEmail">
+          </div>
+
+          <div class="form-group">
+            <input name="password" class="form-control" placeholder="{% trans 'Password' %}*" 
+            type="password" required="true" id="txtPassword">
+          </div>
+
+          <input type="text" id="txtRecaptchaResponse" 
+          name="g-recaptcha-response" 
+          hidden="true" style="visibility: hidden;">
+
+          <button type="submit" 
+          class="submit-btn form-control btn btn-primary" 
+          id="form-submit">
+            {% trans "Login" %}
+          </button>
+        </form>
+      </div>
+
+      <div class="modal-footer">
+          <a class="small" href="#" 
+          data-dismiss="modal">
+          	{% trans 'Close' %}
+          </a>
+      </div>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,41 @@
+{% load i18n %}
+
+<aside id="leftsidebar" class="sidebar">
+  <!-- User Info -->
+  {% include 'dashboard/assets/left-side-bar/user-info.html' %}
+
+  <!-- Menu -->
+  {% include 'dashboard/assets/left-side-bar/menu.html' %}
+
+  <!-- Footer -->
+  <div class="legal">
+    <div class="copyright">
+      &copy; 
+      <script type="text/javascript">
+        document.write(new Date().getFullYear());
+      </script> 
+
+      <a href="javascript:void(0);">
+        MiNegocito
+      </a>
+    </div>
+
+    <span
+      id="tutorialStep7"
+      data-toggle="popover-x" 
+      data-placement="top top-left"
+      data-target="#ftt-Step7">
+    </span>
+
+    <div class="version">
+      <b>Version: </b> 1.0B
+      <br />
+
+      <b>{% trans 'License' %}</b>:
+      {{app_version}}<br />
+
+      <b>{% trans 'Expires' %}:</b>
+      {{expires}}
+    </div>
+  </div>
+</aside>

@@ -1,0 +1,211 @@
+{% load static i18n %}
+
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+    <title>
+    	{% block title %}
+        {% trans 'App name' %}
+      {% endblock %}
+
+      ::
+      {% block title_suffix %}
+        {% trans 'Home' %}
+      {% endblock %}
+      ::
+    </title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="description" 
+    content="{% trans 'App name' %}">
+    <meta name="keywords" content="{% trans 'App name' %}">
+    <meta name="author" content="minegocito.mx@gmail.com">
+
+    {% block additional_meta %}
+    {% endblock %}
+
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Mukta:300,400,700"> 
+    <link rel="stylesheet" href="{% static 'shoppers-gh-pages/fonts/icomoon/style.css' %}">
+
+    <link rel="stylesheet" href="{% static 'shoppers-gh-pages/css/bootstrap.min.css' %}">
+    <link rel="stylesheet" href="{% static 'shoppers-gh-pages/css/magnific-popup.css' %}">
+    <link rel="stylesheet" href="{% static 'shoppers-gh-pages/css/jquery-ui.css' %}">
+    <link rel="stylesheet" href="{% static 'shoppers-gh-pages/css/owl.carousel.min.css' %}">
+    <link rel="stylesheet" href="{% static 'shoppers-gh-pages/css/owl.theme.default.min.css' %}">
+
+    <link rel="stylesheet" href="{% static 'shoppers-gh-pages/css/aos.css' %}">
+
+    <link rel="stylesheet" href="{% static 'shoppers-gh-pages/css/style.css' %}">
+
+    <!-- Favicon-->
+    <link rel="icon" href="{% static 'imgs/favicon.png' %}" 
+    type="image/x-icon">
+
+    <!--
+    	The next 3 lines are for reCAPTCHA v3
+    	See https://developers.google.com/recaptcha/docs/v3
+    	for more details
+    -->
+    
+    <script src='https://www.google.com/recaptcha/api.js?render=6Ld-f6sUAAAAAB81NR_oPrcJ3AdoGV8IIqCZL7wN'></script>
+
+    <style type="text/css">
+      .modal {
+        z-index: 2000;
+      }
+
+      .scroll-to-top {
+        position: fixed;
+        right: 1rem;
+        bottom: 1rem;
+        display: none;
+        width: 2.75rem;
+        height: 2.75rem;
+        text-align: center;
+        color: #fff;
+        background: rgba(90,92,105,.5);
+        line-height: 46px;
+      }
+
+      .rounded {
+        border-radius: .35rem !important;
+      }
+    </style>
+
+    {% block extra_css %}
+		{% endblock extra_css %}
+
+    {% block extra_css2 %}
+    {% endblock %}
+
+		{% block extra_js %}
+		{% endblock extra_js %}
+  </head>
+
+  <body>
+	  <div class="site-wrap">
+	  	{% include 'assets/top-menu.html' %}
+
+      <a class="scroll-to-top rounded" 
+        href="#" style="display: inline;">
+        <i class="icon icon-angle-up"></i>
+      </a>
+
+      {% block content %}        
+  	    {% include 'home/slider.html' %}
+  	    {% include 'home/features.html' %}
+  	    <!-- {% include 'home/customers.html' %} -->
+        {% include 'home/most-visited-shops-base.html' %}
+  	    <!-- <span id="secMostVisitedShops">
+          <p style="text-align: center; margin: 20px 0 0 0;">
+            {% trans 'Loading' %}...
+          </p>
+        </span> -->
+      {% endblock %}
+
+      {% include 'assets/footer.html' %}
+	  </div>
+
+	  <script src="{% static 'shoppers-gh-pages/js/jquery-3.3.1.min.js' %}" type="text/javascript"></script>
+
+	  <script src="{% static 'shoppers-gh-pages/js/jquery-ui.js' %}" type="text/javascript"></script>
+
+	  <script src="{% static 'shoppers-gh-pages/js/popper.min.js' %}" type="text/javascript"></script>
+
+	  <script src="{% static 'shoppers-gh-pages/js/bootstrap.min.js' %}" type="text/javascript"></script>
+
+	  <script src="{% static 'shoppers-gh-pages/js/owl.carousel.min.js' %}" type="text/javascript"></script>
+
+	  <script src="{% static 'shoppers-gh-pages/js/jquery.magnific-popup.min.js' %}" type="text/javascript"></script>
+
+	  <script src="{% static 'shoppers-gh-pages/js/aos.js' %}" type="text/javascript"></script>
+
+	  <script src="{% static 'shoppers-gh-pages/js/main.js' %}"></script>
+
+	  <!-- Toastr -->
+    <script src="{% static 'toastr/toastr.min.js' %}" 
+    type="text/javascript"></script>
+
+    <link href="{% static 'toastr/toastr.min.css' %}" rel="stylesheet" type="text/css">
+
+	  <script src="{% static 'js/app.js' %}" type="text/javascript"></script>
+
+	  <script src="{% static 'js/utils.js' %}" type="text/javascript"></script>
+
+	  {% include 'users/login.html' %}
+	  {% include 'users/forgot-password.html' %}
+	  {% include 'users/register.html' %}
+
+	  {% if msg %}
+    	<script type="text/javascript">
+      	$(document).ready(function(){
+        	show_msg_with_toastr("{{level}}", "{{msg}}");
+      	});
+    	</script>
+    {% endif %}
+
+    {% block js_footer %}
+    {% endblock %}
+
+	  {% block extra_js_footer %}
+		{% endblock %}
+
+    <script type="text/javascript" src="{% static 'js/jquery.form.min.js' %}">
+    </script>
+
+    <script type="text/javascript">
+      var msg_wait;
+
+      $.ajax({
+        method: "GET",
+        url: "/translator/translate/",
+        data: { msg: "Please wait"}
+      })
+      .done(function(result) {
+        msg_wait = result;
+      });
+
+      $(document).ready(function(){
+        $('[data-toggle="tooltip"]').tooltip();
+
+        $("#frmNewsletter #email_subscribe").change(function() {
+          show_msg_with_toastr("info", msg_wait);
+
+          $.ajax({
+            method: "GET",
+            url: "/newsletter/verify-unique-email/",
+            data: {email: this.value}
+          })
+          .done(function(result) {
+            toastr.clear();
+            if (!result.continue) {
+              // $("#frmNewsletter #btnSend").attr("disabled", "");
+              show_msg_with_toastr(result.status, result.msg);
+            }
+            // else
+            //   $("#frmNewsletter #btnSend").removeAttr("disabled");
+          });
+        });
+
+        var options = { 
+          target:        '#frmNewsletter #dummy',
+          beforeSubmit:  showRequest,
+          success:       showResponse 
+        }; 
+
+        function showRequest(formData, jqForm, options) { 
+          show_msg_with_toastr("info", msg_wait);
+          $("#frmNewsletter #btnSend").attr("disabled", "");
+        }
+
+        function showResponse(responseText, statusText, xhr, $form)  { 
+          toastr.clear();
+          show_msg_with_toastr(responseText.status, responseText.msg);
+          $("#frmNewsletter #btnSend").removeAttr("disabled");
+        }
+
+        $("#frmNewsletter").ajaxForm(options);
+      });
+    </script>
+  </body>
+</html>

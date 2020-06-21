@@ -1,0 +1,30 @@
+{% load static i18n %}
+
+<div class="container-fluid">
+  <div class="card">
+    <div class="header bg-orange">
+      <h2>
+        {% trans 'You have not created any customer' %}
+      </h2>
+    </div>
+
+    <div class="body">
+      <p style="text-align: justify;">
+        {% trans 'The action can not be completed because there are not any customer created by you' %}.
+      </p>
+
+      <button class="btn btn-primary waves-effect" 
+      onclick="showMainPanel()" 
+      type="button">
+        <i class="material-icons">done</i>
+        {% trans 'Accept' %}
+      </button>
+    </div>
+  </div>
+</div>
+
+<script type="text/javascript">
+  $(document).ready(function(){
+    $("div.menu a#{{itm_menu}}").parent().addClass("active");
+  });
+</script>

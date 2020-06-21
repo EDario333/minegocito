@@ -1,0 +1,64 @@
+{% load i18n %}
+
+<!-- For add provider -->
+
+<h4 id="headerContactPersons">
+{% trans 'Contact persons' %}
+</h4>
+
+<table id="tblContactPersons"
+class="table table-bordered table-striped table-hover no-footer">
+  <thead>
+    <tr>
+      <th>{% trans 'First name' %}</th>
+      <th>{% trans 'Middle name' %}</th>
+      <th>{% trans 'Last name' %}</th>
+      <th>{% trans 'Mothers last name' %}</th>
+      <!--<th>{% trans 'Quantity' %}</th>-->
+      <!--<th>Subtotal</th>-->
+      <th>{% trans 'Options' %}</th>
+      <th></th>
+    </tr>
+  </thead>
+
+  <tbody>
+    <!--
+    <tr id="rowEmptyTable">
+      <td colspan="5">
+        {# trans 'Add sales products using the button above' #}
+      </td>
+    </tr>
+  -->
+  </tbody>
+</table>
+
+<a href="#" 
+id="actRemoveContactPersons">
+  <i class="material-icons">
+    delete
+  </i>
+  {% trans 'Remove all' %}  
+</a>
+
+<script type="text/javascript">
+  // function showDetails() {
+  //  return true;
+  // }
+
+  // function removeContactPerson() {
+  //  return true;
+  // }
+
+  $(document).ready(function() {
+    $("#actRemoveContactPersons").click(function() {
+      if (confirm("Perderá los datos capturados de las personas de contacto. ¿Desea continuar?")) {
+        $("#tblContactPersons tbody").empty();
+        $("#secContactPersons").hide();
+      }
+      $(this).blur();
+      return false;
+    });
+  });
+</script>
+
+<div id="secDetailsContactPerson"></div>

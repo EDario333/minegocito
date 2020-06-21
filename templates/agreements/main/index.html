@@ -1,0 +1,471 @@
+{% extends 'base.html' %}
+
+{% load static i18n %}
+
+{% block content %}
+<style type="text/css">
+  .header-container {
+    margin: 0 0 20px 0;
+    text-align: justify;
+  }
+
+  h4 {
+    text-align: left;
+  }
+</style>
+
+<!-- https://developers.google.com/terms/ -->
+
+<div class="bg-light py-3">
+  <div class="container">
+    <div class="row">
+      <div class="col-md-12 mb-0">
+      	<a href="/">{% trans 'Home' %}</a>
+      	<span class="mx-2 mb-0">/</span> 
+      	<strong class="text-black">
+      		{% trans 'Service conditions' %}
+      	</strong>
+      </div>
+    </div>
+  </div>
+</div>  
+
+<div class="site-section">
+  <div class="container">
+    <div class="row">
+      <div class="col-md-12">
+        <h3 class="h3 mb-3 text-black">
+        	{% trans 'Service conditions' %}
+      	</h3>
+      </div>
+
+      <!-- <div class="col-md-7"> -->
+    	<!-- <div class="col-md-12" 
+      style="height: 500px; border-bottom: 2px groove gray;"> -->
+      <div class="col-md-12 header-container">
+        <h4 class="h4 text-black" data-aos="fade-up">
+          {% trans 'App Terms of Service' %}
+        </h4>
+
+        <span data-aos="fade" data-aos-delay="500"
+        class="text-black">
+          {% trans 'App Terms of Service content' %}
+        </span>
+      </div>
+
+      <div class="col-md-12 header-container">
+        <h4 class="h4 text-black" data-aos="fade-up">
+          {% trans 'Section' %}&nbsp;1.
+          {% trans 'Account and registration header' %}
+        </h4>
+
+        <h5 class="h5 text-black" data-aos="fade-up">
+          1.1. {% trans 'Accepting the Terms header' %}
+        </h4>
+
+        <span data-aos="fade" data-aos-delay="500"
+        class="text-black">
+          {% trans 'Accepting the Terms content' %}
+        </span>
+
+        <h5 class="h5 text-black" data-aos="fade-up">
+          1.2. {% trans 'Entity Level Acceptance header' %}
+        </h4>
+
+        <span data-aos="fade" data-aos-delay="500"
+        class="text-black">
+          {% trans 'Entity Level Acceptance content' %}
+        </span>
+
+        <h5 class="h5 text-black" data-aos="fade-up">
+          1.3. {% trans 'Registration header' %}
+        </h4>
+
+        <span data-aos="fade" data-aos-delay="500"
+        class="text-black">
+          {% trans 'Registration content' %}
+        </span>
+
+        <h5 class="h5 text-black" data-aos="fade-up">
+          1.4. {% trans 'Subsidiaries and Affiliates header' %}
+        </h4>
+
+        <span data-aos="fade" data-aos-delay="500"
+        class="text-black">
+          {% trans 'Subsidiaries and Affiliates content' %}
+        </span>
+      </div>
+
+      <div class="col-md-12 header-container">
+        <h4 class="h4 text-black" data-aos="fade-up">
+          {% trans 'Section' %}&nbsp;2.
+          {% trans 'Using Our Apps header' %}
+        </h4>
+
+        <h5 class="h5 text-black" data-aos="fade-up">
+          2.1. {% trans 'Your End Users header' %}
+        </h4>
+
+        <span data-aos="fade" data-aos-delay="500"
+        class="text-black">
+          {% trans 'Your End Users content' %}
+        </span>
+
+        <h5 class="h5 text-black" data-aos="fade-up">
+          2.2. {% trans 'Compliance with Law Third Party Rights and Terms of Service header' %}
+        </h4>
+
+        <span data-aos="fade" data-aos-delay="500"
+        class="text-black">
+          {% trans 'Compliance with Law Third Party Rights and Terms of Service header content' %}
+        </span>
+
+        <h5 class="h5 text-black" data-aos="fade-up">
+          2.3. {% trans 'Permitted Access header' %}
+        </h4>
+
+        <span data-aos="fade" data-aos-delay="500"
+        class="text-black">
+          {% trans 'Permitted Access content' %}
+        </span>
+
+        <h5 class="h5 text-black" data-aos="fade-up">
+          2.4. {% trans 'Limitations header' %}
+        </h4>
+
+        <span data-aos="fade" data-aos-delay="500"
+        class="text-black">
+          {% trans 'Limitations content' %}
+        </span>
+
+        <h5 class="h5 text-black" data-aos="fade-up">
+          2.5. {% trans 'Open Source Software header' %}
+        </h4>
+
+        <span data-aos="fade" data-aos-delay="500"
+        class="text-black">
+          {% trans 'Open Source Software content' %}
+        </span>
+
+        <h5 class="h5 text-black" data-aos="fade-up">
+          2.6. {% trans 'Communication with Us header' %}
+        </h4>
+
+        <span data-aos="fade" data-aos-delay="500"
+        class="text-black">
+          {% trans 'Communication with Us content' %}
+        </span>
+
+        <h5 class="h5 text-black" data-aos="fade-up">
+          2.7. {% trans 'Feedback header' %}
+        </h4>
+
+        <span data-aos="fade" data-aos-delay="500"
+        class="text-black">
+          {% trans 'Feedback content' %}
+        </span>
+
+        <h5 class="h5 text-black" data-aos="fade-up">
+          2.8. {% trans 'Non-Exclusivity header' %}
+        </h4>
+
+        <span data-aos="fade" data-aos-delay="500"
+        class="text-black">
+          {% trans 'Non-Exclusivity content' %}
+        </span>
+      </div>
+
+      <div class="col-md-12 header-container">
+        <h4 class="h4 text-black" data-aos="fade-up">
+          {% trans 'Section' %}&nbsp;3.
+          {% trans 'Your Users header' %}
+        </h4>
+
+        <h5 class="h5 text-black" data-aos="fade-up">
+          3.1. {% trans 'Users and Monitoring header' %}
+        </h4>
+
+        <span data-aos="fade" data-aos-delay="500"
+        class="text-black">
+          {% trans 'Users and Monitoring content' %}
+        </span>
+
+        <h5 class="h5 text-black" data-aos="fade-up">
+          3.2. {% trans 'Security header' %}
+        </h4>
+
+        <span data-aos="fade" data-aos-delay="500"
+        class="text-black">
+          {% trans 'Security content' %}
+        </span>
+
+        <h5 class="h5 text-black" data-aos="fade-up">
+          3.3. {% trans 'Ownership header' %}
+        </h4>
+
+        <span data-aos="fade" data-aos-delay="500"
+        class="text-black">
+          {% trans 'Ownership content' %}
+        </span>
+
+        <h5 class="h5 text-black" data-aos="fade-up">
+          3.4. {% trans 'User Privacy header' %}
+        </h4>
+
+        <span data-aos="fade" data-aos-delay="500"
+        class="text-black">
+          {% trans 'User Privacy content' %}
+        </span>
+      </div>
+
+      <div class="col-md-12 header-container">
+        <h4 class="h4 text-black" data-aos="fade-up">
+          {% trans 'Section' %}&nbsp;4.
+          {% trans 'Prohibitions and Confidentiality header' %}
+        </h4>
+
+        <h5 class="h5 text-black" data-aos="fade-up">
+          4.1. {% trans 'Prohibitions header' %}
+        </h4>
+
+        <span data-aos="fade" data-aos-delay="500"
+        class="text-black">
+          {% trans 'Prohibitions content' %}
+        </span>
+
+        <h5 class="h5 text-black" data-aos="fade-up">
+          4.2. {% trans 'Confidentiality header' %}
+        </h4>
+
+        <span data-aos="fade" data-aos-delay="500"
+        class="text-black">
+          {% trans 'Confidentiality content' %}
+        </span>
+      </div>
+
+      <div class="col-md-12 header-container">
+        <h4 class="h4 text-black" data-aos="fade-up">
+          {% trans 'Section' %}&nbsp;5.
+          {% trans 'Content header' %}
+        </h4>
+
+        <h5 class="h5 text-black" data-aos="fade-up">
+          5.1. {% trans 'Content Accessible Through our APPs header' %}
+        </h4>
+
+        <span data-aos="fade" data-aos-delay="500"
+        class="text-black">
+          {% trans 'Content Accessible Through our APPs content' %}
+        </span>
+
+        <h5 class="h5 text-black" data-aos="fade-up">
+          5.2. {% trans 'Submission of Content header' %}
+        </h4>
+
+        <span data-aos="fade" data-aos-delay="500"
+        class="text-black">
+          {% trans 'Submission of Content content' %}
+        </span>
+
+        <h5 class="h5 text-black" data-aos="fade-up">
+          5.3. {% trans 'Retrieval of content header' %}
+        </h4>
+
+        <span data-aos="fade" data-aos-delay="500"
+        class="text-black">
+          {% trans 'Retrieval of content content' %}
+        </span>
+
+        <h5 class="h5 text-black" data-aos="fade-up">
+          5.4. {% trans 'Data Portability header' %}
+        </h4>
+
+        <span data-aos="fade" data-aos-delay="500"
+        class="text-black">
+          {% trans 'Data Portability content' %}
+        </span>
+
+        <h5 class="h5 text-black" data-aos="fade-up">
+          5.5. {% trans 'Prohibitions on Content header' %}
+        </h4>
+
+        <span data-aos="fade" data-aos-delay="500"
+        class="text-black">
+          {% trans 'Prohibitions on Content content' %}
+        </span>
+      </div>
+
+      <div class="col-md-12 header-container">
+        <h4 class="h4 text-black" data-aos="fade-up">
+          {% trans 'Section' %}&nbsp;6.
+          {% trans 'Our Brand header' %}
+        </h4>
+
+        <h5 class="h5 text-black" data-aos="fade-up">
+          6.1. {% trans 'Brand Features header' %}
+        </h4>
+
+        <span data-aos="fade" data-aos-delay="500"
+        class="text-black">
+          {% trans 'Brand Features content' %}
+        </span>
+
+        <h5 class="h5 text-black" data-aos="fade-up">
+          6.2. {% trans 'Attribution header' %}
+        </h4>
+
+        <span data-aos="fade" data-aos-delay="500"
+        class="text-black">
+          {% trans 'Attribution content' %}
+        </span>
+
+        <h5 class="h5 text-black" data-aos="fade-up">
+          6.3. {% trans 'Publicity header' %}
+        </h4>
+
+        <span data-aos="fade" data-aos-delay="500"
+        class="text-black">
+          {% trans 'Publicity content' %}
+        </span>
+
+        <h5 class="h5 text-black" data-aos="fade-up">
+          6.4. {% trans 'Promotional and Marketing Use header' %}
+        </h4>
+
+        <span data-aos="fade" data-aos-delay="500"
+        class="text-black">
+          {% trans 'Promotional and Marketing Use content' %}
+        </span>
+      </div>
+
+      <div class="col-md-12 header-container">
+        <h4 class="h4 text-black" data-aos="fade-up">
+          {% trans 'Section' %}&nbsp;7.
+          {% trans 'Privacy and Copyright Protection header' %}
+        </h4>
+
+        <h5 class="h5 text-black" data-aos="fade-up">
+          7.1. {% trans 'Privacy Policies header' %}
+        </h4>
+
+        <span data-aos="fade" data-aos-delay="500"
+        class="text-black">
+          {% trans 'Privacy Policies content' %}
+        </span>
+      </div>
+
+      <div class="col-md-12 header-container">
+        <h4 class="h4 text-black" data-aos="fade-up">
+          {% trans 'Section' %}&nbsp;8.
+          {% trans 'Termination header' %}
+        </h4>
+
+        <h5 class="h5 text-black" data-aos="fade-up">
+          8.1. {% trans 'Termination header' %}
+        </h4>
+
+        <span data-aos="fade" data-aos-delay="500"
+        class="text-black">
+          {% trans 'Termination content' %}
+        </span>
+
+        <h5 class="h5 text-black" data-aos="fade-up">
+          8.2. {% trans 'Your Obligations Post-Termination header' %}
+        </h4>
+
+        <span data-aos="fade" data-aos-delay="500"
+        class="text-black">
+          {% trans 'Your Obligations Post-Termination content' %}
+        </span>
+
+        <h5 class="h5 text-black" data-aos="fade-up">
+          8.3. {% trans 'Surviving Provisions header' %}
+        </h4>
+
+        <span data-aos="fade" data-aos-delay="500"
+        class="text-black">
+          {% trans 'Surviving Provisions content' %}
+        </span>
+      </div>
+
+      <div class="col-md-12 header-container">
+        <h4 class="h4 text-black" data-aos="fade-up">
+          {% trans 'Section' %}&nbsp;9.
+          {% trans 'Liability for our APPs header' %}
+        </h4>
+
+        <h5 class="h5 text-black" data-aos="fade-up">
+          9.1. {% trans 'Warranties header' %}
+        </h4>
+
+        <span data-aos="fade" data-aos-delay="500"
+        class="text-black">
+          {% trans 'Warranties content' %}
+        </span>
+
+        <h5 class="h5 text-black" data-aos="fade-up">
+          9.2. {% trans 'Limitation Of Liability header' %}
+        </h4>
+
+        <span data-aos="fade" data-aos-delay="500"
+        class="text-black">
+          {% trans 'Limitation Of Liability content' %}
+        </span>
+
+        <h5 class="h5 text-black" data-aos="fade-up">
+          9.3. {% trans 'Indemnification header' %}
+        </h4>
+
+        <span data-aos="fade" data-aos-delay="500"
+        class="text-black">
+          {% trans 'Indemnification content' %}
+        </span>
+      </div>
+
+      <div class="col-md-12 header-container">
+        <h4 class="h4 text-black" data-aos="fade-up">
+          {% trans 'Section' %}&nbsp;10.
+          {% trans 'General Provisions header' %}
+        </h4>
+
+        <h5 class="h5 text-black" data-aos="fade-up">
+          10.1. {% trans 'Modification header' %}
+        </h4>
+
+        <span data-aos="fade" data-aos-delay="500"
+        class="text-black">
+          {% trans 'Modification content' %}
+        </span>
+
+        <h5 class="h5 text-black" data-aos="fade-up">
+          10.2. {% trans 'Mexico Federal Agency Entities header' %}
+        </h4>
+
+        <span data-aos="fade" data-aos-delay="500"
+        class="text-black">
+          {% trans 'Mexico Federal Agency Entities content' %}
+        </span>
+
+        <h5 class="h5 text-black" data-aos="fade-up">
+          10.3. {% trans 'General Legal Terms header' %}
+        </h4>
+
+        <span data-aos="fade" data-aos-delay="500"
+        class="text-black">
+          {% trans 'General Legal Terms content' %}
+        </span>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock content %}
+
+{% block js_footer %}
+<script type="text/javascript">
+  $("ul.site-menu li").removeClass("active");
+  // $("ul.site-menu li#navAbout").addClass("active");
+
+  $(document).ready(function(){
+  });
+</script>
+{% endblock %}

@@ -1,0 +1,42 @@
+{% load i18n %}
+
+<table id="tblProductDetails"
+class="table table-bordered table-striped table-hover no-footer">
+  <thead>
+    <tr>
+      <th>{% trans 'SKU' %}</th>
+      <th>{% trans 'Product' %}</th>
+      <th>{% trans 'Brand' %}</th>
+      <th>{% trans 'Unit price' %}</th>
+      <!--<th>{% trans 'Quantity' %}</th>-->
+      <!--<th>Subtotal</th>-->
+      <th>{% trans 'Options' %}</th>
+    </tr>
+  </thead>
+
+  <tbody>
+    <!--
+    <tr id="rowEmptyTable">
+      <td colspan="5">
+        {# trans 'Add sales products using the button above' #}
+      </td>
+    </tr>
+  -->
+  </tbody>
+
+  <tfoot>
+    <tr 
+    style="text-align: right; 
+    font-weight: bold">
+      <td colspan="3">
+        {% trans 'Totals' %}:
+      </td>
+
+      <td id="secCounterProducts"></td>
+
+      <td>
+      $<span class="sale-total"></span>
+      </td>
+    </tr>
+  </tfoot>
+</table>

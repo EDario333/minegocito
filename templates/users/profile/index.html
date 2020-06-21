@@ -1,0 +1,306 @@
+{% load static i18n %}
+
+{% if msg %}
+  <script type="text/javascript">
+    $(document).ready(function(){
+      show_msg_with_toastr("{{level}}", "{{msg}}");
+      if ($("section.content form input")[0] != undefined)
+        $("section.content form input")[0].focus();
+    });
+  </script>
+{% endif %}
+
+<script type="text/javascript">
+  var msg_wait;
+  //var missed_query;
+
+  $.ajax({
+    method: "GET",
+    url: "/translator/translate/",
+    data: { msg: "Please wait"}
+  })
+  .done(function(result) {
+    msg_wait=result;
+    /*result = result.split(',');
+    msg_wait = result[0];
+    missed_query = result[1];*/
+  });
+/*
+  function view_all(url, action) {
+    show_msg_with_toastr("info", msg_wait);
+    $("section.content form button[type='submit']").attr("disabled", "true");
+    url = url + "?itm_menu={{itm_menu}}&user={{user}}";
+
+    if (action.toUpperCase() == 'EDIT')
+      url = url + "&edit=true";
+    else if (action.toUpperCase() == 'DELETE')
+      url = url + "&delete=true";
+
+    $.ajax({
+      method: "GET",
+      url: url
+    })
+    .done(function(result) {
+      $("section.content").html(result);
+      //toastr.clear();
+      return false;
+    });
+  }
+*/
+</script>
+
+<style type="text/css">
+  .profile-picture {
+    /*border-radius: 50%;
+    -webkit-border-radius: 50%;
+    -moz-border-radius: 50%
+    -ms-border-radius: 50%;*/
+    cursor: pointer;
+  }
+</style>
+
+<div class="container-fluid">
+  <div class="row clearfix">
+    <div class="card">
+      <div class="header">
+        <h2>
+          {{form.title|upper}}
+        </h2>
+      </div>
+
+      <div class="body">
+        <p>
+          {% block msg_pre_form %}
+            {% trans 'Fields marked are mandatory' %}.
+          {% endblock %}
+        </p>
+
+        <form action="{{form.action}}" 
+        method="post" enctype="multipart/form-data"
+        onreset="$('section.content form input')[0].focus();">
+
+          <img src="{{user.static_profile_picture}}" 
+          class="profile-picture" 
+          width="86" height="86" 
+          id="imgProfilePicture" 
+          data-placement="bottom"
+          data-toggle="tooltip" 
+          title="{% trans 'Change profile picture' %}" 
+          data-original-title="{% trans 'Change profile picture' %}"
+          alt="{% trans 'Profile picture' %}" />
+          <br />
+
+          {{form.as_table}}
+          {% csrf_token %}
+
+          <label for="txtNewPass">
+          	{% trans 'New password' %}:
+          </label>
+
+          <input class="form-control" id="txtNewPass" 
+          style="margin: 0 0 10px 0"
+          type="password" name="new_password" />
+
+          <label for="txtConfirmPass">
+          	{% trans 'Confirm new password' %}:
+          </label>
+
+          <input class="form-control" 
+          id="txtConfirmPass" 
+          style="margin: 0 0 10px 0"
+          type="password" name="confirm_password" />
+
+          <input hidden="true" 
+          style="visibility: hidden;" 
+          type="email" 
+          name="user" 
+          value="{{user}}"
+          id="txtEmailHid">
+
+          <!-- <input hidden="true" 
+          style="visibility: hidden;" 
+          name="user_obj" 
+          id="txtUserHid">
+
+          <input hidden="true" 
+          style="visibility: hidden;" 
+          name="app_version" 
+          value="{{app_version}}">
+
+          <input hidden="true" 
+          style="visibility: hidden;" 
+          name="itm_menu" 
+          value="{{itm_menu}}"> -->
+
+          <button class="btn btn-primary waves-effect"
+          type="submit" id="btnSubmit">
+            <i class="material-icons">
+              {{form.icon_btn_submit}}
+            </i>
+            {{form.btn_label}}
+          </button>
+
+          <button class="btn btn-warning waves-effect"
+          type="reset">
+            <i class="material-icons">clear_all</i>
+            {% trans 'Clean all' %}
+          </button>
+
+          <button class="btn btn-default waves-effect act-cancel-form" type="button">
+            <i class="material-icons">cancel</i>
+            {% trans 'Cancel' %}
+          </button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="divAjaxResults"></div>
+<!--
+<script type="text/javascript" src="{% static 'js/jquery-ui-1.12.1/jquery-ui.min.js' %}"></script>
+
+<link href="{% static 'js/jquery-ui-1.12.1/jquery-ui.min.css' %}" rel="stylesheet">
+-->
+<script type="text/javascript" src="{% static 'js/jquery.form.min.js' %}"></script>
+
+<script type="text/javascript">
+	$('#id_password').val('');
+
+	function readURL(input) {
+    if (input.files && input.files[0]) {
+      var reader = new FileReader();
+
+      reader.onload = function (e) {
+        $('#imgProfilePicture')
+        .attr('src', e.target.result);
+        //.width(150)
+        //.height(200);
+      };
+
+      reader.readAsDataURL(input.files[0]);
+    }
+  }
+
+  $(document).ready(function(){
+    $('[data-toggle="tooltip"]').tooltip();
+
+    module_name = $(".container-fluid .card .header h2")[0].innerHTML;
+    module_name = module_name.toUpperCase();
+
+    var options = { 
+      target:        '#divAjaxResults',
+      beforeSubmit:  showRequest,
+      success:       showResponse 
+    }; 
+
+    $(".act-cancel-form").click(function() {
+      showMainPanel();
+    });
+
+    function showRequest(formData, jqForm, options) { 
+      show_msg_with_toastr("info", msg_wait);
+      $("section.content form button[type='submit']").attr("disabled", "true");
+
+      if (!module_name.includes('AGREGAR')) {
+        inputs = $('section.content form input.validate');
+        tope = inputs.length;
+        x = -1;
+        disable_btn = false;
+        counter_failed = 0;
+
+        while (++x < tope)
+          if (!validField(inputs[x]))
+            counter_failed++;
+
+        if (counter_failed == tope)
+          disable_btn = true;
+
+        toastr.clear();
+
+        if (disable_btn) {
+          $("section.content form button[type='submit']").removeAttr("disabled");
+          show_msg_with_toastr("error", missed_query);
+        }
+
+        return !disable_btn;
+      }
+
+      return true; 
+    }
+ 
+    function showResponse(responseText, statusText, xhr, $form)  { 
+      //$(".page-loader-wrapper").remove();
+      show_msg_with_toastr(responseText.status, responseText.msg);
+      $("#btnSubmit").removeAttr("disabled");
+      if (responseText.status=="success") {
+      	$("#mainProfilePicture").attr("src", responseText.new_profile_picture);
+      }
+      //console.log(responseText);
+      //alert(statusText);
+    }
+/*
+    if (module_name.includes('AGREGAR'))
+      $("input[name='name']").change(function(){
+        show_msg_with_toastr("info", msg_wait);
+        name = this.value.trim();
+        $.ajax({
+          method: "GET",
+          url: "/brands/search/by-name",
+          data: { brand: name}
+        })
+        .done(function(result) {
+          toastr.clear();
+          if (result['exist'] != undefined && 
+            result['exist'] && !result.dropped)
+            $.ajax({
+              method: "GET",
+              url: "/translator/translate",
+              data: { msg: "The brand already exists"}
+            })
+            .done(function(result) {
+              show_msg_with_toastr("error", result);
+              $("section.content form button[type='submit']").attr("disabled", "true");
+            });
+          else {
+            $("section.content form button[type='submit']").removeAttr("disabled");
+          }
+        });
+      });
+*/
+    $("img.profile-picture").click(function() {
+      $("#id_profile_picture").click();
+    });
+
+    $("#id_password").change(function() {
+    	$.ajax({
+        method: "GET",
+        url: "/users/admin/verify-my-current-password",
+        data: { password: this.value }
+      })
+      .done(function(result) {
+      	if (result.status != "success") {
+	        show_msg_with_toastr(result.status, result.msg);
+	        $("#btnSubmit").attr("disabled", "true");
+      	}
+      	else {
+      		$("#btnSubmit").removeAttr("disabled");
+      	}
+      });
+    });
+
+    $("#txtNewPass").change(function() {
+    	verifyPasswordStrength(this.value, "#btnSubmit");
+    });
+
+    $("#txtConfirmPass").change(function() {
+    	verifyPasswordMatching(this.value, $("#txtNewPass").val(), "#btnSubmit");
+    });
+
+    $("section.content form").ajaxForm(options);
+    //$("div.menu a#{{itm_menu}}").parent().addClass("active");
+  });
+</script>
+
+{% block actions_js %}
+{% endblock %}

@@ -1,0 +1,60 @@
+﻿{% extends 'dashboard/base.html' %}
+
+{% load static %}
+
+{% block extra_js_footer %}
+	{% include 'dashboard/assets/confirm-logout.html' %}
+
+	<script type="text/javascript" src="{% static 'js/dashboard/app.js' %}">
+	</script>
+
+	{% if not my_user.first_time_login %}
+		<script type="text/javascript" src="{% static 'js/dashboard/tutorials/first/app.js' %}">
+		</script>
+
+	  {% include 'dashboard/tutorials/first/first-time-login.html' %}
+
+	  <script type="text/javascript">
+			$(function () {
+				$("#dlgFirstTimeLogin").modal();
+
+		    $('#dlgFirstTimeLogin').on('hidden.bs.modal', function () {
+		    		$.ajax({
+						  method: "GET",
+						  url: "/users/check-first-time-login-for-user",
+						  data: { user: "{{user}}"}
+						})
+					  .done(function(msg) {
+					  	//console.log(msg);
+					  });
+			 		}
+				);
+			});
+		</script>
+	{% elif my_user.show_dlg_first_tutorial_not_completed %}
+    {% if not my_user.first_tutorial_completed %}
+    	<script type="text/javascript" src="{% static 'js/dashboard/tutorials/first/app.js' %}">
+			</script>
+    	{% include 'dashboard/tutorials/first/complete-first.html' %}
+    	<script type="text/javascript">
+				$(function () {
+					$("#dlgCompleteFirstTutorial").modal();
+
+			    $('#dlgCompleteFirstTutorial').on('hidden.bs.modal', function () {
+			    		if (!($("#dlgCompleteFirstTutorial #chkAlwaysShowDlgFirstTutorial").prop("checked")))
+			    			//valid_csrftoken();
+			    			$.ajax({
+								  method: "GET",
+								  url: "/users/disable-first-time-tutorial-for-user",
+								  data: { user: "{{user}}"}
+								})
+							  .done(function(msg) {
+							  	console.log(msg);
+							  });
+				 		}
+					);
+				});
+			</script>
+    {% endif %}
+	{% endif %}
+{% endblock %}

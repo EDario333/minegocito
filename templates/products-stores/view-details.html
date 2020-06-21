@@ -1,0 +1,789 @@
+{% load static i18n %}
+
+<style type="text/css">
+	div#modalViewDetails {
+		width: 35%;
+	}
+
+  table.tbl-view-details {
+    width: 100%;
+  }
+
+  table.tbl-view-details tbody tr td:first-child  {
+    /* text-align: right; */
+    font-weight: bold;
+    width: 100%;
+  }
+
+  .right-alignment {
+    text-align: right;
+  }
+
+  .hidden {
+    visibility: hidden;
+  }
+
+  img.product-image {
+    width: 128px;
+    height: 128px;
+    margin: 0 0 10px 0;
+    border-radius: 10px;
+  }
+</style>
+
+{% if can_edit and can_edit|upper == 'TRUE' %}
+<script src="{% static 'js/dashboard/view-details/edit-functions.js' %}"></script>
+{% endif %}
+
+{% if can_delete and can_delete|upper == 'TRUE' %}
+<script src="{% static 'js/dashboard/view-details/delete-functions.js' %}"></script>
+{% endif %}
+
+<div class="bg-gradient-primary modal fade" 
+id="dlgViewDetails" tabindex="-1" role="dialog" 
+aria-labelledby="lblHeader" aria-hidden="true">
+  <div class="modal-dialog my-modal" 
+  role="document" id="modalViewDetails">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="lblHeader">
+          {% trans 'Product details' %}
+        </h5>
+
+        <button class="close" type="button" 
+        data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">×</span>
+        </button>
+      </div>
+      <hr />
+
+      <div class="modal-body">
+        <div class="card hidden confirm-delete">
+          <div class="body bg-blue-grey">
+            <h4>
+              <!-- 
+                <i class="material-icons">warning</i> 
+              -->
+              {% trans 'Are you sure do you want to remove this product from its store' %}
+            </h4>
+
+            <form action="/products-stores/confirmed-delete" method="post" 
+            class="confirm-delete">
+              {% csrf_token %}
+
+              <label for="txtReasonToDrop">
+                {% trans 'Aditionally you can specify the reason to remove the product' %}
+              </label>
+
+              <textarea cols="10" id="txtReasonToDrop" 
+              name="reason" class="form-control"></textarea>
+
+              <input name="productstore" 
+              value="{{product.id}}" 
+              hidden="true" 
+              style="visibility: hidden;" />
+
+              <input type="text" name="itm_menu" 
+              value="{{itm_menu}}" hidden="true" 
+              style="visibility: hidden;" />
+              <br />
+
+              <button class="btn btn-default" 
+              type="submit">
+                {% trans 'Delete' %}
+              </button>
+
+              <button class="btn btn-default" 
+              type="button" 
+              onclick="cancelDelete()">
+                {% trans 'Cancel' %}
+              </button>
+            </form>
+          </div>
+        </div>
+
+        <p class="hidden edit">
+          {% trans 'Fields marked are mandatory' %}.
+        </p>
+
+      	<div class="table-responsive">
+          <img src="{{product.static_photo}}" 
+          alt="photo" class="product-image" />
+
+          <form method="post" class="update"
+          enctype="multipart/form-data"
+          action="/products-stores/update">
+            {% csrf_token %}
+
+            <input type="text" 
+            hidden="true" 
+            style="visibility: hidden;" 
+            value="{{product.id}}" 
+            name="productstore">
+
+            <input name="module"
+            hidden="true" 
+            style="visibility: hidden;"  
+            value="edit-details" />
+
+            {% if can_edit and can_edit|upper == 'TRUE' %}
+              <br />
+              <span class="hidden edit form-group">
+                <label for="txtImage">
+                  {% trans 'Change image' %}:
+                </label>
+
+                <input id="txtImage" 
+                type="file"
+                accept="image/*" 
+                value="{{product.image}}" 
+                name="image">
+              </span>
+            {% endif %}
+
+            <table class="table-bordered table-striped tbl-view-details" 
+            style="white-space: nowrap;">
+              <tbody>
+                {% if can_edit and can_edit|upper == 'TRUE' %}
+                  <tr class="hidden edit">
+                    <td>
+                      <label for="txtProduct">
+                        *&nbsp;{% trans 'Product' %}:
+                      </label>
+                    </td>
+                  </tr>
+
+                  <tr class="hidden edit">
+                    <td>
+                      <input id="txtProduct" 
+                      type="text" required="true" 
+                      class="form-control" 
+                      value="{{product.purchase_detail.product.name}}" 
+                      name="product">
+
+                      <input hidden="" style="visibility: hidden;" 
+                      name="product_obj" 
+                      value="{{product.purchase_detail.product.id}}" />
+                    </td>
+                  </tr>
+                {% endif %}
+
+                <tr class="view">
+                  <td>
+                    {% trans 'Product' %}:
+                  </td>
+
+                  <td>
+                    {{product.purchase_detail.product.name}}
+                  </td>
+                </tr>
+
+                {% if can_edit and can_edit|upper == 'TRUE' %}
+                  <tr class="hidden edit">
+                    <td>
+                      <label for="txtBrand">
+                        *&nbsp;{% trans 'Brand' %}:
+                      </label>
+                    </td>
+                  </tr>
+
+                  <tr class="hidden edit">
+                    <td>
+                      <input id="txtBrand" 
+                      required="true"
+                      class="form-control" 
+                      value="{{product.purchase_detail.brand.name}}"
+                      name="brand">
+
+                      <input hidden="" style="visibility: hidden;" 
+                      value="{{product.purchase_detail.brand.id}}" 
+                      name="brand_obj">
+                    </td>
+                  </tr>
+                {% endif %}
+
+                <tr class="view">
+                  <td>
+                    {% trans 'Brand' %}:
+                  </td>
+
+                  <td>
+                    {{product.purchase_detail.brand.name}}
+                  </td>
+                </tr>
+
+                {% if can_edit and can_edit|upper == 'TRUE' %}
+                  <tr class="hidden edit">
+                    <td>
+                      <label for="txtSKU">
+                        *&nbsp;{% trans 'SKU' %}:
+                      </label>
+                    </td>
+                  </tr>
+
+                  <tr class="hidden edit">
+                    <td>
+                      <input id="txtSKU" 
+                      required="true"
+                      class="form-control" 
+                      value="{{product.sku}}" 
+                      name="sku">
+                    </td>
+                  </tr>
+                {% endif %}
+
+                <tr class="view">
+                  <td>
+                    {% trans 'SKU' %}:
+                  </td>
+
+                  <td>
+                    {{product.sku}}
+                  </td>
+                </tr>
+
+                {% if can_edit and can_edit|upper == 'TRUE' %}
+                  <tr class="hidden edit">
+                    <td>
+                      <label for="txtPurchasedAt">
+                        *&nbsp;{% trans 'Purchased at' %}:
+                      </label>
+                    </td>
+                  </tr>
+
+                  <tr class="hidden edit">
+                    <td>
+                      <input id="txtPurchasedAt" 
+                      class="form-control" 
+                      value="{{product.purchase_detail.purchase.purchased_at}}" 
+                      name="purchased_at">
+                    </td>
+                  </tr>
+                {% endif %}
+
+                <tr class="view">
+                  <td>
+                    {% trans 'Purchased at' %}:
+                  </td>
+
+                  <td>
+                    {{product.purchase_detail.purchase.purchased_at}}
+                  </td>
+                </tr>
+
+                {% if can_edit and can_edit|upper == 'TRUE' %}
+                  <tr class="hidden edit">
+                    <td>
+                      <label for="txtPurchasedWhen">
+                        *&nbsp;{% trans 'Purchased when' %}:
+                      </label>
+                    </td>
+                  </tr>
+
+                  <tr class="hidden edit">
+                    <td>
+                      <input id="txtPurchasedWhen" 
+                      class="form-control" 
+                      value="{{product.purchase_detail.purchase.purchased_when_fmt_mx}}" 
+                      name="purchased_when">
+                    </td>
+                  </tr>
+                {% endif %}
+
+                <tr class="view">
+                  <td>
+                    {% trans 'Purchased when' %}:
+                  </td>
+
+                  <td>
+                    {{product.purchase_detail.purchase.purchased_when}}
+                  </td>
+                </tr>
+
+                {% if can_edit and can_edit|upper == 'TRUE' %}
+                  <tr class="hidden edit">
+                    <td>
+                      <label for="txtPurchaseID">
+                        *&nbsp;{% trans 'Purchase ID' %}:
+                      </label>
+                    </td>
+                  </tr>
+
+                  <tr class="hidden edit">
+                    <td>
+                      <input id="txtPurchaseID" 
+                      required="true"
+                      class="form-control" 
+                      value="{{product.purchase_detail.purchase.identifier}}" 
+                      name="purchase_id">
+                    </td>
+                  </tr>
+                {% endif %}
+
+                <tr class="view">
+                  <td>
+                    {% trans 'Purchase ID' %}:
+                  </td>
+
+                  <td>
+                    {{product.purchase_detail.purchase.identifier}}
+                  </td>
+                </tr>
+
+                {% if product.stored %}
+                  {% if can_edit and can_edit|upper == 'TRUE' %}
+                    <tr class="hidden edit">
+                      <td>
+                        <label for="txtStore">
+                          *&nbsp;{% trans 'In store' %}:
+                        </label>
+                      </td>
+                    </tr>
+
+                    <tr class="hidden edit">
+                      <td>
+                        <input id="txtStore" 
+                        class="form-control" 
+                        required="true"
+                        value="{{product.in_store.name}}" 
+                        name="store">
+
+                        <input hidden="" style="visibility: hidden;" 
+                        value="{{product.in_store.id}}" 
+                        name="store_obj">
+                      </td>
+                    </tr>
+
+                    <tr class="hidden edit">
+                      <td>
+                        {% trans 'In shop' %}:
+                        <p id="secShopname">
+                        {{product.in_store.shop.name}}
+                        </p>
+                      </td>
+                    </tr>
+                  {% endif %}
+
+                  <tr class="view">
+                    <td>
+                      {% trans 'In store' %}:
+                    </td>
+
+                    <td>
+                      {{product.in_store.name}}
+                    </td>
+                  </tr>
+
+                  <tr class="view">
+                    <td>
+                      {% trans 'In shop' %}:
+                    </td>
+
+                    <td>
+                      {{product.in_store.shop.name}}
+                    </td>
+                  </tr>
+                {% else %}
+                  {% if can_edit and can_edit|upper == 'TRUE' %}
+                    <tr class="hidden edit">
+                      <td>
+                        <label for="txtStore">
+                          *&nbsp;{% trans 'In store' %}:
+                        </label>
+                      </td>
+                    </tr>
+
+                    <tr class="hidden edit">
+                      <td>
+                        <input id="txtStore" 
+                        class="form-control" 
+                        required="true"
+                        name="store">
+                      </td>
+                    </tr>
+                  {% endif %}
+
+                  <tr class="view">
+                    <td>
+                      {% trans 'In store' %}:
+                    </td>
+
+                    <td>
+                      {% trans 'None male' %}
+                    </td>
+                  </tr>
+                {% endif %}
+
+                {% if can_edit and can_edit|upper == 'TRUE' %}
+                  <tr class="hidden edit">
+                    <td>
+                      <label for="txtPurchasePrice">
+                        *&nbsp;{% trans 'Purchase price' %}:
+                      </label>
+                    </td>
+                  </tr>
+
+                  <tr class="hidden edit">
+                    <td>
+                      <input id="txtPurchasePrice" 
+                      required="true"
+                      class="form-control" 
+                      value="{{product.purchase_detail.purchase_price}}" 
+                      name="purchase_price">
+                    </td>
+                  </tr>
+                {% endif %}
+
+                <tr class="view">
+                  <td>
+                    {% trans 'Purchase price' %}:
+                  </td>
+
+                  <td>
+                    ${{product.purchase_detail.purchase_price}}
+                  </td>
+                </tr>
+
+                <tr id="rowBtnSave" 
+                hidden="true" class="hidden">
+                  <td colspan="2">
+                    <button type="submit" 
+                    class="btn btn-primary">
+                      {% trans 'Save' %}
+                    </button>
+
+                    <button type="button" 
+                    onclick="cancelEdit()" 
+                    class="btn btn-primary btnCancelEdit">
+                      {% trans 'Cancel' %}
+                    </button>
+                  </td>
+                </tr>
+
+                {% if can_edit and can_edit|upper == 'TRUE' or can_delete and can_delete|upper == 'TRUE' %}
+                <tr class="view">
+                  <td>{% trans 'Options' %}:</td>
+
+                  <td>
+                  	{% if can_edit and can_edit|upper == 'TRUE' %}
+  	                	<a href="#" data-placement="bottom"
+  	                	data-toggle="tooltip"  
+                      onclick="editData();prepareEditFrm();" 
+                      id="actEditData"
+  	                	title="{% trans 'Edit' %}" 
+  	                	data-original-title="{% trans 'Edit' %}"><i class="material-icons">edit</i></a>
+                  	{% endif %}
+
+                  	{% if can_delete and can_delete|upper == 'TRUE' %}
+  	                	<a href="#" data-placement="top"
+  	                	data-toggle="tooltip" 
+                      id="actDelete" 
+                      onclick="confirmDelete()" 
+  	                	title="{% trans 'Delete' %}" 
+  	                	data-original-title="{% trans 'Delete' %}"><i class="material-icons">delete</i></a>
+                  	{% endif %}
+                  </td>
+                </tr>
+                {% endif %}
+              </tbody>
+            </table>
+          </form>
+        </div>
+      </div>
+      <hr />
+
+      <div class="modal-footer">
+      	<button type="button" 
+        class="btn btn-primary" 
+      	data-dismiss="modal">
+      		<!--<i class="material-icons">clear</i>-->
+      		{% trans 'Back' %}
+      	</button>
+        <div id="divAjaxResults"></div>
+      </div>
+    </div>
+	</div>
+</div>
+
+<script type="text/javascript">
+  function on_close_dlgViewDetails() {
+    $('#dlgViewDetails').on('hidden.bs.modal', 
+      function () {
+        //$('#dlgSearchResults').focus();
+        toastr.clear();
+      });
+  }
+
+	$(document).ready(function(){
+		toastr.clear();
+
+    itm_menu = $("div.menu li.active a")[0].id;
+    $("#dlgViewDetails input[name='itm_menu']").val(itm_menu);
+
+		var msg_wait;
+
+	  $.ajax({
+	    method: "GET",
+	    url: "/translator/translate/",
+	    data: { msg: "Please wait"}
+	  })
+	  .done(function(result) {
+	    msg_wait = result;
+	  });
+
+		$('[data-toggle="tooltip"]').tooltip();
+  });
+</script>
+
+{% if can_delete and can_delete|upper == 'TRUE' %}
+<script type="text/javascript">
+  function prepareDeleteFrm() {
+    options = { 
+      target:        'section.content .container-fluid',
+      beforeSubmit:  showRequest,
+      success:       showResponse
+    }; 
+
+    function showRequest(formData, jqForm, options) { 
+      show_msg_with_toastr("info", msg_wait);
+      return true;
+    }
+ 
+    function showResponse(responseText, statusText, xhr, $form)  { 
+      /*console.log(responseText);
+      console.log(statusText);
+      console.log(xhr);
+      console.log($form);*/
+      //$("#dlgViewDetails").modal("close");
+      //$("#dlgSearchResults").modal("hide");
+    }
+
+    $("#dlgViewDetails form.confirm-delete").ajaxForm(options);
+  }
+</script>
+{% endif %}
+
+{% if can_edit and can_edit|upper == 'TRUE' %}
+<script type="text/javascript" src="{% static 'js/jquery-ui-1.12.1/datepicker-es.js' %}"></script>
+
+<script type="text/javascript" src="{% static 'js/jquery-timepicker/jquery.timepicker.min.js' %}"></script>
+
+<link href="{% static 'js/jquery-timepicker/jquery.timepicker.min.css' %}" rel="stylesheet">
+
+<script type="text/javascript">
+  function prepareEditFrm() {
+    $("#dlgViewDetails form.update input[name='product']").autocomplete({
+      source: "/products/autocomplete/my-products",
+      minLength: 1,
+    });
+
+    $("#dlgViewDetails form.update input[name='brand']").autocomplete({
+      source: "/brands/autocomplete/my-brands",
+      minLength: 1,
+    });
+
+    $("#dlgViewDetails form.update input[name='store']").autocomplete({
+      source: "/stores/autocomplete/my-stores",
+      minLength: 1,
+    });
+
+    $("#dlgViewDetails table.tbl-view-details tbody tr td:first-child").removeClass("right-alignment");
+
+    $("#dlgViewDetails form.update input[name='product']").change(function(){
+      if (this.value.trim().length < 1) {
+        $("#dlgViewDetails form.update button[type='submit']").attr("disabled", "true");
+        return false;
+      }
+
+      show_msg_with_toastr("info", msg_wait);
+      $.ajax({
+        method: "GET",
+        url: "/products/search/by-name",
+        data: { product: this.value }
+      })
+      .done(function(result) {
+        toastr.clear();
+        if (result['exist'] != undefined && 
+            !result['exist'] || result.dropped)
+          $.ajax({
+            method: "GET",
+            url: "/translator/translate",
+            data: { msg: "Please enter a valid product"}
+          })
+          .done(function(result) {
+            show_msg_with_toastr("error", result);
+            $("#dlgViewDetails form.update input[name='product_obj']").val("");
+            $("#dlgViewDetails form.update button[type='submit']").attr("disabled", "true");
+          });
+        else if (result.exist == undefined) {
+          show_msg_with_toastr(result.status, result.msg);
+        }
+        else {
+          $("#dlgViewDetails form.update input[name='product_obj']").val(result.product);
+          $("#dlgViewDetails form.update button[type='submit']").removeAttr("disabled");
+        }
+      });
+    });
+
+    $("#dlgViewDetails form.update input[name='brand']").change(function(){
+      if (this.value.trim().length < 1) {
+        $("#dlgViewDetails form.update button[type='submit']").attr("disabled", "true");
+        return false;
+      }
+
+      show_msg_with_toastr("info", msg_wait);
+      $.ajax({
+        method: "GET",
+        url: "/brands/search/by-name",
+        data: { brand: this.value}
+      })
+      .done(function(result) {
+        toastr.clear();
+        if (result['exist'] != undefined && 
+            !result['exist'] || result.dropped)
+          $.ajax({
+            method: "GET",
+            url: "/translator/translate",
+            data: { msg: "Please enter a valid brand"}
+          })
+          .done(function(result) {
+            show_msg_with_toastr("error", result);
+            $("#dlgViewDetails form.update input[name='brand_obj']").val("");
+            $("#dlgViewDetails form.update button[type='submit']").attr("disabled", "true");
+          });
+        else if (result['exist'] == undefined) {
+          show_msg_with_toastr(result.status, result.msg);
+        }
+        else {
+          $("#dlgViewDetails form.update input[name='brand_obj']").val(result.brand);
+          $("#dlgViewDetails form.update button[type='submit']").removeAttr("disabled");
+        }
+      });
+    });
+
+    $("#dlgViewDetails form.update input[name='store']").change(function(){
+      if (this.value.trim().length < 1) {
+        $("#dlgViewDetails form.update button[type='submit']").attr("disabled", "true");
+        $("#dlgViewDetails form.update #secShopname").html("------");
+        return false;
+      }
+
+      show_msg_with_toastr("info", msg_wait);
+      storename = this.value.substring(0, this.value.indexOf(" ["));
+      $.ajax({
+        method: "GET",
+        url: "/stores/search/by-name",
+        data: { store: storename }
+      })
+      .done(function(result) {
+        toastr.clear();
+        if (result['exist'] != undefined && 
+          !result['exist'] || result.dropped)
+          $.ajax({
+            method: "GET",
+            url: "/translator/translate",
+            data: { msg: "Please enter a valid store"}
+          })
+          .done(function(result) {
+            show_msg_with_toastr("error", result);
+            $("#dlgViewDetails form.update input[name='store_obj']").val("");
+            $("#dlgViewDetails form.update #secShopname").html("------");
+            $("#dlgViewDetails form.update button[type='submit']").attr("disabled", "true");
+          });
+        else if (result['exist'] == undefined) {
+          show_msg_with_toastr(result.status, result.msg);
+          $("#dlgViewDetails form.update #secShopname").html("------");
+        }
+        else {
+          $("#dlgViewDetails form.update input[name='store_obj']").val(result.store);
+          $("#dlgViewDetails form.update #secShopname").html(result.shop_name);
+          $("#dlgViewDetails form.update button[type='submit']").removeAttr("disabled");
+        }
+      });
+    });
+
+    // The next approach solve the issue with jQuery autocompletes on Bootstrap's modal dialog
+    // The issue is that the autocomplete options will appear "behind" the modal dialog. In my previous apps I will include a css style modifying the z-index for the ui-autocomplete, but now, I think this approach is even better
+    // This was taken from: 
+    // https://stackoverflow.com/questions/16133654/autocomplete-issue-into-bootstrap-modal
+    $("#dlgViewDetails form.update input[name='product']").autocomplete("option", "appendTo", "#dlgViewDetails form.update");
+
+    $("#dlgViewDetails form.update input[name='brand']").autocomplete("option", "appendTo", "#dlgViewDetails form.update");
+
+    $("#dlgViewDetails form.update input[name='store']").autocomplete("option", "appendTo", "#dlgViewDetails form.update");
+
+    options = { 
+      target:        '#dlgViewDetails #divAjaxResults',
+      beforeSubmit:  showRequest,  
+      success:       showResponse
+    }; 
+
+    function showRequest(formData, jqForm, options) { 
+      $('#dlgViewDetails form.update button[type="submit"]').attr("disabled", "true");
+      show_msg_with_toastr("info", msg_wait);
+      return true;
+    }
+ 
+    function showResponse(responseText, statusText, xhr, $form)  { 
+      toastr.clear();
+      if (statusText == "success")
+        show_msg_with_toastr(responseText.status, responseText.msg);
+      $('#dlgViewDetails form.update button[type="submit"]').removeAttr("disabled");
+    }
+
+    $("#dlgViewDetails form.update").ajaxForm(options);
+
+    $("#txtPurchasedAt").timepicker({'timeFormat': 'H:i:s', 'step': 15, 'disableTextInput': true});
+
+    $("#txtPurchasedWhen").datepicker({maxDate: "+0D",  showButtonPanel: true, changeMonth: true, changeYear: true});
+    $("#txtPurchasedWhen").datepicker("option", $.datepicker.regional["es"] );
+
+    $("#txtPurchasedWhen").attr("readonly", "readonly");
+    //$("#id_identifier").datepicker("option", "appendTo", "div.body");
+/*
+    function verifyPurchaseData() {
+      show_msg_with_toastr("info", msg_wait);
+
+      pi = $("#txtPurchaseID").val();
+      p_at = $("#txtPurchasedAt").val();
+      p_when = $("#txtPurchasedWhen").val();
+
+      data = {
+        identifier: pi,
+        purchased_at: p_at,
+        purchased_when: p_when
+      };
+
+      $.ajax({
+        method: "GET",
+        url: "/purchases/search/by-unique-purchase-user",
+        data: data
+      })
+      .done(function(result) {
+        toastr.clear();
+        if (result.exist) {
+          show_msg_with_toastr("error", result.msg);
+          $("#dlgViewDetails form.update button[type='submit']").attr("disabled", "true");
+        }
+        else
+          $("#dlgViewDetails form.update button[type='submit']").removeAttr("disabled");
+      });
+    }
+
+    $("#txtPurchaseID").change(function(){
+      verifyPurchaseData();       
+    });
+
+    $("#txtPurchasedAt").change(function(){
+      verifyPurchaseData();       
+    });
+
+    $("#txtPurchasedWhen").change(function(){
+      verifyPurchaseData();       
+    });
+*/
+  }
+</script>
+{% endif %}
+
+<div id="divViewDetails"></div>

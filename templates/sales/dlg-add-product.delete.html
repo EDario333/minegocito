@@ -1,0 +1,772 @@
+{% load i18n %}
+
+<style type="text/css">
+  div.modal-dialog {
+    width: 50%;
+  }
+</style>
+
+<div class="bg-gradient-primary modal fade" 
+id="dlgAddProduct" tabindex="-1" role="dialog" 
+aria-labelledby="lblHeader" aria-hidden="true"
+onfocus='$("#dlgAddProduct #txtProduct").focus();'>
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="lblHeader">
+          {% trans 'Add product to purchase' %}
+        </h5>
+
+        <button class="close" type="button" 
+        data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">×</span>
+        </button>
+      </div>
+      <hr />
+
+      <div class="modal-body row">
+        <div class="col-sm-6">
+  				<label for="txtProduct">
+  					*&nbsp;{% trans 'Product' %}:
+  				</label>
+
+  				<input name="product_obj" id="product_obj" 
+          style="visibility: hidden;" hidden />
+
+  				<input name="product" 
+  				next-target="txtBrand" 
+  				class="form-control" type="text" 
+  				style="margin: 0 0 10px 0" 
+  				id="txtProduct" />
+
+  				<label for="txtBrand">
+  					*&nbsp;{% trans 'Brand' %}:
+  				</label>
+
+  				<input name="brand_obj" id="brand_obj" />
+
+  				<input name="brand" 
+  				next-target="txtPurchasePrice"
+  				class="form-control" 
+  				style="margin: 0 0 10px 0" 
+  				id="txtBrand" />
+
+  				<label for="txtPurchasePrice">
+  					*&nbsp;{% trans 'Purchase price' %}:
+  				</label>
+
+  				<input name="purchase_price" 
+  				class="form-control" value="0.01" 
+  				next-target="txtQuantity"
+  				type="number" min="0.01" step="0.01" 
+  				style="margin: 0 0 10px 0" 
+  				id="txtPurchasePrice" />
+
+  				<label for="txtQuantity">
+  					*&nbsp;{% trans 'Quantity' %}:
+  				</label>
+
+  				<input name="quantity" 
+  				class="form-control" value="1" 
+  				type="number" min="1" step="1" 
+  				next-target="txtDescription"
+  				style="margin: 0 0 10px 0" 
+          onkeypress="return event.charCode >= 48 && event.charCode <= 57"
+  				id="txtQuantity" />
+
+  				<label for="txtDescription">
+  					{% trans 'Description' %}:
+  				</label>
+
+  				<textarea name="description" 
+  				class="form-control" cols="50" 
+  				style="margin: 0 0 10px 0" 
+  				id="txtDescription"></textarea>
+
+  				<label for="txtNotes">
+  					{% trans 'Notes or comments' %}:
+  				</label>
+
+  				<textarea name="notes" 
+  				class="form-control" 
+  				style="margin: 0 0 10px 0" 
+  				id="txtNotes"></textarea>
+
+          {% if 'AGREGAR' in form.title|upper %}
+            <input type="checkbox" 
+            class="all-products-in-store"
+            id="chkAllProductsInSameStore" />
+
+            <label for="chkAllProductsInSameStore"
+            class="all-products-in-store">
+              {% trans 'Assign all these products to store' %}
+            </label>
+            <br />
+          {% endif %}
+
+          <span class="global-store">
+            <label for="txtStoreProducts">
+              *&nbsp;{% trans 'Store name' %}:
+            </label>
+
+            <input name="storename"
+            id="txtStoreProducts" 
+            class="form-control" />
+
+            <input name="store_obj" />
+          </span>
+
+          <span 
+          style="color: blue; 
+          font-size: x-large; font-weight: bold;">
+            {% trans 'Subtotal' %}:
+            $<span id="secSubtotal">
+            0.1
+            </span>
+          </span>
+        </div>
+
+        <div class="col-sm-6" 
+        id="divProductsDetails">
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button type="button" id="btnAccept" 
+        class="btn btn-primary waves-effect">
+          {% trans 'Accept' %}
+        </button>
+
+        <button class="btn btn-secondary waves-effect" 
+        type="button" data-dismiss="modal">
+          {% trans 'Cancel' %}
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script type="text/javascript">	
+	var msg_not_a_number;
+	var msg_valid_product;
+	var msg_valid_brand;
+	var msg_valid_pp;
+	var msg_valid_quantity;
+	var msg_added_product;
+  var msg_product_exist;
+  var item_counter = 0;
+  var row_number = 0;
+  $("#dlgAddProduct .global-store").hide();
+
+  //product_added = false;
+
+  $.ajax({
+    method: "GET",
+    url: "/translator/many/",
+    data: { msgs: "Please enter a valid number,Please enter a valid product,Please enter a valid brand,Please enter a valid purchase price,Please enter a valid quantity,Product was added to the current purchase,The product already was added to the purchase"}
+  })
+  .done(function(result) {
+  	result = result.split(',');
+		msg_not_a_number = result[0];
+		msg_valid_product = result[1];
+		msg_valid_brand = result[2];
+		msg_valid_pp = result[3];
+		msg_valid_quantity = result[4];
+		msg_added_product = result[5];
+    msg_product_exist = result[6];
+  });
+
+  $("#dlgAddProduct #chkAllProductsInSameStore").change(function() {
+
+    if (this.checked) {
+      $("#dlgAddProduct .global-store").show();
+      $("#dlgAddProduct #txtStoreProducts").attr("required", "true");
+      $("#dlgAddProduct #txtStoreProducts").val('');
+      $("#dlgAddProduct input[name='store_obj']").val('');
+      $("#dlgAddProduct #txtStoreProducts").focus();
+      chks = $(".product-store");
+      tope = chks.length;
+      for (x = 0; x < tope; x++)
+        if (chks[x].checked)
+          $(chks[x]).click();
+
+      $(".input-product-store").hide();
+      $(".product-store").hide();
+    }
+    else {
+      $("#dlgAddProduct .global-store").hide();
+      $("#dlgAddProduct #txtStoreProducts").removeAttr("required");
+      $(".input-product-store").show();
+      $(".product-store").show();
+    }
+  });
+
+  $("#dlgAddProduct #txtStoreProducts").autocomplete({
+    source: "/stores/autocomplete/my-stores/",
+    minLength: 1,
+  });
+
+  $("#dlgAddProduct #txtStoreProducts").autocomplete("option", "appendTo", "#dlgAddProduct .modal-body");
+
+  $("#dlgAddProduct #txtStoreProducts").change(function(){
+    show_msg_with_toastr("info", msg_wait);
+    obj = $(this);
+    storename = this.value.substr(0, this.value.indexOf(' ['))
+
+    $.ajax({
+      method: "GET",
+      url: "/stores/search/by-name/",
+      data: { store: storename }
+    })
+    .done(function(result) {
+      toastr.clear();
+      if (!result['exist'])
+        $.ajax({
+          method: "GET",
+          url: "/translator/translate",
+          data: { msg: "Please enter a valid store"}
+        })
+        .done(function(result) {
+          show_msg_with_toastr("error", result);
+          $("#dlgAddProduct input[name='store_obj']").val("");
+          $(obj).val('');
+          //$("section.content form button[type='submit']").attr("disabled", "true");
+        });
+      else {
+        store = result.store;
+        $("#dlgAddProduct input[name='store_obj']").val(store);
+        $("#dlgAddProduct .store-obj-for-product").val(store);
+        //$("section.content form button[type='submit']").removeAttr("disabled");
+      }
+    });
+  });
+
+  function reloadProductsDetailsSection(quantity, show_warning, comes_from) {
+    if (show_warning)
+      if (!confirm("Perderá los detalles de los productos capturados. ¿Seguro que desea continuar?"))
+        return false;
+
+    show_msg_with_toastr("info", msg_wait);
+
+    $.ajax({
+      method: "GET",
+      url: "/purchases/sku-products/",
+      data: { quantity: quantity }
+    })
+    .done(function(result) {
+      toastr.clear();
+      if (comes_from.toUpperCase() == "EDIT_DETAILS")
+        $("#dlgProductDetails div#divProductsDetails").html(result);
+      else
+        $("#dlgAddProduct div#divProductsDetails").html(result);
+    });
+  }
+
+  reloadProductsDetailsSection(1, false, "ADD_DETAILS");
+
+	$("#dlgAddProduct input[name='product']").autocomplete({
+    source: "/products/autocomplete/my-products",
+    minLength: 1,
+  });
+
+  $("#dlgAddProduct input[name='brand']").autocomplete({
+    source: "/brands/autocomplete/my-brands",
+    minLength: 1,
+  });
+
+  $("#dlgAddProduct input[name='product']").autocomplete("option", "appendTo", "#dlgAddProduct .modal-body");
+
+  $("#dlgAddProduct input[name='brand']").autocomplete("option", "appendTo", "#dlgAddProduct .modal-body");
+
+  $("#dlgAddProduct #btnAccept").click(function(){
+  	show_msg_with_toastr("info", msg_wait);
+    product = $("#dlgAddProduct #product_obj");
+    brand = $("#dlgAddProduct #brand_obj");
+    purchase_price = $("#dlgAddProduct #txtPurchasePrice");
+    quantity = $("#dlgAddProduct #txtQuantity");
+    description = $("#dlgAddProduct #txtDescription").val();
+    notes = $("#dlgAddProduct #txtNotes").val();
+
+    valid = true;
+
+    if (!validField(product)) {
+    	valid = false;
+    	show_msg_with_toastr("error", msg_valid_product);
+    }
+
+    if (!validField(brand)) {
+    	valid = false;
+    	show_msg_with_toastr("error", msg_valid_brand);
+    }
+
+    if (!validField(purchase_price)) {
+    	valid = false;
+    	show_msg_with_toastr("error", msg_valid_pp);
+    }
+
+    if (!validField(quantity)) {
+    	valid = false;
+    	show_msg_with_toastr("error", msg_valid_quantity);
+    }
+
+    products = $("#tblProductDetails .product_obj");
+    brands = $("#tblProductDetails .brand_obj");
+
+    tope_p = products.length;
+    x = 0;
+    found = false;
+
+    while (x < tope_p && !found) {
+      p = products[x++].innerHTML;
+      if (p == $(product).val()) {
+        tope_b = brands.length;
+        y = 0;
+        while (y < tope_b && !found) {
+          if (brands[y++].innerHTML == $(brand).val()) {
+            toastr.clear();
+            valid = false;
+            found = true;
+            show_msg_with_toastr("error", msg_product_exist);
+          }
+        }
+      }
+    }
+
+    if (valid) {
+      item_counter++;
+      skus = $("#divProductsDetails .product-sku");
+      images = $("#divProductsDetails .product-image");
+      stores = $("#divProductsDetails .store-obj-for-product");
+      product = $(product).val();
+      brand = $(brand).val();
+      quantity = $(quantity).val();
+
+      //tope = skus.length;
+      skus_values = [];
+      images_values = [];
+      stores_values = [];
+      //tope = images.length;
+
+      for (x = 0; x < quantity; x++) {
+        skus_values.push($(skus[x]).val());
+        stores_values.push($(stores[x]).val());
+        o_file = $(images[x])[0].files[0];
+        if (o_file != undefined) {
+          image = {
+            "filename": o_file.name,
+            "type": o_file.type,
+            "input_name": $(images[x])[0].name
+          }
+          //images_values.push(image.filename);
+          image_files.push($(images[x]));
+        }
+        else
+          image = undefined;
+
+        images_values.push(image);
+      }
+
+      skus = {
+        "skus": skus_values
+      };
+
+      imgs = {
+        "images": images_values
+      };
+
+      stores = {
+        "stores": stores_values
+      };
+
+      /*console.log("skus_values");
+      console.log(skus_values);
+      console.log("images");
+      console.log(images);
+
+      skus = JSON.stringify(skus_values);
+      console.log("skus");
+      console.log(skus);*/
+
+    	//toastr.clear();
+    	$("#tblProductDetails #rowEmptyTable").remove();
+      product_name = $("#dlgAddProduct #txtProduct").val();
+      brand_name = $("#dlgAddProduct #txtBrand").val();
+      purchase_price = $(purchase_price).val();
+
+      description = $("#dlgAddProduct #txtDescription").val();
+      notes = $("#dlgAddProduct #txtNotes").val();
+
+      html = "<tr id='product" + ++row_number + "'>";
+
+      html +=   "<td>";
+      html +=       "<span class='product_name'>";
+      html +=       product_name;
+      html +=       "</span>";
+      html +=       "<br />";
+      html +=       "<span class='product_obj'>";
+      html +=       product;
+      html +=       "</span>";
+
+      html +=   "</td>";
+
+      html +=   "<td>";
+      html +=       "<span class='brand_name'>";
+      html +=       brand_name;
+      html +=       "</span>";
+      html +=       "<span class='brand_obj'>";
+      html +=       brand;
+      html +=       "</span>";
+      html +=   "</td>";
+
+      html +=   "<td class='price' style='text-align: right'>";
+      html +=       parseFloat(purchase_price).toFixed(2);
+      html +=   "</td>";
+
+      html +=   "<td class='quantity' style='text-align: right'>";
+      html +=       parseInt(quantity);
+      html +=   "</td>";
+
+      html +=   "<td style='text-align: right'>";
+      html +=       "$";
+      html +=       "<span class='subtotal'>";
+      html +=       subtotal;
+      html +=       "</span>";
+      html +=   "</td>";
+
+      html +=   "<td>";
+
+      html +=
+                    '<a href="#" '+
+                    'onclick="viewProduct(' +
+                    '\'' + product_name + '\', ' +
+                    '\'' + product + '\', ' +
+                    '\'' + brand_name + '\', ' +
+                    '\'' + brand + '\', ' +
+                    '\'' + purchase_price + '\', ' +
+                    '\'' + quantity + '\', ' +
+                    '\'' + description + '\', ' +
+                    '\'' + notes + '\', ' +
+                    '\'' + row_number + '\', ' +
+                    'false, \'' +
+                    skus_values + '\', \'' +
+                    images_values + '\'' +
+                    ');" ' +
+                    'data-placement="bottom" ' +
+                    'data-toggle=\'tooltip\' ' +
+                    'title=\'{% trans "Details" %}\' ' +
+                    'data-original-title=\'' +
+                    '{% trans "Details" %}\'>' +
+                    '<i class="material-icons">'+
+                    'zoom_in</i></a>';
+
+      html +=
+                    '<a href="#" ' +
+                    'data-placement="bottom" ' +
+                    'data-toggle="tooltip" ' +
+                    'onclick="viewProduct(' +
+                    '\'' + product_name + '\', ' +
+                    '\'' + product + '\', ' +
+                    '\'' + brand_name + '\', ' +
+                    '\'' + brand + '\', ' +
+                    '\'' + purchase_price + '\', ' +
+                    '\'' + quantity + '\', ' +
+                    '\'' + description + '\', ' +
+                    '\'' + notes + '\', ' +
+                    '\'' + row_number + '\', ' +
+                    'true, \'' +
+                    skus_values + '\', \'' +
+                    images_values + '\'' +
+                    ');" ' +
+                    'title=\'{% trans "Edit" %}\' ' +
+                    'data-original-title=\'' +
+                    '{% trans "Edit" %}\'> ' +
+                    '<i class="material-icons">'+
+                    'edit</i></a>';
+
+      html +=
+                    '<a href="#" ' +
+                    'data-placement="bottom" ' +
+                    'data-toggle="tooltip" ' +
+                    'onclick="deleteProduct(' +
+                    row_number + ', ' +
+                    '\'product_add\')" ' +
+                    'title=\'{% trans "Delete" %}\' ' +
+                    'data-original-title=\'' +
+                    '{% trans "Delete" %}\'> ' +
+                    '<i class="material-icons">'+
+                    'delete</i></a>';
+
+      html +=   "</td>";
+
+      html +=   "<td class='skus' hidden='' style='visibility: hidden'>";
+      //html +=       skus_values;
+      html +=       JSON.stringify(skus);
+      html +=   "</td>";
+
+      html +=   "<td class='images' hidden='' style='visibility: hidden'>";
+      //html +=       images_values;
+      html +=       JSON.stringify(imgs);
+      html +=   "</td>";
+
+      //html +=   "<td class='stores' hidden='' style='visibility: hidden'>";
+      html +=   "<td class='stores' hidden='' style='visibility: hidden'>";
+      html +=       JSON.stringify(stores);
+      html +=   "</td>";
+
+      html +=   "<td class='description' hidden='' style='visibility: hidden'>";
+      //html +=       images_values;
+      html +=       description;
+      html +=   "</td>";
+
+      html +=   "<td class='notes' hidden='' style='visibility: hidden'>";
+      //html +=       images_values;
+      html +=       notes;
+      html +=   "</td>";
+
+      html += "</tr>";
+
+      $("#dlgAddProduct #product_obj").val('');
+      $("#dlgAddProduct #brand_obj").val('');
+      $("#dlgAddProduct #txtProduct").val('');
+      $("#dlgAddProduct #txtBrand").val('');
+      $("#dlgAddProduct #txtPurchasePrice").val("0.1");
+      $("#dlgAddProduct #txtQuantity").val("1");
+      $("#dlgAddProduct #txtDescription").val('');
+      $("#dlgAddProduct #txtNotes").val('');
+
+      $("#tblProductDetails tbody").append(html);
+
+      //tope_i = images_files.length;
+
+      //for (x = 0; x < tope_i; x++)
+
+      toastr.clear();
+    	show_msg_with_toastr("info", msg_added_product);
+
+      $("#btnRemoveProducts").show();
+
+      total += parseFloat(subtotal);
+      counter_products = parseInt(counter_products)+ parseInt(quantity);
+      //counter_products = parseFloat(counter_products).toFixed(2);
+
+      $("#tblProductDetails tfoot #secCounterProducts").html(counter_products);
+      $("#tblProductDetails tfoot").show();
+      refreshTotal();
+
+      $("#dlgAddProduct #txtProduct").focus();
+    }
+  });
+
+  function calculateSubtotal() {
+    pp = $("#dlgAddProduct #txtPurchasePrice").val();
+    q = $("#dlgAddProduct #txtQuantity").val();
+    subtotal = parseFloat(pp) * parseFloat(q);
+    subtotal = subtotal.toFixed(2);
+
+    $("#dlgAddProduct #secSubtotal").html(subtotal);
+  }
+
+  $("#dlgAddProduct input[name='purchase_price']").focus(function(){
+  	this.oldValue = this.value;
+  });
+
+  $("#dlgAddProduct input[name='purchase_price']").change(function(){
+  	show_msg_with_toastr("info", msg_wait);
+
+  	val = parseFloat($(this).val());
+  	if (isNaN(val) || val <= 0) {
+  		toastr.clear();
+  		show_msg_with_toastr("error", msg_not_a_number);
+  		this.value = this.oldValue;
+  		//$("#dlgAddProduct #btnAccept").attr("disabled", "true");
+  		//reloadProductsDetailsSection(0);
+  	}
+  	else {
+      this.value = val.toFixed(2);
+      calculateSubtotal();
+  		toastr.clear();
+  	}
+  });
+
+  $("#dlgAddProduct input[name='quantity']").focus(function(){
+  	this.oldValue = this.value;
+  });
+
+  $("#dlgAddProduct input[name='quantity']").change(function(event){
+  	show_msg_with_toastr("info", msg_wait);
+
+  	val = parseFloat($(this).val());
+    if (!this.validity.valid) {
+      show_msg_with_toastr("error", this.validationMessage);
+      this.value = this.oldValue;
+    }
+  	else if (isNaN(val) || val <= 0) {
+  		toastr.clear();
+  		show_msg_with_toastr("error", msg_not_a_number);
+  		this.value = this.oldValue;
+  		reloadProductsDetailsSection(1, true, "ADD_DETAILS");
+  	}
+  	else {
+        this.value = val.toFixed(2);
+    		reloadProductsDetailsSection(val, true, "ADD_DETAILS");
+        calculateSubtotal();
+        toastr.clear();
+  	}
+  });
+
+  $("#dlgAddProduct input[name='product']").change(function(){
+    show_msg_with_toastr("info", msg_wait);
+    $.ajax({
+      method: "GET",
+      url: "/products/search/by-name",
+      data: { product: this.value }
+    })
+    .done(function(result) {
+      toastr.clear();
+      if (result['exist'] != undefined && 
+          !result['exist'] || result.dropped)
+        $.ajax({
+          method: "GET",
+          url: "/translator/translate",
+          data: { msg: "Please enter a valid product"}
+        })
+        .done(function(result) {
+          show_msg_with_toastr("error", result);
+          $("#dlgAddProduct input[name='product_obj']").val("");
+          $("#dlgAddProduct #btnAccept").attr("disabled", "");
+        });
+      else if (result.exist == undefined) {
+        show_msg_with_toastr(result.status, result.msg);
+      }
+      else {
+        $("#dlgAddProduct input[name='product_obj']").val(result.product);
+        $("#dlgAddProduct #btnAccept").removeAttr("disabled");
+      }
+    });
+  });
+
+  $("#dlgAddProduct input[name='brand']").change(function(){
+    show_msg_with_toastr("info", msg_wait);
+    $.ajax({
+      method: "GET",
+      url: "/brands/search/by-name",
+      data: { brand: this.value }
+    })
+    .done(function(result) {
+      toastr.clear();
+      if (result['exist'] != undefined && 
+          !result['exist'] || result.dropped)
+        $.ajax({
+          method: "GET",
+          url: "/translator/translate",
+          data: { msg: "Please enter a valid brand"}
+        })
+        .done(function(result) {
+          show_msg_with_toastr("error", result);
+          $("#dlgAddProduct input[name='brand_obj']").val("");
+          $("#dlgAddProduct #btnAccept").attr("disabled", "");
+        });
+      else if (result['exist'] == undefined) {
+        show_msg_with_toastr(result.status, result.msg);
+      }
+      else {
+        $("#dlgAddProduct input[name='brand_obj']").val(result.brand);
+        $("#dlgAddProduct #btnAccept").removeAttr("disabled");
+      }
+    });
+  });
+
+  $("#dlgAddProduct input").keyup(function(event) {
+  	if (event.which == 13)
+  		$("#" + $(event.target).attr("next-target")).focus();
+  });
+
+  function deleteProduct(number, comes_from) {
+    if (!confirm("¿Seguro que desea eliminar este producto de la lista?"))
+      return false;
+
+    row_id = "#product" + number;
+
+    current_quantity = $(row_id + " td.quantity").html();
+    current_quantity = parseFloat(current_quantity);
+
+    //counter_products = parseFloat(counter_products - current_quantity).toFixed(2);
+    counter_products = parseFloat(counter_products - current_quantity);
+    $("#tblProductDetails tfoot #secCounterProducts").html(counter_products);
+
+    current_st = parseFloat($(row_id + " td span.subtotal").html()).toFixed(2);
+    total = total - current_st;
+
+    $(row_id).remove();
+    item_counter--;
+
+    if (item_counter <= 0) {
+      $("#btnRemoveProducts").hide();
+      html = 
+        '<tr id="rowEmptyTable">' +
+          '<td colspan="5">' +
+          "{% trans 'Add products using the button above' %}" +
+          "</td></tr>";
+      $("#tblProductDetails tbody").append(html);
+      $("#tblProductDetails tfoot").hide();
+      row_number = 0;
+      subtotal = 0;
+      total = 0;
+      counter_products = 0;
+    }
+
+    refreshTotal();
+
+    if (comes_from.toUpperCase() == "PRODUCT_DETAILS")
+      $("#dlgProductDetails").modal("hide");
+  }
+
+  function viewProduct(pn, p, bn, b, pu, q, d, n, row_number, enter_and_edit, skus, images) {
+
+    /*
+    images = images.split(',');
+    tope = images.length;
+    for (x = 0; x < tope; x++)
+      console.log(images[x]);
+    */
+
+    data = {
+      product: pn, product_obj: p, brand: bn,
+      brand_obj: b, purchase_price: pu,
+      quantity: q, description: d,
+      notes: n, row_number: row_number,
+      enter_and_edit: enter_and_edit,
+      skus: skus, images: images
+    };
+
+    $.ajax({
+      method: "GET",
+      url: "/purchases/product-details/",
+      data: data
+    })
+    .done(function(result) {
+      $("#divProductDetails").html(result);
+      if (enter_and_edit) {
+        setTimeout(
+          function() { 
+            $("#divProductsDetails .edit").show();
+            $("#divProductsDetails .view").hide();
+          }
+        , 100);
+      }
+      $("#dlgProductDetails").modal("show");
+    });
+  }
+/*
+  $("#dlgAddProduct").on("hidden.bs.modal", 
+  function () {
+    alert(item_counter);
+    if (!product_added) {
+      alert("entro");
+      item_counter--;
+    }
+    alert(item_counter);
+  });
+  */
+  subtotal = parseFloat($("#dlgAddProduct #secSubtotal").html()).toFixed(2);
+</script>

@@ -1,0 +1,366 @@
+{% load static i18n %}
+
+{% if msg %}
+  <script type="text/javascript">
+    $(document).ready(function(){
+      show_msg_with_toastr("{{level}}", "{{msg}}");
+      if ($("section.content form input")[0] != undefined)
+        $("section.content form input")[0].focus();
+    });
+  </script>
+{% endif %}
+
+<script type="text/javascript">
+  var msg_wait;
+  var missed_query;
+
+  $.ajax({
+    method: "GET",
+    url: "/translator/many/",
+    data: { msgs: "Please wait,Please enter at least one search criteria"}
+  })
+  .done(function(result) {
+    result = result.split(',');
+    msg_wait = result[0];
+    missed_query = result[1];
+  });
+
+  function view_all(url, action) {
+    show_msg_with_toastr("info", msg_wait);
+    $("section.content form button[type='submit']").attr("disabled", "true");
+    url = url + "?itm_menu={{itm_menu}}&user={{user}}";
+
+    if (action.toUpperCase() == 'EDIT')
+      url = url + "&edit=true";
+    else if (action.toUpperCase() == 'DELETE')
+      url = url + "&delete=true";
+
+    $.ajax({
+      method: "GET",
+      url: url
+    })
+    .done(function(result) {
+      $("section.content").html(result);
+      //toastr.clear();
+      return false;
+    });
+  }
+</script>
+
+<style type="text/css">
+  .btn {
+    width: 120px;
+    margin: 0 0 10px 0;
+  }
+</style>
+
+<div class="container-fluid">
+  <!--
+  <div class="block-header" style="margin: 0 0 15px -15px">
+    <h2>
+      {{form.title|upper}}
+  	</h2>
+  </div>
+  -->
+
+  <div class="row clearfix">
+    <div class="card">
+      <div class="header">
+        <h2>
+      {{form.title|upper}}
+    </h2>
+  </div>
+
+<div class="body">
+    <p>
+      {% block msg_pre_form %}
+      {% endblock %}
+    </p>
+
+    <form action="{{form.action}}" method="post"
+    onreset="$('section.content form input')[0].focus();">
+      <!--
+      <div class="form-group form-float">
+        <div class="form-line">
+          <input type="text" id="email_address" class="">
+          <label class="form-label">Email Address</label>
+        </div>
+      </div>
+      -->
+
+      <!--
+      {% for field in form.fields %}
+        {{field}}
+      {% endfor %}
+      -->
+
+      {{form.as_table}}
+      {% csrf_token %}
+
+      {% if 'AGREGAR' not in form.title|upper %}
+        <p>
+          {% if 'EDITAR' in form.title|upper %}
+            <a href="#" class="act-list-all"
+            onclick="view_all('/shops/list-all', 'edit'); return false;" >
+              {% trans 'View all' %}
+            </a>
+          {% elif 'ELIMINAR' in form.title|upper %}
+            <a href="#" class="act-list-all"
+            onclick="view_all('/shops/list-all', 'delete'); return false;" >
+              {% trans 'View all' %}
+            </a>
+          {% else %}
+            <a href="#" class="act-list-all"
+            onclick="view_all('/shops/list-all', 'search'); return false;" >
+              {% trans 'View all' %}
+            </a>
+          {% endif %}
+        </p>
+
+        <!--
+        <p>
+          <a href="#" 
+          class="act-search-config">
+            {% trans 'Search config' %}
+          </a>
+        </p>
+        -->
+      {% endif %}
+
+      <input hidden="true" style="visibility: hidden;" 
+      name="user" value="{{user}}" id="txtEmailHid" />
+
+      <input hidden="true" style="visibility: hidden;" 
+      type="text" name="city_obj" id="txtCityHid" />
+
+      <input hidden="true" style="visibility: hidden;" 
+      type="text" name="user_obj" id="txtUserHid" />
+
+      <input hidden="true" style="visibility: hidden;" 
+      type="text" name="app_version" 
+      value="{{app_version}}" />
+
+      <input hidden="true" style="visibility: hidden;" 
+      type="text" name="itm_menu" 
+      value="{{itm_menu}}">
+
+      <button class="btn btn-primary waves-effect"
+      type="submit">
+        <i class="material-icons">
+          {{form.icon_btn_submit}}
+        </i>
+        {{form.btn_label}}
+      </button>
+
+      <button class="btn btn-warning waves-effect"
+      type="reset">
+        <i class="material-icons">clear_all</i>
+        {% trans 'Clean all' %}
+      </button>
+
+      <button class="btn btn-default waves-effect act-cancel-form" type="button">
+        <i class="material-icons">cancel</i>
+        {% trans 'Cancel' %}
+      </button>
+    </form>
+  </div>
+</div>
+</div>
+</div>
+
+<script type="text/javascript" src="{% static 'js/jquery-ui-1.12.1/jquery-ui.min.js' %}"></script>
+
+<link href="{% static 'js/jquery-ui-1.12.1/jquery-ui.min.css' %}" rel="stylesheet">
+
+<script type="text/javascript" src="{% static 'js/jquery.form.min.js' %}"></script>
+
+<script type="text/javascript">
+  $(document).ready(function(){
+    var options = { 
+      target:        'section.content',   // target element(s) to be updated with server response 
+      beforeSubmit:  showRequest,  // pre-submit callback 
+      success:       showResponse  // post-submit callback 
+
+      // other available options: 
+      //url:       url         // override for form's 'action' attribute 
+      //type:      type        // 'get' or 'post', override for form's 'method' attribute 
+      //dataType:  null        // 'xml', 'script', or 'json' (expected server response type) 
+      //clearForm: true        // clear all form fields after successful submit 
+      //resetForm: true        // reset the form after successful submit 
+
+      // $.ajax options can be used here too, for example: 
+      //timeout:   3000 
+    }; 
+
+    $(".act-cancel-form").click(function() {
+      showMainPanel();
+    });
+
+    // pre-submit callback 
+    function showRequest(formData, jqForm, options) { 
+      // formData is an array; here we use $.param to convert it to a string to display it but the form plugin does this for you automatically when it submits the data 
+      //var queryString = $.param(formData); 
+   
+      // jqForm is a jQuery object encapsulating the form element.  To access the DOM element for the form do this: 
+      // var formElement = jqForm[0]; 
+   
+      //alert('About to submit: \n\n' + queryString); 
+   
+      // here we could return false to prevent the form from being submitted; returning anything other than false will allow the form submit to continue 
+      //showLoader();
+      show_msg_with_toastr("info", msg_wait);
+      $("section.content form button[type='submit']").attr("disabled", "true");
+
+      module_name = $(".container-fluid .card .header h2")[0].innerHTML;
+      module_name = module_name.toUpperCase();
+     
+      if (module_name.includes('AGREGAR')) {
+        city = $("input[name='city_obj']").val().trim();
+        uas = $("input[name='user_obj']").val().trim();
+
+        if (city.length < 1 || uas.length < 1) {
+          if (city.length < 1)
+            $.ajax({
+              method: "GET",
+              url: "/translator/translate",
+              data: { msg: "Please enter a valid city"}
+            })
+            .done(function(result) {
+              show_msg_with_toastr("error", result);
+              $("input[name='city_obj']").val("");
+              $("section.content form button[type='submit']").attr("disabled", "true");
+            });
+
+          if (uas.length < 1)
+            $.ajax({
+              method: "GET",
+              url: "/translator/translate",
+              data: { msg: "Please enter a valid user"}
+            })
+            .done(function(result) {
+              show_msg_with_toastr("error", result);
+              $("input[name='user_obj']").val("");
+              $("section.content form button[type='submit']").attr("disabled", "true");
+            });
+
+          toastr.clear();
+          return false;
+        }
+      }
+      //else if (module_name.includes('BUSCAR')) {
+      else {
+        inputs = $('section.content form input.validate');
+        tope = inputs.length;
+        x = -1;
+        disable_btn = false;
+        counter_failed = 0;
+
+        while (++x < tope)
+          if (!validField(inputs[x]))
+            counter_failed++;
+
+        if (counter_failed == tope)
+          disable_btn = true;
+
+        toastr.clear();
+
+        if (disable_btn) {
+          
+          //$("section.content form button[type='submit']").attr("disabled", "true");
+          $("section.content form button[type='submit']").removeAttr("disabled");
+          show_msg_with_toastr("error", missed_query);
+        }
+        else {
+          //$("section.content form button[type='submit']").removeAttr("disabled");
+        }
+
+        return !disable_btn;
+      }
+
+      return true; 
+    }
+ 
+    // post-submit callback 
+    function showResponse(responseText, statusText, xhr, $form)  { 
+      // for normal html responses, the first argument to the success callback is the XMLHttpRequest object's responseText property 
+   
+      // if the ajaxForm method was passed an Options Object with the dataType property set to 'xml' then the first argument to the success callback is the XMLHttpRequest object's responseXML property 
+   
+      // if the ajaxForm method was passed an Options Object with the dataType property set to 'json' then the first argument to the success callback is the json data object returned by the server 
+   
+      /*
+      alert('status: ' + statusText + '\n\nresponseText: \n' + responseText + 
+          '\n\nThe output div should have already been updated with the responseText.'); 
+      */
+      //toastr.clear();
+      $(".page-loader-wrapper").remove();
+    }
+ 
+    $("input[name='city']").autocomplete({
+      source: "{% url 'cities-autocomplete' %}",
+      minLength: 1,
+    });
+
+    $("input[name='city']").change(function(){
+      show_msg_with_toastr("info", msg_wait);
+      $.ajax({
+        method: "GET",
+        url: "{% url 'search-city-by-name' %}",
+        data: { name: this.value}
+      })
+      .done(function(result) {
+        toastr.clear();
+        if (!result['exist'])
+          $.ajax({
+            method: "GET",
+            url: "/translator/translate",
+            data: { msg: "Please enter a valid city"}
+          })
+          .done(function(result) {
+            show_msg_with_toastr("error", result);
+            $("input[name='city_obj']").val("");
+            $("section.content form button[type='submit']").attr("disabled", "true");
+          });
+        else {
+          $("input[name='city_obj']").val(result["city"]);
+          $("section.content form button[type='submit']").removeAttr("disabled");
+        }
+      });
+    });
+
+    $("input[name='admin']").change(function(){
+      show_msg_with_toastr("info", msg_wait);
+      email = this.value.substring(this.value.indexOf("[email=") + "[email=".length, this.value.indexOf("]"));
+      $.ajax({
+        method: "GET",
+        url: "{% url 'search-user-by-email' %}",
+        data: { email: email}
+      })
+      .done(function(result) {
+        toastr.clear();
+        if (!result['exist'])
+          $.ajax({
+            method: "GET",
+            url: "/translator/translate",
+            data: { msg: "Please enter a valid user"}
+          })
+          .done(function(result) {
+            show_msg_with_toastr("error", result);
+            $("input[name='user_obj']").val("");
+            $("section.content form button[type='submit']").attr("disabled", "true");
+          });
+        else {
+          $("input[name='user_obj']").val(result["user"]);
+          $("section.content form button[type='submit']").removeAttr("disabled");
+        }
+      });
+    });
+
+    $("section.content form").ajaxForm(options);
+    $("div.menu a#{{itm_menu}}").parent().addClass("active");
+    //console.log($("div.menu a#{{itm_menu}}"));
+  });
+</script>
+
+{% block actions_js %}
+{% endblock %}

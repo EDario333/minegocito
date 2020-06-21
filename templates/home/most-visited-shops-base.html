@@ -1,0 +1,40 @@
+{% load static i18n %}
+
+<div class="site-section block-3 site-blocks-2 bg-light" 
+id="secMostVisitedShops">
+	<div class="container">
+		<div class="row justify-content-center">
+		  <div class="col-md-7 site-section-heading text-center pt-4">
+		    <h2>
+		    	{% trans 'Most visited' %}
+		    </h2>
+		  </div>
+		</div>
+
+		<div class="row">
+		  <div class="col-md-12">
+	    	<div id="secShops">
+	    		<p style="text-align: center; margin: 20px 0 0 0;">
+          	{% trans 'Loading' %}...
+        	</p>
+	    	</div>
+		  </div>
+		</div>
+	</div>
+</div>
+
+<!-- <div id="divViewDetails"></div> -->
+<script type="text/javascript">
+  $(document).ready(function(){
+    $("#secShops").load("/home/most-visited-shops/");
+   //  $.ajax({
+   //    method: "GET",
+   //    url: "/home/most-visited-shops/"
+   //  })
+   //  .done(function(result) {
+   //  	$("#secShops").html(result);
+   //  	$("#secShops").addClass("owl-carousel");
+			// $("#secShops").owlCarousel({nav: true});
+   //  });
+  });
+</script>

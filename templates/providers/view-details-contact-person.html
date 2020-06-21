@@ -1,0 +1,813 @@
+{% load static i18n %}
+
+<!-- For add provider -->
+
+<style type="text/css">
+	div#modalViewDetails {
+		width: 35%;
+	}
+
+  table.tbl-view-details {
+    width: 100%;
+  }
+
+  table.tbl-view-details tbody tr td:first-child  {
+    /* text-align: right; */
+    font-weight: bold;
+    width: 100%;
+  }
+
+  .right-alignment {
+    text-align: right;
+  }
+
+  .hidden {
+    visibility: hidden;
+  }
+</style>
+
+{% if can_edit and can_edit|upper == 'TRUE' %}
+<!-- <script src="{% static 'js/dashboard/view-details/edit-functions.js' %}"></script> -->
+<script type="text/javascript">
+  function editData() {
+    $('[data-toggle="tooltip"]').tooltip();
+
+    //$('table.tbl-view-details').editableTableWidget();
+    $(".edit").removeClass("hidden");
+    $(".view").addClass("hidden");
+
+    $("tr#rowBtnSave").removeClass("hidden");
+    $("tr#rowBtnSave").removeAttr("hidden");
+
+    $("#dlgDetailsContactPerson table.tbl-view-details").removeClass("table-striped");
+    $("#dlgDetailsContactPerson table.tbl-view-details tbody tr td:first-child").removeClass("right-alignment");
+
+    $("#dlgDetailsContactPerson #txtFirstName").select();
+  }
+
+  function cancelEdit() {
+    $('[data-toggle="tooltip"]').tooltip();
+
+    $(".edit").addClass("hidden");
+    $(".view").removeClass("hidden");
+    $("#dlgDetailsContactPerson table.tbl-view-details").addClass("table-striped");
+    $("#dlgDetailsContactPerson table.tbl-view-details tbody tr td:first-child").addClass("right-alignment");
+
+    $("tr#rowBtnSave").addClass("hidden");
+    $("tr#rowBtnSave").attr("hidden", "true");
+  }
+</script>
+{% endif %}
+
+{% if can_delete and can_delete|upper == 'TRUE' %}
+<!-- <script src="{% static 'js/dashboard/view-details/delete-functions.js' %}"></script> -->
+<script type="text/javascript">
+  function confirmDelete() {
+    row_id=$("#dlgDetailsContactPerson #row_id").val();
+    id="#tblContactPersons tbody tr#"+row_id
+    $(id+" td a.remove-contact-person").click();
+    // prepareDeleteFrm();
+    // $("#dlgViewDetails .confirm-delete").removeClass("hidden");
+    // $("#dlgViewDetails form textarea").focus();
+  }
+</script>
+{% endif %}
+
+<div class="bg-gradient-primary modal fade" 
+id="dlgDetailsContactPerson" 
+tabindex="-1" role="dialog" 
+aria-labelledby="lblHeader" aria-hidden="true">
+  <div class="modal-dialog my-modal" 
+  role="document" id="modalViewDetails">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="lblHeader">
+          {% trans 'Contact person details' %}
+        </h5>
+
+        <button class="close" type="button" 
+        data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">×</span>
+        </button>
+      </div>
+      <hr />
+
+      <div class="modal-body">
+        <input hidden="" style="visibility: hidden;" 
+        id="row_id" value="{{row_id}}" />
+        <!-- <div class="card hidden confirm-delete">
+          <div class="body bg-blue-grey">
+            <h4>
+              {% trans 'Are you sure do you want to remove this' %}
+            </h4>
+
+            <form action="/providers/confirmed-delete" 
+              method="post" class="confirm-delete">
+              {% csrf_token %}
+
+              <label for="txtReasonToDrop">
+                {% trans 'Aditionally you can specify the reason to remove this' %}
+              </label>
+
+              <textarea cols="10" id="txtReasonToDrop" 
+              name="reason" class="form-control"></textarea>
+
+              <input type="text" name="store" 
+              value="{{store.id}}" hidden="true" 
+              style="visibility: hidden;" />
+
+              <input type="text" name="itm_menu" 
+              value="{{itm_menu}}" hidden="true" 
+              style="visibility: hidden;" />
+              <br />
+
+              <button class="btn btn-default" 
+              type="submit">
+                {% trans 'Delete' %}
+              </button>
+
+              <button class="btn btn-default" 
+              type="button" onclick="cancelDelete()">
+                {% trans 'Cancel' %}
+              </button>
+            </form>
+          </div>
+        </div> -->
+
+        <p class="hidden edit">
+          {% trans 'Fields marked are mandatory' %}.
+        </p>
+
+      	<div class="table-responsive">
+          <form method="post" class="update" 
+          action="/providers/update-contact-person/">
+            {% csrf_token %}
+
+            <!-- CAMBIAR!!! -->
+            <input type="text" 
+            readonly="true" 
+            value="{{store.id}}" 
+            hidden="true" 
+            style="visibility: hidden;"
+            name="store">
+
+            <table class="table-bordered table-striped tbl-view-details" 
+            style="white-space: nowrap;">
+              <tbody>
+                {% if can_edit and can_edit|upper == 'TRUE' %}
+                  <tr class="hidden edit">
+                    <td>
+                      <label for="txtFirstName">
+                        *&nbsp;{% trans 'First name' %}:
+                      </label>
+                    </td>
+                  </tr>
+
+                  <tr class="hidden edit">
+                    <td>
+                      <!-- CAMBIAR!!! -->
+                      <input id="txtFirstName" 
+                      type="text" required="true" 
+                      class="form-control" 
+                      value="{{first_name}}" 
+                      name="first_name">
+                    </td>
+                  </tr>
+                {% endif %}
+
+                <tr class="view">
+                  <td>
+                    {% trans 'First name' %}:
+                  </td>
+
+                  <td>
+                    {{first_name}}
+                  </td>
+                </tr>
+
+                {% if can_edit and can_edit|upper == 'TRUE' %}
+                  <tr class="hidden edit">
+                    <td>
+                      <label for="txtMiddleName">
+                        {% trans 'Middle name' %}:
+                      </label>
+                    </td>
+                  </tr>
+
+                  <tr class="hidden edit">
+                    <td>
+                      <input id="txtMiddleName" 
+                      type="text"
+                      class="form-control" 
+                      value="{{middle_name}}" 
+                      name="middle_name">
+                    </td>
+                  </tr>
+                {% endif %}
+
+                <tr class="view">
+                  <td>
+                    {% trans 'Middle name' %}:
+                  </td>
+
+                  <td>
+                    {{middle_name}}
+                  </td>
+                </tr>
+
+                {% if can_edit and can_edit|upper == 'TRUE' %}
+                  <tr class="hidden edit">
+                    <td>
+                      <label for="txtLastName">
+                        *&nbsp;{% trans 'Last name' %}:
+                      </label>
+                    </td>
+                  </tr>
+
+                  <tr class="hidden edit">
+                    <td>
+                      <input id="txtLastName" 
+                      type="text" required="true"
+                      class="form-control" 
+                      value="{{last_name}}" 
+                      name="last_name">
+                    </td>
+                  </tr>
+                {% endif %}
+
+                <tr class="view">
+                  <td>
+                    {% trans 'Last name' %}:
+                  </td>
+
+                  <td>
+                    {{last_name}}
+                  </td>
+                </tr>
+
+                {% if can_edit and can_edit|upper == 'TRUE' %}
+                  <tr class="hidden edit">
+                    <td>
+                      <label for="txtMothersLastName">
+                        {% trans 'Mothers last name' %}:
+                      </label>
+                    </td>
+                  </tr>
+
+                  <tr class="hidden edit">
+                    <td>
+                      <input id="txtMothersLastName" 
+                      type="text" 
+                      class="form-control" 
+                      value="{{mothers_last_name}}" 
+                      name="mothers_last_name">
+                    </td>
+                  </tr>
+                {% endif %}
+
+                <tr class="view">
+                  <td>
+                    {% trans 'Mothers last name' %}:
+                  </td>
+
+                  <td>
+                    {{mothers_last_name}}
+                  </td>
+                </tr>
+
+                {% if can_edit and can_edit|upper == 'TRUE' %}
+                  <tr class="hidden edit">
+                    <td>
+                      <label for="lstGender">
+                        *&nbsp;{% trans 'Gender' %}:
+                      </label>
+                    </td>
+                  </tr>
+
+                  <tr class="hidden edit">
+                    <td>
+                      <select id="lstGender"
+                      class="form-control"
+                      name="gender">
+                        <option>
+                          -- {% trans 'Pick one' %} --
+                        </option>
+
+                        {% if gender == '' %}
+                          <option value="" 
+                          selected="true">
+                            {% trans 'Prefer not to say' %}
+                          </option>
+                        {% else %}
+                          <option value="">
+                            {% trans 'Prefer not to say' %}
+                          </option>
+                        {% endif %}
+
+                        {% if gender == 'M' %}
+                          <option value="M" 
+                          selected="true">
+                            {% trans 'Male' %}
+                          </option>
+                        {% else %}
+                          <option value="M">
+                            {% trans 'Male' %}
+                          </option>
+                        {% endif %}
+
+                        {% if gender == 'F' %}
+                          <option value="F" 
+                          selected="true">
+                            {% trans 'Female' %}
+                          </option>
+                        {% else %}
+                          <option value="F">
+                            {% trans 'Female' %}
+                          </option>
+                        {% endif %}
+                      </select>
+                    </td>
+                  </tr>
+                {% endif %}
+
+                <tr class="view">
+                  <td>
+                    {% trans 'Gender' %}:
+                  </td>
+
+                  <td>
+                    {{gender_as_long_string}}
+                  </td>
+                </tr>
+
+                {% if can_edit and can_edit|upper == 'TRUE' %}
+                  <tr class="hidden edit">
+                    <td>
+                      <label for="txtDOB">
+                        {% trans 'Date of birth' %}:
+                      </label>
+                    </td>
+                  </tr>
+
+                  <tr class="hidden edit">
+                    <td>
+                      <input id="txtDOB" 
+                      class="form-control"
+                      value="{{dob}}" 
+                      name="dob">
+                    </td>
+                  </tr>
+                {% endif %}
+
+                <tr class="view">
+                  <td>
+                    {% trans 'Date of birth' %}:
+                  </td>
+
+                  <td>
+                    {{dob}}
+                  </td>
+                </tr>
+
+                {% if can_edit and can_edit|upper == 'TRUE' %}
+                  <tr class="hidden edit">
+                    <td>
+                      <label for="txtEmail">
+                        *&nbsp;{% trans 'Email' %}:
+                      </label>
+                    </td>
+                  </tr>
+
+                  <tr class="hidden edit">
+                    <td>
+                      <input id="txtEmail" 
+                      class="form-control" 
+                      required="true"
+                      value="{{email}}" 
+                      name="email">
+                    </td>
+                  </tr>
+                {% endif %}
+
+                <tr class="view">
+                  <td>
+                    {% trans 'Email' %}:
+                  </td>
+
+                  <td>
+                    {{email}}
+                  </td>
+                </tr>
+
+                {% if can_edit and can_edit|upper == 'TRUE' %}
+                  <tr class="hidden edit">
+                    <td>
+                      <label for="txtCity">
+                        {% trans 'City' %}:
+                      </label>
+                    </td>
+                  </tr>
+
+                  <tr class="hidden edit">
+                    <td>
+                      <input id="txtCity" 
+                      class="form-control" 
+                      value="{{city}}" 
+                      name="city">
+
+                      <input type="text" 
+                      hidden="true" 
+                      style="visibility: hidden;" 
+                      value="{{city_id}}" 
+                      name="city_obj">
+                    </td>
+                  </tr>
+                {% endif %}
+
+                <tr class="view">
+                  <td>
+                    {% trans 'City' %}:
+                  </td>
+
+                  <td>
+                    {{city}}
+                  </td>
+                </tr>
+
+                {% if can_edit and can_edit|upper == 'TRUE' %}
+                  <tr class="hidden edit">
+                    <td>
+                      <label for="txtAddr1">
+                        {% trans 'Address line 1' %}:
+                      </label>
+                    </td>
+                  </tr>
+
+                  <tr class="hidden edit">
+                    <td>
+                      <input id="txtAddr1" 
+                      class="form-control" 
+                      value="{{addr1}}"
+                      name="address_line1">
+                    </td>
+                  </tr>
+                {% endif %}
+
+                <tr class="view">
+                  <td>
+                    {% trans 'Address line 1' %}:
+                  </td>
+
+                  <td>
+                    {{addr1}}
+                  </td>
+                </tr>
+
+                {% if can_edit and can_edit|upper == 'TRUE' %}
+                  <tr class="hidden edit">
+                    <td>
+                      <label for="txtAddr2">
+                        {% trans 'Address line 2' %}:
+                      </label>
+                    </td>
+                  </tr>
+
+                  <tr class="hidden edit">
+                    <td>
+                      <input id="txtAddr2" 
+                      class="form-control" 
+                      value="{{addr2}}"
+                      name="address_line2">
+                    </td>
+                  </tr>
+                {% endif %}
+
+                <tr class="view">
+                  <td>
+                    {% trans 'Address line 2' %}:
+                  </td>
+
+                  <td>
+                    {{addr2}}
+                  </td>
+                </tr>
+
+                {% if can_edit and can_edit|upper == 'TRUE' %}
+                  <tr class="hidden edit">
+                    <td>
+                      <label for="txtCellPhone">
+                        *&nbsp;{% trans 'Cell phone' %}:
+                      </label>
+                    </td>
+                  </tr>
+
+                  <tr class="hidden edit">
+                    <td>
+                      <input id="txtCellPhone" 
+                      class="form-control" 
+                      required="true"
+                      value="{{cell_phone}}" 
+                      name="cellphone">
+                    </td>
+                  </tr>
+                {% endif %}
+
+                <tr class="view">
+                  <td>
+                    {% trans 'Cell phone' %}:
+                  </td>
+
+                  <td>
+                    {{cell_phone}}
+                  </td>
+                </tr>
+
+                {% if can_edit and can_edit|upper == 'TRUE' %}
+                  <tr class="hidden edit">
+                    <td>
+                      <label for="txtHomePhone">
+                        {% trans 'Home phone' %}:
+                      </label>
+                    </td>
+                  </tr>
+
+                  <tr class="hidden edit">
+                    <td>
+                      <input id="txtHomePhone" 
+                      class="form-control" 
+                      value="{{home_phone}}" 
+                      name="homephone">
+                    </td>
+                  </tr>
+                {% endif %}
+
+                <tr class="view">
+                  <td>
+                    {% trans 'Home phone' %}:
+                  </td>
+
+                  <td>
+                    {{home_phone}}
+                  </td>
+                </tr>
+
+                {% if can_edit and can_edit|upper == 'TRUE' %}
+                  <tr class="hidden edit">
+                    <td>
+                      <label for="txtOtherPhone">
+                        {% trans 'Other phone' %}:
+                      </label>
+                    </td>
+                  </tr>
+
+                  <tr class="hidden edit">
+                    <td>
+                      <input id="txtOtherPhone" 
+                      class="form-control" 
+                      value="{{other_phone}}" 
+                      name="otherphone">
+                    </td>
+                  </tr>
+                {% endif %}
+
+                <tr class="view">
+                  <td>
+                    {% trans 'Other phone' %}:
+                  </td>
+
+                  <td>
+                    {{other_phone}}
+                  </td>
+                </tr>
+
+                <tr id="rowBtnSave" 
+                hidden="true" class="hidden">
+                  <td colspan="2">
+                    <button type="submit" 
+                    class="btn btn-primary">
+                      {% trans 'Save' %}
+                    </button>
+
+                    <button type="button" 
+                    onclick="cancelEdit()" 
+                    class="btn btn-primary btnCancelEdit">
+                      {% trans 'Cancel' %}
+                    </button>
+                  </td>
+                </tr>
+
+                {% if can_edit and can_edit|upper == 'TRUE' or can_delete and can_delete|upper == 'TRUE' %}
+                <tr class="view">
+                  <td>{% trans 'Options' %}:</td>
+
+                  <td>
+                  	{% if can_edit and can_edit|upper == 'TRUE' %}
+  	                	<a href="#" data-placement="bottom"
+  	                	data-toggle="tooltip"  
+                      onclick="editData();prepareEditFrm();" 
+                      id="actEditData"
+  	                	title="{% trans 'Edit' %}" 
+  	                	data-original-title="{% trans 'Edit' %}"><i class="material-icons">edit</i></a>
+                  	{% endif %}
+
+                  	{% if can_delete and can_delete|upper == 'TRUE' %}
+  	                	<a href="#" data-placement="top"
+  	                	data-toggle="tooltip" 
+                      id="actDelete" 
+                      onclick="confirmDelete(); return false;" 
+  	                	title="{% trans 'Delete' %}" 
+  	                	data-original-title="{% trans 'Delete' %}"><i class="material-icons">delete</i></a>
+                  	{% endif %}
+                  </td>
+                </tr>
+                {% endif %}
+              </tbody>
+            </table>
+          </form>
+        </div>
+      </div>
+      <hr />
+
+      <div class="modal-footer">
+      	<button type="button" class="btn btn-primary" 
+      	data-dismiss="modal">
+      		<!--<i class="material-icons">clear</i>-->
+      		{% trans 'Back' %}
+      	</button>
+        <div id="divAjaxResults"></div>
+      </div>
+    </div>
+	</div>
+</div>
+
+<script type="text/javascript">
+  /*function on_close_dlgViewDetails() {
+    $('#dlgViewDetails').on('hidden.bs.modal', 
+      function () {
+        //$('#dlgSearchResults').focus();
+        toastr.clear();
+      });
+  }*/
+
+	$(document).ready(function(){
+		toastr.clear();
+/*
+    itm_menu = $("div.menu li.active a")[0].id;
+    $("#dlgViewDetails input[name='itm_menu']").val(itm_menu);
+
+		var msg_wait;
+
+	  $.ajax({
+	    method: "GET",
+	    url: "/translator/translate/",
+	    data: { msg: "Please wait"}
+	  })
+	  .done(function(result) {
+	    msg_wait = result;
+	  });
+
+		$('[data-toggle="tooltip"]').tooltip();
+*/
+  });
+</script>
+
+{% if can_delete and can_delete|upper == 'TRUE' %}
+<script type="text/javascript">
+  function prepareDeleteFrm() {
+    options = { 
+      target:        'section.content .container-fluid',
+      beforeSubmit:  showRequest,
+      success:       showResponse
+    }; 
+
+    function showRequest(formData, jqForm, options) { 
+      show_msg_with_toastr("info", msg_wait);
+      return true;
+    }
+ 
+    function showResponse(responseText, statusText, xhr, $form)  { 
+      $("#dlgDetailsContactPerson").modal("hide");
+      // $("#dlgSearchResults").modal("hide");
+    }
+
+    $("#dlgDetailsContactPerson form.confirm-delete").ajaxForm(options);
+  }
+</script>
+{% endif %}
+
+{% if can_edit and can_edit|upper == 'TRUE' %}
+<script type="text/javascript">
+  function prepareEditFrm() {
+    /*$("#dlgViewDetails form.update input[name='useradmin']").autocomplete({
+      source: "{% url 'my-users-autocomplete' %}",
+      minLength: 1,
+    });*/
+
+    $("#dlgDetailsContactPerson form.update input[name='city']").autocomplete({
+      source: "{% url 'cities-autocomplete' %}",
+      minLength: 1,
+    });
+
+    $("#dlgDetailsContactPerson table.tbl-view-details tbody tr td:first-child").removeClass("right-alignment");
+
+    $("#dlgDetailsContactPerson form.update input[name='city']").change(function(){
+      show_msg_with_toastr("info", msg_wait);
+      $.ajax({
+        method: "GET",
+        url: "{% url 'search-city-by-name' %}",
+        data: {name: this.value}
+      })
+      .done(function(result) {
+        toastr.clear();
+        if (!result.exist)
+          $.ajax({
+            method: "GET",
+            url: "/translator/translate",
+            data: { msg: "Please enter a valid city"}
+          })
+          .done(function(result) {
+            show_msg_with_toastr("error", result);
+            $("input[name='city_obj']").val("");
+            $("#dlgDetailsContactPerson form.update button[type='submit']").attr("disabled", "true");
+          });
+        else {
+          $("input[name='city_obj']").val(result["city"]);
+          $("#dlgDetailsContactPerson form.update button[type='submit']").removeAttr("disabled");
+        }
+      });
+    });
+
+    /*$("#dlgDetailsContactPerson form.update input[name='useradmin']").autocomplete({
+      source: "{% url 'my-users-autocomplete' %}",
+      minLength: 1,
+    });
+
+    $("#dlgViewDetails form.update input[name='useradmin']").change(function(){
+      show_msg_with_toastr("info", msg_wait);
+
+      email = this.value.substring(this.value.indexOf("[email=") + "[email=".length, this.value.indexOf("]"));
+
+      $.ajax({
+        method: "GET",
+        url: "{% url 'search-user-by-email' %}",
+        data: { email: email}
+      })
+      .done(function(result) {
+        toastr.clear();
+        if (!result['exist'])
+          $.ajax({
+            method: "GET",
+            url: "/translator/translate",
+            data: { msg: "Please enter a valid user"}
+          })
+          .done(function(result) {
+            show_msg_with_toastr("error", result);
+            $("#dlgViewDetails form.update input[name='useradmin_obj']").val("");
+            $("#dlgViewDetails form.update button[type='submit']").attr("disabled", "true");
+          });
+        else {
+          $("#dlgViewDetails form.update input[name='useradmin_obj']").val(result["user"]);
+          $("#dlgViewDetails form.update button[type='submit']").removeAttr("disabled");
+        }
+      });
+    });*/
+
+    // The next approach solve the issue with jQuery autocompletes on Bootstrap's modal dialog
+    // The issue is that the autocomplete options will appear "behind" the modal dialog. In my previous apps I will include a css style modifying the z-index for the ui-autocomplete, but now, I think this approach is even better
+    // This was taken from: 
+    // https://stackoverflow.com/questions/16133654/autocomplete-issue-into-bootstrap-modal
+    /*$("#dlgViewDetails form.update input[name='useradmin']").autocomplete("option", "appendTo", "#dlgViewDetails form.update");*/
+
+    $("#dlgDetailsContactPerson form.update input[name='city']").autocomplete("option", "appendTo", "#dlgDetailsContactPerson form.update");
+
+    options = { 
+      target:        '#dlgDetailsContactPerson #divAjaxResults',
+      beforeSubmit:  showRequest,  
+      success:       showResponse
+    }; 
+
+    function showRequest(formData, jqForm, options) { 
+      $('#dlgDetailsContactPerson form.update button[type="submit"]').attr("disabled", "true");
+      show_msg_with_toastr("info", msg_wait);
+      return true;
+    }
+ 
+    function showResponse(responseText, statusText, xhr, $form)  { 
+      toastr.clear();
+      if (statusText == "success")
+        show_msg_with_toastr(responseText.status, responseText.msg);
+      $('#dlgDetailsContactPerson form.update button[type="submit"]').removeAttr("disabled");
+    }
+
+    $("#dlgDetailsContactPerson form.update").ajaxForm(options);  }
+</script>
+{% endif %}
+
+{% if enter_and_edit and enter_and_edit|upper == 'TRUE' %}
+<script type="text/javascript">
+  editData();
+  prepareEditFrm();
+</script>
+{% endif %}
+
+<div id="divViewDetails"></div>

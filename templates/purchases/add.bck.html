@@ -1,0 +1,92 @@
+{% extends 'purchases/generic-form.html' %}
+
+{% load i18n %}
+
+{% block msg_pre_form %}
+	{% trans 'Fields marked are mandatory' %}.
+{% endblock %}
+
+{% block actions_js %}
+	<script type="text/javascript">
+	  $(document).ready(function(){
+	  	var msg_not_a_number;
+	  	var quantity_field_modified = false;
+
+	    $.ajax({
+	      method: "GET",
+	      url: "/translator/translate/",
+	      data: { msg: "Please enter a valid number"}
+	    })
+	    .done(function(result) {
+	      msg_not_a_number = result;
+	    });
+
+	    function reloadProductsDetailsSection(quantity) {
+		    $.ajax({
+			    method: "GET",
+			    url: "/purchases/products-details/",
+			    data: { quantity: quantity }
+			  })
+			  .done(function(result) {
+			  	toastr.clear();
+			  	$("form div#divProductDetails").html(result);
+			  	if (quantity < 1)
+			  		$("form button[type='submit']").attr("disabled", "true");
+			  	else {
+			  		$("form button[type='submit']").removeAttr("disabled");
+			  	}
+			  });
+			}
+
+			reloadProductsDetailsSection(0);
+
+	  	$("input[name='product']").autocomplete({
+	      source: "/products/autocomplete/my-products",
+	      minLength: 1,
+	    });
+
+	    $("input[name='brand']").autocomplete({
+	      source: "/brands/autocomplete/my-brands",
+	      minLength: 1,
+	    });
+
+	    $("input[name='quantity']").focus(function(){
+	    	this.oldValue = this.value;
+	    });
+
+	    $("section.content form button[type='reset']").click(function() {
+	    	if (quantity_field_modified)
+	    		if (!confirm("Perderá los datos de los productos capturados. ¿Seguro que desea continuar?")) {
+	    			return false;
+	    		}
+
+	      reloadProductsDetailsSection(0);
+	    });
+
+	    $("input[name='quantity']").change(function(event){
+	    	show_msg_with_toastr("info", msg_wait);
+
+	    	quantity = parseFloat($(this).val());
+	    	if (isNaN(quantity)) {
+	    		toastr.clear();
+	    		show_msg_with_toastr("error", msg_not_a_number);
+	    		this.value = this.oldValue;
+	    		//reloadProductsDetailsSection(0);
+	    	}
+	    	else  {
+	    		if (quantity_field_modified && this.oldValue > 0)
+		    		if (!confirm("Perderá los datos de los productos capturados. ¿Seguro que desea continuar?")) {
+		    			this.value = this.oldValue;
+		    			return false;
+		    		}
+
+		    	quantity_field_modified = true;
+	    		if (quantity < 1)
+	    			reloadProductsDetailsSection(0);
+	    		else
+	    			reloadProductsDetailsSection(quantity);
+	    	}
+	    });
+	  });
+	</script>
+{% endblock %}

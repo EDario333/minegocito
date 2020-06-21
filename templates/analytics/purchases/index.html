@@ -1,0 +1,2322 @@
+{% load static i18n %}
+
+<!-- Jquery DataTable Plugin Js -->
+<script src="{% static 'js/jquery-datatable/jquery.dataTables.js' %}"></script>
+<script src="{% static 'js/jquery-datatable/skin/bootstrap/js/dataTables.bootstrap.js' %}"></script>
+<script src="{% static 'js/jquery-datatable/extensions/export/dataTables.buttons.min.js' %}"></script>
+<script src="{% static 'js/jquery-datatable/extensions/export/buttons.flash.min.js' %}"></script>
+<script src="{% static 'js/jquery-datatable/extensions/export/jszip.min.js' %}"></script>
+<script src="{% static 'js/jquery-datatable/extensions/export/pdfmake.min.js' %}"></script>
+<script src="{% static 'js/jquery-datatable/extensions/export/vfs_fonts.js' %}"></script>
+<script src="{% static 'js/jquery-datatable/extensions/export/buttons.html5.min.js' %}"></script>
+<script src="{% static 'js/jquery-datatable/extensions/export/buttons.print.min.js' %}"></script>
+
+<!-- JQuery DataTable Css -->
+<link href="{% static 'js/jquery-datatable/skin/bootstrap/css/dataTables.bootstrap.css' %}" rel="stylesheet">
+
+<style type="text/css">
+  #secPurchasesOfTheDay .table-responsive, 
+  #secPurchasesByRange .table-responsive, 
+  #secPurchasesByProviders .table-responsive,
+  #secPurchasesByUsers .table-responsive,
+  #secPurchasesByProducts .table-responsive,
+  #secPurchasesByBrands .table-responsive,
+  #secPurchasesByShops .table-responsive,
+  #secPurchasesOfTheDay table.dataTable thead th,
+  #secPurchasesByRange table.dataTable thead th,
+  #secPurchasesByProviders table.dataTable thead th,
+  #secPurchasesByUsers table.dataTable thead th,
+  #secPurchasesByProducts table.dataTable thead th,
+  #secPurchasesByBrands table.dataTable thead th,
+  #secPurchasesByShops table.dataTable thead th {
+    text-align: center;
+  }
+</style>
+
+<script src="{% static 'js/dashboard/search-results/before-load-html.js' %}"></script>
+
+<div class="container-fluid">
+  <div class="row clearfix">
+    <div class="card">
+      <div class="header">
+        <h2>
+      		{{form.title|upper}}
+        </h2>
+  		</div>
+
+			<div class="body">
+		    <p>
+		      {% block msg_pre_form %}
+		      {% endblock %}
+		    </p>
+
+        <!-- Starts row 1 -->
+        <div class="row">
+          <!-- Starts col 1 -->
+  		    <div 
+          class="col-lg-6 col-md-6 col-sm-12 col-xs-12">
+  	        <div class="card">
+  	          <div class="header">
+                <h2>{% trans 'Purchases of the day' %}</h2>
+  	          </div>
+
+              <div class="body" id="secPurchasesOfTheDay">
+                <canvas id="purchases_of_the_day" 
+                height="358" 
+                style="display: block; width: 717px; height: 358px;" 
+                width="717"></canvas>
+
+                <p id="secDetails" 
+                style="margin: 10px 0"></p>
+              </div>
+  	        </div>
+  	      </div>
+          <!-- Ends col 1 -->
+
+          <!-- Starts col 2 -->
+  	      <div 
+          class="col-lg-6 col-md-6 col-sm-12 col-xs-12">
+  	      	<div class="card">
+              <div class="header">
+                <h2>{% trans 'Purchases by range' %}</h2>
+              </div>
+
+              <div class="body" id="secPurchasesByRange">
+                <form method="post" 
+                onreset="resetFrmPurchasesByRange()" 
+                action="/analytics/purchases/by-range/">
+                {% csrf_token %}
+
+                <input hidden="" 
+                name="itm_menu"
+                style="visibility: hidden;" 
+                value="{{itm_menu}}" />
+
+                  <div class="row hide-me-on-config">
+                    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                      {% trans 'Fields marked are mandatory' %}
+                    </div>
+                  </div>
+
+                  <div class="row hide-me-on-config">
+                    <div class="col-lg-6 col-md-6 col-sm-12 col-xs-12">
+                      <label for="txtStartingWhen">
+                        *&nbsp;{% trans 'Starting when' %}:
+                      </label>
+
+                      <input name="starting_when" 
+                      id="txtStartingWhen" required="" 
+                      placeholder="{% trans 'Date format' %}"
+                      class="form-control">
+                    </div>
+
+                    <div class="col-lg-6 col-md-6 col-sm-12 col-xs-12">
+                      <label for="txtStartingAt">
+                        *&nbsp;{% trans 'Starting at' %}:
+                      </label>
+
+                      <input name="starting_at" 
+                      id="txtStartingAt" required="" 
+                      class="form-control">
+                    </div>
+                  </div>
+
+                  <div class="row hide-me-on-config">
+                    <div class="col-lg-6 col-md-6 col-sm-12 col-xs-12">
+                      <label for="txtEndingWhen">
+                        *&nbsp;{% trans 'Ending when' %}:
+                      </label>
+
+                      <input name="ending_when" 
+                      id="txtEndingWhen" required="" 
+                      placeholder="{% trans 'Date format' %}"
+                      class="form-control">
+                    </div>
+
+                    <div class="col-lg-6 col-md-6 col-sm-12 col-xs-12">
+                      <label for="txtEndingAt">
+                        *&nbsp;{% trans 'Ending at' %}:
+                      </label>
+
+                      <input name="ending_at" 
+                      id="txtEndingAt" required="" 
+                      placeholder="{% trans 'Date format' %}"
+                      class="form-control">
+                    </div>
+                  </div>
+
+                  <a href="#" class="actCfg">
+                    {% trans 'Advanced config' %}
+                  </a>
+
+                  <div style="margin: 0 0 10px 0">
+                    <div class="secAdvancedConfig">
+                    </div>
+                  </div>
+
+                  <div class="btns">
+                    <button type="submit" 
+                    class="btn btn-primary waves-effect">
+                      <i class="material-icons">search</i>
+                      {% trans 'Search' %}
+                    </button>
+
+                    <button type="reset"
+                    class="btn btn-warning waves-effect">
+                      <i class="material-icons">clear_all</i>
+                      {% trans 'Clean all' %}
+                    </button>
+                  </div>
+                </form>
+
+                <p id="msg" 
+                style="margin: 10px 0 0 0"></p>
+
+                <!-- El siguiente es el bueno -->
+                <canvas id="purchases_by_range" 
+                height="558" 
+                style="display: block; width: 717px; height: 558px;" 
+                width="717"></canvas>
+
+                <p id="secDetails" 
+                style="margin: 10px 0"></p>
+
+                <!-- <canvas id="purchases_by_range" 
+                height="358" 
+                style="display: block; width: 717px; height: 358px;" 
+                width="717"></canvas> -->
+              </div>
+            </div>
+  	      </div>
+          <!-- Ends col 2 -->
+        </div>  
+        <!-- Ends row 1 -->
+
+        <!-- Starts row 2 -->
+        <div class="row">
+          <!-- Starts col 1 -->
+          <div 
+          class="col-lg-6 col-md-6 col-sm-12 col-xs-12">
+            <div class="card">
+              <div class="header">
+                <h2>{% trans 'Purchases by providers' %}</h2>
+              </div>
+
+              <div class="body" id="secPurchasesByProviders">
+                <form method="post" 
+                onreset="resetFrmPurchasesByProviders();" 
+                action="/analytics/purchases/by-provider/">
+                {% csrf_token %}
+
+                <input hidden="" 
+                name="itm_menu" id="itm_menu" 
+                style="visibility: hidden;" 
+                value="{{itm_menu}}" />
+
+                  <div class="row hide-me-on-config">
+                    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                      {% trans 'Fields marked are mandatory' %}
+                    </div>
+                  </div>
+
+                  <div class="hide-me-on-config"
+                  style="margin: 0 0 20px 0">
+                    <label for="txtProvider">
+                      *&nbsp;{% trans 'Provider' %}:
+                    </label>
+
+                    <input 
+                    id="txtProvider" required="" 
+                    name="provider" 
+                    class="form-control">
+
+                    <input hidden="" 
+                    style="visibility: hidden;" 
+                    id="provider_obj"
+                    name="provider_obj" />
+                  </div>
+
+                  <a href="#"
+                  class="hide-me-on-config view-all">
+                    {% trans 'View all' %}s
+                  </a>
+
+                  <a href="#" class="actCfg">
+                    {% trans 'Advanced config' %}
+                  </a>
+
+                  <div style="margin: 0 0 10px 0">
+                    <div class="secAdvancedConfig">
+                    </div>
+                  </div>
+
+                  <div class="btns">
+                    <button type="submit" 
+                    class="btn btn-primary waves-effect">
+                      <i class="material-icons">search</i>
+                      {% trans 'Search' %}
+                    </button>
+
+                    <button type="reset"
+                    class="btn btn-warning waves-effect">
+                      <i class="material-icons">clear_all</i>
+                      {% trans 'Clean all' %}
+                    </button>
+                  </div>
+                </form>
+
+                <p id="msg" 
+                style="margin: 10px 0 0 0"></p>
+
+                <canvas id="purchases_by_providers" 
+                height="358" 
+                style="display: block; width: 717px; height: 358px;" 
+                width="717"></canvas>
+
+                <p id="secDetails" 
+                style="margin: 10px 0"></p>
+              </div>
+            </div>
+          </div>
+          <!-- Ends col 1 -->
+
+          <!-- Starts col 2 -->
+          <div 
+          class="col-lg-6 col-md-6 col-sm-12 col-xs-12">
+            <div class="card">
+              <div class="header">
+                <h2>{% trans 'Purchases by responsible' %}</h2>
+              </div>
+
+              <div class="body" id="secPurchasesByUsers">
+                <form method="post" 
+                onreset="resetFrmPurchasesByUsers()" 
+                action="/analytics/purchases/by-user/">
+                {% csrf_token %}
+
+                <input hidden="" 
+                name="itm_menu" id="itm_menu" 
+                style="visibility: hidden;" 
+                value="{{itm_menu}}" />
+
+                  <div class="row hide-me-on-config">
+                    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                      {% trans 'Fields marked are mandatory' %}
+                    </div>
+                  </div>
+
+                  <div class="hide-me-on-config" 
+                  style="margin: 0 0 20px 0">
+                    <label for="txtUser">
+                      *&nbsp;{% trans 'Responsible' %}:
+                    </label>
+
+                    <input 
+                    id="txtUser" required=""
+                    name="user" class="form-control">
+
+                    <input hidden="" 
+                    id="user_obj" 
+                    style="visibility: hidden;" 
+                    name="user_obj" />
+                  </div>
+
+                  <a href="#" 
+                  class="hide-me-on-config view-all">
+                    {% trans 'View all' %}s
+                  </a>
+
+                  <a href="#" class="actCfg">
+                    {% trans 'Advanced config' %}
+                  </a>
+
+                  <div style="margin: 0 0 10px 0">
+                    <div class="secAdvancedConfig">
+                    </div>
+                  </div>
+
+                  <div class="btns">
+                    <button type="submit" 
+                    class="btn btn-primary waves-effect">
+                      <i class="material-icons">search</i>
+                      {% trans 'Search' %}
+                    </button>
+
+                    <button type="reset"
+                    class="btn btn-warning waves-effect">
+                      <i class="material-icons">clear_all</i>
+                      {% trans 'Clean all' %}
+                    </button>
+                  </div>
+                </form>
+
+                <p id="msg" 
+                style="margin: 10px 0 0 0"></p>
+
+                <canvas id="purchases_by_users" 
+                height="358" 
+                style="display: block; width: 717px; height: 358px;" 
+                width="717"></canvas>
+
+                <p id="secDetails" 
+                style="margin: 10px 0"></p>
+              </div>
+            </div>
+          </div>
+          <!-- Ends col 2 -->
+        </div>
+        <!-- Ends row 2 -->
+
+        <!-- Starts row 3 -->
+        <div class="row">
+          <!-- Starts col 1 -->
+          <div 
+          class="col-lg-6 col-md-6 col-sm-12 col-xs-12">
+            <div class="card">
+              <div class="header">
+                <h2>{% trans 'Purchases by products' %}</h2>
+              </div>
+
+              <div class="body" 
+              id="secPurchasesByProducts">
+                <form method="post" 
+                onreset="resetFrmPurchasesByProducts();" 
+                action="/analytics/purchases/by-product/">
+                {% csrf_token %}
+
+                <input hidden="" 
+                name="itm_menu" id="itm_menu" 
+                style="visibility: hidden;" 
+                value="{{itm_menu}}" />
+
+                  <div class="row hide-me-on-config">
+                    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                      {% trans 'Fields marked are mandatory' %}
+                    </div>
+                  </div>
+
+                  <div class="hide-me-on-config"
+                  style="margin: 0 0 20px 0">
+                    <label for="txtProduct">
+                      *&nbsp;{% trans 'Product' %}:
+                    </label>
+
+                    <input 
+                    id="txtProduct" required="" 
+                    name="product" 
+                    class="form-control">
+
+                    <input hidden="" 
+                    style="visibility: hidden;" 
+                    id="product_obj"
+                    name="product_obj" />
+                  </div>
+
+                  <a href="#"
+                  class="hide-me-on-config view-all">
+                    {% trans 'View all' %}s
+                  </a>
+
+                  <a href="#" class="actCfg">
+                    {% trans 'Advanced config' %}
+                  </a>
+
+                  <div style="margin: 0 0 10px 0">
+                    <div class="secAdvancedConfig">
+                    </div>
+                  </div>
+
+                  <div class="btns">
+                    <button type="submit" 
+                    class="btn btn-primary waves-effect">
+                      <i class="material-icons">search</i>
+                      {% trans 'Search' %}
+                    </button>
+
+                    <button type="reset"
+                    class="btn btn-warning waves-effect">
+                      <i class="material-icons">clear_all</i>
+                      {% trans 'Clean all' %}
+                    </button>
+                  </div>
+                </form>
+
+                <p id="msg" 
+                style="margin: 10px 0 0 0"></p>
+
+                <canvas id="purchases_by_products" 
+                height="358" 
+                style="display: block; width: 717px; height: 358px;" 
+                width="717"></canvas>
+
+                <p id="secDetails" 
+                style="margin: 10px 0"></p>
+              </div>
+            </div>
+          </div>
+          <!-- Ends col 1 -->
+
+          <!-- Starts col 2 -->
+          <div 
+          class="col-lg-6 col-md-6 col-sm-12 col-xs-12">
+            <div class="card">
+              <div class="header">
+                <h2>
+                  {% trans 'Purchases by brands' %}
+                </h2>
+              </div>
+
+              <div class="body" id="secPurchasesByBrands">
+                <form method="post" 
+                onreset="resetFrmPurchasesByBrands()" 
+                action="/analytics/purchases/by-brand/">
+                {% csrf_token %}
+
+                <input hidden="" 
+                name="itm_menu" id="itm_menu" 
+                style="visibility: hidden;" 
+                value="{{itm_menu}}" />
+
+                  <div class="row hide-me-on-config">
+                    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                      {% trans 'Fields marked are mandatory' %}
+                    </div>
+                  </div>
+
+                  <div class="hide-me-on-config" 
+                  style="margin: 0 0 20px 0">
+                    <label for="txtBrand">
+                      *&nbsp;{% trans 'Brand' %}:
+                    </label>
+
+                    <input 
+                    id="txtBrand" required=""
+                    name="brand" class="form-control">
+
+                    <input hidden="" 
+                    id="brand_obj" 
+                    style="visibility: hidden;" 
+                    name="brand_obj" />
+                  </div>
+
+                  <a href="#" 
+                  class="hide-me-on-config view-all">
+                    {% trans 'View all' %}s
+                  </a>
+
+                  <a href="#" class="actCfg">
+                    {% trans 'Advanced config' %}
+                  </a>
+
+                  <div style="margin: 0 0 10px 0">
+                    <div class="secAdvancedConfig">
+                    </div>
+                  </div>
+
+                  <div class="btns">
+                    <button type="submit" 
+                    class="btn btn-primary waves-effect">
+                      <i class="material-icons">search</i>
+                      {% trans 'Search' %}
+                    </button>
+
+                    <button type="reset"
+                    class="btn btn-warning waves-effect">
+                      <i class="material-icons">clear_all</i>
+                      {% trans 'Clean all' %}
+                    </button>
+                  </div>
+                </form>
+
+                <p id="msg" 
+                style="margin: 10px 0 0 0"></p>
+
+                <canvas id="purchases_by_brands" 
+                height="358" 
+                style="display: block; width: 717px; height: 358px;" 
+                width="717"></canvas>
+
+                <p id="secDetails" 
+                style="margin: 10px 0"></p>
+              </div>
+            </div>
+          </div>
+          <!-- Ends col 2 -->
+        </div>
+        <!-- Ends row 3 -->
+
+        <!-- Starts row 4 -->
+        <div class="row">
+          <!-- Starts col 1 -->
+          <div 
+          class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+            <div class="card">
+              <div class="header">
+                <h2>{% trans 'Purchases by shops' %}</h2>
+              </div>
+
+              <div class="body" 
+              id="secPurchasesByShops">
+                <form method="post" 
+                onreset="resetFrmPurchasesByShops();" 
+                action="/analytics/purchases/by-shop/">
+                {% csrf_token %}
+
+                <input hidden="" 
+                name="itm_menu" id="itm_menu" 
+                style="visibility: hidden;" 
+                value="{{itm_menu}}" />
+
+                  <div class="row hide-me-on-config">
+                    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                      {% trans 'Fields marked are mandatory' %}
+                    </div>
+                  </div>
+
+                  <div class="hide-me-on-config"
+                  style="margin: 0 0 20px 0">
+                    <label for="txtShop">
+                      *&nbsp;{% trans 'Shop' %}:
+                    </label>
+
+                    <input 
+                    id="txtShop" required="" 
+                    name="shop" 
+                    class="form-control">
+
+                    <input hidden="" 
+                    style="visibility: hidden;" 
+                    id="shop_obj"
+                    name="shop_obj" />
+                  </div>
+
+                  <a href="#"
+                  class="hide-me-on-config view-all">
+                    {% trans 'View all' %}s
+                  </a>
+
+                  <a href="#" class="actCfg">
+                    {% trans 'Advanced config' %}
+                  </a>
+
+                  <div style="margin: 0 0 10px 0">
+                    <div class="secAdvancedConfig">
+                    </div>
+                  </div>
+
+                  <div class="btns">
+                    <button type="submit" 
+                    class="btn btn-primary waves-effect">
+                      <i class="material-icons">search</i>
+                      {% trans 'Search' %}
+                    </button>
+
+                    <button type="reset"
+                    class="btn btn-warning waves-effect">
+                      <i class="material-icons">clear_all</i>
+                      {% trans 'Clean all' %}
+                    </button>
+                  </div>
+                </form>
+
+                <p id="msg" 
+                style="margin: 10px 0 0 0"></p>
+
+                <canvas id="purchases_by_shops" 
+                height="358" 
+                style="display: block; width: 717px; height: 358px;" 
+                width="717"></canvas>
+
+                <p id="secDetails" 
+                style="margin: 10px 0"></p>
+              </div>
+            </div>
+          </div>
+          <!-- Ends col 1 -->
+        </div>
+        <!-- Ends row 4 -->
+		  </div>
+		</div>
+  </div>
+</div>
+
+<script type="text/javascript" src="{% static 'js/jquery-ui-1.12.1/jquery-ui.min.js' %}"></script>
+
+<link href="{% static 'js/jquery-ui-1.12.1/jquery-ui.min.css' %}" rel="stylesheet">
+
+<script type="text/javascript" src="{% static 'js/jquery.form.min.js' %}"></script>
+
+<script type="text/javascript" src="{% static 'js/jquery-ui-1.12.1/datepicker-es.js' %}"></script>
+
+<script type="text/javascript" src="{% static 'js/jquery-timepicker/jquery.timepicker.min.js' %}"></script>
+
+<link href="{% static 'js/jquery-timepicker/jquery.timepicker.min.css' %}" rel="stylesheet">
+
+<!-- Chart Plugins Js -->
+<script src="{% static 'js/chartjs/Chart.bundle.min.js' %}"></script>
+
+<script src="{% static 'js/chartjs/utils.js' %}"></script>
+
+<script src="{% static 'js/chartjs/moment.min.js' %}"></script>
+
+<!-- Custom Js 
+<script src="{% static 'js/chartjs/Chart.bundle.js' %}"></script>
+
+<script src="{% static 'AdminBSBMaterialDesign-master/js/pages/charts/chartjs.js' %}"></script>
+-->
+<script type="text/javascript">
+  var msg_wait;
+  var msg_wrong_date_fmt;
+  var msg_wrong_dates;
+  var msg_wrong_times;
+
+  $.ajax({
+    method: "GET",
+    url: "/translator/many/",
+    data: {msgs: "Please wait,Wrong format for date,Starting and ending dates are wrong,Starting and ending times are wrong"}
+  })
+  .done(function(result) {
+    result = result.split(',');
+    msg_wait = result[0];
+    msg_wrong_date_fmt = result[1];
+    msg_wrong_dates = result[2];
+    msg_wrong_times = result[3];
+  });
+
+  function loadAdvancedCfgPurchasesByRangeFrm() {
+    show_msg_with_toastr("info", msg_wait);
+    $("#secPurchasesByRange .secAdvancedConfig").load("/analytics/purchases/advanced-cfg-by-range/", function() {
+        toastr.clear();
+        $("#secPurchasesByRange .secAdvancedConfig").hide();
+
+        can_i_search=
+          selected_shops.length>0 &&
+          selected_products.length>0 &&
+          selected_brands.length>0 &&
+          selected_users.length>0 &&
+          selected_providers.length>0;
+
+        if (!can_i_search) {
+          //$("#secPurchasesByRange").parent().remove();
+          $("#secPurchasesOfTheDay").parent().parent().attr("class", "col-lg-12 col-md-12 col-sm-12 col-xs-12");
+          return false;          
+        }
+        else {
+          return true;
+        }
+      });
+  }
+
+  function resetFrmPurchasesByRange() {
+    $("#secPurchasesByRange #msg").empty(); 
+    $("#secPurchasesByRange #purchases_by_range").hide(); 
+    $("#secPurchasesByRange .secAdvancedConfig").hide();
+    $("#secPurchasesByRange #secDetails").empty();
+    loadAdvancedCfgPurchasesByRangeFrm();
+  }
+
+  function loadAdvancedCfgPurchasesByProvidersFrm() {
+    show_msg_with_toastr("info", msg_wait);
+    $("#secPurchasesByProviders .secAdvancedConfig").load("/analytics/purchases/advanced-cfg-by-providers/", function() {
+        toastr.clear();
+        $("#secPurchasesByProviders .secAdvancedConfig").hide();
+
+        can_i_search=
+          selected_shops.length>0 &&
+          selected_products.length>0 &&
+          selected_brands.length>0 &&
+          selected_users.length>0;
+
+        if (!can_i_search) {
+          $("#secPurchasesByProviders").parent().remove();
+          $("#secPurchasesByUsers").parent().parent().attr("class", "col-lg-12 col-md-12 col-sm-12 col-xs-12");
+          return false;
+        }
+        else {
+          return true;
+        }
+      });
+  }
+
+  function resetFrmPurchasesByProviders() {
+    $("#secPurchasesByProviders #msg").empty(); 
+    $("#secPurchasesByProviders #purchases_by_providers").hide(); 
+    $("#secPurchasesByProviders .secAdvancedConfig").hide();
+    loadAdvancedCfgPurchasesByProvidersFrm();
+    $("#secPurchasesByProviders #secDetails").empty();
+    $("#txtProvider").focus();
+    //$("#secPurchasesByRange #advanced-search").val(false);
+  }
+
+  function loadAdvancedCfgPurchasesByUsersFrm() {
+    show_msg_with_toastr("info", msg_wait);
+    $("#secPurchasesByUsers .secAdvancedConfig").load("/analytics/purchases/advanced-cfg-by-users", function() {
+        toastr.clear();
+        $("#secPurchasesByUsers .secAdvancedConfig").hide();
+
+        can_i_search=
+          selected_shops.length>0 &&
+          selected_products.length>0 &&
+          selected_brands.length>0 &&
+          selected_providers.length>0;
+
+        if (!can_i_search) {
+          $("#secPurchasesByUsers").parent().remove();
+          $("#secPurchasesByProviders").parent().parent().attr("class", "col-lg-12 col-md-12 col-sm-12 col-xs-12");
+          return false;          
+        }
+        else {
+          return true;
+        }
+      });
+  }
+
+  function resetFrmPurchasesByUsers() {
+    $("#secPurchasesByUsers #msg").empty(); 
+    $("#secPurchasesByUsers #purchases_by_users").hide(); 
+    $("#secPurchasesByUsers .secAdvancedConfig").hide();
+    loadAdvancedCfgPurchasesByUsersFrm();
+    $("#secPurchasesByUsers #secDetails").empty();
+    $("#txtUser").focus();
+    //$("#secPurchasesByRange #advanced-search").val(false);
+  }
+
+  function loadAdvancedCfgPurchasesByProductsFrm() {
+    show_msg_with_toastr("info", msg_wait);
+    $("#secPurchasesByProducts .secAdvancedConfig").load("/analytics/purchases/advanced-cfg-by-products/", function() {
+        toastr.clear();
+        $("#secPurchasesByProducts .secAdvancedConfig").hide();
+
+        can_i_search=
+          selected_shops.length>0 &&
+          selected_products.length>0 &&
+          selected_brands.length>0 &&
+          selected_users.length>0 &&
+          selected_providers.length>0;
+
+        if (!can_i_search) {
+          $("#secPurchasesByProducts").parent().remove();
+          $("#secPurchasesByBrands").parent().parent().attr("class", "col-lg-12 col-md-12 col-sm-12 col-xs-12");
+          return false;          
+        }
+        else {
+          return true;
+        }
+      });
+  }
+
+  function resetFrmPurchasesByProducts() {
+    $("#secPurchasesByProducts #msg").empty(); 
+    $("#secPurchasesByProducts #purchases_by_products").hide(); 
+    $("#secPurchasesByProducts .secAdvancedConfig").hide();
+    loadAdvancedCfgPurchasesByProductsFrm();
+    $("#secPurchasesByProducts #secDetails").empty();
+    $("#txtProduct").focus();
+  }
+
+  function loadAdvancedCfgPurchasesByBrandsFrm() {
+    show_msg_with_toastr("info", msg_wait);
+    $("#secPurchasesByBrands .secAdvancedConfig").load("/analytics/purchases/advanced-cfg-by-brands/", function() {
+        toastr.clear();
+        $("#secPurchasesByBrands .secAdvancedConfig").hide();
+
+        can_i_search=
+          selected_shops.length>0 &&
+          selected_products.length>0 &&
+          selected_brands.length>0 &&
+          selected_users.length>0 &&
+          selected_providers.length>0; 
+
+        if (!can_i_search) {
+          $("#secPurchasesByBrands").parent().remove();
+          $("#secPurchasesByProducts").parent().parent().attr("class", "col-lg-12 col-md-12 col-sm-12 col-xs-12");
+          return false;          
+        }
+        else {
+          return true;
+        }
+      });
+  }
+
+  function resetFrmPurchasesByBrands() {
+    $("#secPurchasesByBrands #msg").empty(); 
+    $("#secPurchasesByBrands #purchases_by_brands").hide(); 
+    $("#secPurchasesByBrands .secAdvancedConfig").hide();
+    loadAdvancedCfgPurchasesByBrandsFrm();
+    $("#secPurchasesByBrands #secDetails").empty();
+    $("#txtBrand").focus();
+  }
+
+  function loadAdvancedCfgPurchasesByShopsFrm() {
+    show_msg_with_toastr("info", msg_wait);
+    $("#secPurchasesByShops .secAdvancedConfig").load("/analytics/purchases/advanced-cfg-by-shops/", function() {
+        toastr.clear();
+        $("#secPurchasesByShops .secAdvancedConfig").hide();
+
+        can_i_search=
+          selected_shops.length>0 &&
+          selected_products.length>0 &&
+          selected_brands.length>0 &&
+          selected_users.length>0 &&
+          selected_providers.length>0;
+
+        if (!can_i_search) {
+          $("#secPurchasesByShops").parent().remove();
+          //$("#secPurchasesByProducts").parent().parent().attr("class", "col-lg-12 col-md-12 col-sm-12 col-xs-12");
+          return false;          
+        }
+        else {
+          return true;
+        }
+      });
+  }
+
+  function resetFrmPurchasesByShops() {
+    $("#secPurchasesByShops #msg").empty(); 
+    $("#secPurchasesByShops #purchases_by_shops").hide(); 
+    $("#secPurchasesByShops .secAdvancedConfig").hide();
+    loadAdvancedCfgPurchasesByShopsFrm();
+    $("#secPurchasesByShops #secDetails").empty();
+    $("#txtShop").focus();
+  }
+
+  function cfgPurchasesByRangeFrm() {
+    $("#secPurchasesByRange #purchases_by_range").hide();
+
+    loadAdvancedCfgPurchasesByRangeFrm();
+
+    $("#secPurchasesByRange .actCfg").click(function() {
+      $("#secPurchasesByRange .secAdvancedConfig").show();
+      $("#secPurchasesByRange .hide-me-on-config").hide();
+      $("#secPurchasesByRange .btns").hide();
+      $("#secPurchasesByRange form button[type='submit']").attr("disabled", "");
+      $("#secPurchasesByRange .form-control").attr("disabled", "");
+      // $(this).blur();
+      $(this).hide();
+      return false;
+    })
+
+    function verifyDateFormat(for_field_id) {
+      // Regular expression taken from https://www.regextester.com/99555
+      var re = /^([0-2][0-9]|(3)[0-1])(\/)(((0)[0-9])|((1)[0-2]))(\/)\d{4}$/;
+
+      if (!re.test($(for_field_id).val())) {
+        $.ajax({
+          method: "GET",
+          url: "/translator/translate/",
+          data: {msg: "Wrong format for date"}
+        })
+        .done(function(result) {
+          toastr.clear();
+          show_msg_with_toastr("error", result);
+          $("#secPurchasesByRange form button[type='submit']").attr("disabled", "");
+        });
+        return false;
+      }
+      else {
+        toastr.clear();
+        $("#secPurchasesByRange form button[type='submit']").removeAttr("disabled");
+      }
+      return true;
+    }
+
+    function verifyDateRanges() {
+      show_msg_with_toastr("info", msg_wait);
+      starts=$("#secPurchasesByRange #txtStartingWhen").val();
+      ends=$("#secPurchasesByRange #txtEndingWhen").val();
+
+      if (starts>ends) {
+        toastr.clear();
+        show_msg_with_toastr("error", msg_wrong_dates);
+        $("#secPurchasesByRange form button[type='submit']").attr("disabled", "");
+      }
+      else if (starts==ends) {
+        t_starts=$("#secPurchasesByRange #txtStartingAt").val();
+        t_ends=$("#secPurchasesByRange #txtEndingAt").val();
+        if (t_starts>t_ends) {
+          toastr.clear();
+          show_msg_with_toastr("error", msg_wrong_times);
+          $("#secPurchasesByRange form button[type='submit']").attr("disabled", "");
+        }
+        else {
+          toastr.clear();
+          $("#secPurchasesByRange form button[type='submit']").removeAttr("disabled");
+        }
+      }
+      else {
+        toastr.clear();
+        $("#secPurchasesByRange form button[type='submit']").removeAttr("disabled");
+      }
+    }
+
+    // Starting date
+    $("#secPurchasesByRange #txtStartingWhen").datepicker({maxDate: "+0D", showButtonPanel: true, changeMonth: true, changeYear: true});
+
+    $("#secPurchasesByRange #txtStartingWhen").datepicker("option", $.datepicker.regional["es"] );
+
+    // Starting time
+    $("#secPurchasesByRange #txtStartingAt").timepicker({'scrollDefault': 'now', 'timeFormat': 'H:i:s', 'disableTextInput': true});
+
+    $("#secPurchasesByRange #txtStartingAt").val("00:00:00");
+
+    // Ending date
+    $("#secPurchasesByRange #txtEndingWhen").datepicker({maxDate: "+0D", showButtonPanel: true, changeMonth: true, changeYear: true});
+
+    $("#secPurchasesByRange #txtEndingWhen").datepicker("option", $.datepicker.regional["es"] );
+
+    $("#secPurchasesByRange #txtEndingWhen").val(new Date().toLocaleDateString());
+
+    // Ending time
+    $("#secPurchasesByRange #txtEndingAt").timepicker({'scrollDefault': 'now', 'timeFormat': 'H:i:s', 'disableTextInput': true});
+
+    $("#secPurchasesByRange #txtEndingAt").val(new Date().toLocaleTimeString());
+
+    $("#secPurchasesByRange #txtStartingWhen").change(function() {
+      if (verifyDateFormat("#secPurchasesByRange #txtStartingWhen"))
+        verifyDateRanges();
+    });
+
+    $("#secPurchasesByRange #txtStartingAt").change(function() {
+      verifyDateRanges();
+    });
+
+    $("#secPurchasesByRange #txtEndingWhen").change(function() {
+      if (verifyDateFormat("#secPurchasesByRange #txtEndingWhen"))
+        verifyDateRanges();
+    });
+
+    $("#secPurchasesByRange #txtEndingAt").change(function() {
+      verifyDateRanges();
+    });
+
+    function prepareCfgDataForSubmit(addTo) {
+      selected_shops=[];
+      selected_products=[];
+      selected_brands=[];
+      selected_users=[];
+      selected_providers=[];
+
+      // Shops...
+      chks=$("#secPurchasesByRange .secAdvancedConfig .chkShop");
+      tope=chks.length;
+      for (x=0;x<tope;x++)
+        if (chks[x].checked)
+          selected_shops.push(chks[x].id.substr("chkShop".length));
+
+      // Products...
+      chks=$("#secPurchasesByRange .secAdvancedConfig .chkProduct");
+      tope=chks.length;
+      for (x=0;x<tope;x++)
+        if (chks[x].checked)
+          selected_products.push(chks[x].id.substr("chkProduct".length));
+
+      // Brands...
+      chks=$("#secPurchasesByRange .secAdvancedConfig .chkBrand");
+      tope=chks.length;
+      for (x=0;x<tope;x++)
+        if (chks[x].checked)
+          selected_brands.push(chks[x].id.substr("chkBrand".length));
+
+      // Users...
+      chks=$("#secPurchasesByRange .secAdvancedConfig .chkUser");
+      tope=chks.length;
+      for (x=0;x<tope;x++)
+        if (chks[x].checked)
+          selected_users.push(chks[x].id.substr("chkUser".length));
+
+      // Providers...
+      chks=$("#secPurchasesByRange .secAdvancedConfig .chkProvider");
+      tope=chks.length;
+      for (x=0;x<tope;x++)
+        if (chks[x].checked)
+          selected_providers.push(chks[x].id.substr("chkProvider".length));
+
+      shops = {
+        "name": "shops",
+        "type": "text", 
+        "required": true,
+        "value": JSON.stringify(selected_shops)
+      };
+
+      products = {
+        "name": "products",
+        "type": "text", 
+        "required": true,
+        "value": JSON.stringify(selected_products)
+      };
+
+      brands = {
+        "name": "brands",
+        "type": "text", 
+        "required": true,
+        "value": JSON.stringify(selected_brands)
+      };
+
+      users = {
+        "name": "users",
+        "type": "text", 
+        "required": true,
+        "value": JSON.stringify(selected_users)
+      };
+
+      providers = {
+        "name": "providers",
+        "type": "text", 
+        "required": true,
+        "value": JSON.stringify(selected_providers)
+      };
+
+      addTo.push(shops);
+      addTo.push(products);
+      addTo.push(brands);
+      addTo.push(users);
+      addTo.push(providers);
+    }
+
+    function showRequest(formData, jqForm, options) {
+      toastr.clear(); 
+      show_msg_with_toastr("info", msg_wait);
+      error=false;
+      if (selected_shops.length<1) {
+        $.ajax({
+          method: "GET",
+          url: "/translator/translate/",
+          data: {msg: "Please select at least one store"}
+        })
+        .done(function(result) {
+          toastr.clear();
+          show_msg_with_toastr("error", result);
+          $("#secPurchasesByRange .actCfg").click();
+        });
+        error=true;
+      }
+
+      if (selected_products.length<1) {
+        $.ajax({
+          method: "GET",
+          url: "/translator/translate/",
+          data: {msg: "Please select at least one product"}
+        })
+        .done(function(result) {
+          //toastr.clear();
+          show_msg_with_toastr("error", result);
+          $("#secPurchasesByRange .actCfg").click();
+        });
+        error=true;
+      }
+
+      if (selected_brands.length<1) {
+        $.ajax({
+          method: "GET",
+          url: "/translator/translate/",
+          data: {msg: "Please select at least one brand"}
+        })
+        .done(function(result) {
+          //toastr.clear();
+          show_msg_with_toastr("error", result);
+          $("#secPurchasesByRange .actCfg").click();
+        });
+        error=true;
+      }
+
+      if (error)
+        return false;
+
+      prepareCfgDataForSubmit(formData);
+      $("#secPurchasesByRange form button[type='submit']").attr("disabled", "");
+      return true;
+    }
+ 
+    function showResponse(responseText, statusText, xhr, $form)  {
+      $("#secPurchasesByRange form button[type='submit']").removeAttr("disabled");
+      $('[data-toggle="tooltip"]').tooltip();
+      toastr.clear();
+    }
+
+    options = { 
+      target:        '#secPurchasesByRange #purchases_by_range',
+      beforeSubmit:  showRequest,
+      success:       showResponse
+    };
+
+    $("#secPurchasesByRange form").ajaxForm(options);
+  }
+
+  function cfgPurchasesByProviderFrm() {
+    $("#secPurchasesByProviders #purchases_by_providers").hide();
+
+    loadAdvancedCfgPurchasesByProvidersFrm();
+
+    $("#secPurchasesByProviders .view-all").click(function() {
+      show_msg_with_toastr("info", msg_wait);
+      $(this).blur();
+
+      $("#secPurchasesByProviders form button[type='submit']").attr("disabled", "");
+
+      result = prepareCfgDataForSubmit_providers(null);
+      shops=result[0];
+      products=result[1];
+      brands=result[2];
+      users=result[3];
+
+      shops=JSON.stringify(shops);
+      products=JSON.stringify(products);
+      brands=JSON.stringify(brands);
+      users=JSON.stringify(users);
+
+      itm_menu = $("#secPurchasesByProviders form #itm_menu").val();
+
+      $.ajax({
+        method: "GET",
+        url: "/analytics/purchases/all-providers/",
+        data: {shops: shops, products: products, brands: brands, users: users, itm_menu: itm_menu}
+      })
+      .done(function(result) {
+        $("#secPurchasesByProviders #purchases_by_providers").html(result);
+        $("#secPurchasesByProviders form button[type='submit']").removeAttr("disabled");
+        toastr.clear();
+      });
+
+      return false;
+    })
+
+    $("#secPurchasesByProviders .actCfg").click(function() {
+      $("#secPurchasesByProviders .secAdvancedConfig").show();
+      $("#secPurchasesByProviders .hide-me-on-config").hide();
+      $("#secPurchasesByProviders .btns").hide();
+      $("#secPurchasesByProviders form button[type='submit']").attr("disabled", "");
+      $("#secPurchasesByProviders .form-control").attr("disabled", "");
+      // $(this).blur();
+      $(this).hide();
+      return false;
+    })
+
+    function prepareCfgDataForSubmit_providers(addTo) {
+      selected_shops=[];
+      selected_products=[];
+      selected_brands=[];
+
+      // Shops...
+      chks=$("#secPurchasesByProviders .secAdvancedConfig .chkShop_providers");
+      tope=chks.length;
+      for (x=0;x<tope;x++)
+        if (chks[x].checked)
+          selected_shops.push(chks[x].id.substr("chkShop_providers".length));
+
+      // Products...
+      chks=$("#secPurchasesByProviders .secAdvancedConfig .chkProduct_providers");
+      tope=chks.length;
+      for (x=0;x<tope;x++)
+        if (chks[x].checked)
+          selected_products.push(chks[x].id.substr("chkProduct_providers".length));
+
+      // Brands...
+      chks=$("#secPurchasesByProviders .secAdvancedConfig .chkBrand_providers");
+      tope=chks.length;
+      for (x=0;x<tope;x++)
+        if (chks[x].checked)
+          selected_brands.push(chks[x].id.substr("chkBrand_providers".length));
+
+      // Users...
+      selected_users=[];
+      if (doIHaveToVerifyUsers) {
+        chks=$("#secPurchasesByProviders .secAdvancedConfig .chkUser_providers");
+        tope=chks.length;
+        for (x=0;x<tope;x++)
+          if (chks[x].checked)
+            selected_users.push(chks[x].id.substr("chkUser_providers".length));
+      }
+
+      shops = {
+        "name": "shops",
+        "type": "text", 
+        "required": true,
+        "value": JSON.stringify(selected_shops)
+      };
+
+      products = {
+        "name": "products",
+        "type": "text", 
+        "required": true,
+        "value": JSON.stringify(selected_products)
+      };
+
+      brands = {
+        "name": "brands",
+        "type": "text", 
+        "required": true,
+        "value": JSON.stringify(selected_brands)
+      };
+
+      users = {
+        "name": "users",
+        "type": "text", 
+        "required": true,
+        "value": JSON.stringify(selected_users)
+      };
+
+      if (addTo!=null) {
+        addTo.push(shops);
+        addTo.push(products);
+        addTo.push(brands);
+        addTo.push(users);
+      }
+      else {
+        return [selected_shops, selected_products, selected_brands, selected_users];
+      }
+    }
+
+    $("#secPurchasesByProviders #txtProvider").autocomplete({
+      source: "/providers/autocomplete/my-providers/",
+      minLength: 3,
+    });
+
+    $("#secPurchasesByProviders #txtProvider").change(function() {
+      show_msg_with_toastr("info", msg_wait);
+      rfc=this.value.substr(this.value.indexOf('RFC=')+"RFC=".length);
+      rfc=rfc.substr(0, rfc.length-1);
+
+      $.ajax({
+        method: "GET",
+        url: "/providers/search/by-rfc/",
+        data: { rfc: rfc }
+      })
+      .done(function(result) {
+        toastr.clear();
+        if (!result.exist)
+          $.ajax({
+            method: "GET",
+            url: "/translator/translate",
+            data: {msg: "Please enter a valid provider"}
+          })
+          .done(function(result) {
+            show_msg_with_toastr("error", result);
+            $("#secPurchasesByProviders #provider_obj").val("");
+            $("#secPurchasesByProviders form button[type='submit']").attr("disabled", "");
+          });
+        else {
+          $("#secPurchasesByProviders #provider_obj").val(result.provider);
+          $("#secPurchasesByProviders form button[type='submit']").removeAttr("disabled");
+        }
+      });
+    });
+
+    function showRequest(formData, jqForm, options) { 
+      toastr.clear(); 
+      show_msg_with_toastr("info", msg_wait);
+      error=false;
+      if (selected_shops.length<1) {
+        $.ajax({
+          method: "GET",
+          url: "/translator/translate/",
+          data: {msg: "Please select at least one store"}
+        })
+        .done(function(result) {
+          toastr.clear();
+          show_msg_with_toastr("error", result);
+          $("#secPurchasesByProviders .actCfg").click();
+        });
+        error=true;
+      }
+
+      if (selected_products.length<1) {
+        $.ajax({
+          method: "GET",
+          url: "/translator/translate/",
+          data: {msg: "Please select at least one product"}
+        })
+        .done(function(result) {
+          //toastr.clear();
+          show_msg_with_toastr("error", result);
+          $("#secPurchasesByProviders .actCfg").click();
+        });
+        error=true;
+      }
+
+      if (selected_brands.length<1) {
+        $.ajax({
+          method: "GET",
+          url: "/translator/translate/",
+          data: {msg: "Please select at least one brand"}
+        })
+        .done(function(result) {
+          //toastr.clear();
+          show_msg_with_toastr("error", result);
+          $("#secPurchasesByProviders .actCfg").click();
+        });
+        error=true;
+      }
+
+      if (error)
+        return false;
+
+      prepareCfgDataForSubmit_providers(formData);
+      $("#secPurchasesByProviders form button[type='submit']").attr("disabled", "");
+      return true;
+    }
+ 
+    function showResponse(responseText, statusText, xhr, $form)  {
+      toastr.clear();
+      $("#secPurchasesByProviders form button[type='submit']").removeAttr("disabled");
+    }
+
+    options = { 
+      target:        '#secPurchasesByProviders #purchases_by_providers',
+      beforeSubmit:  showRequest,
+      success:       showResponse
+    };
+
+    $("#secPurchasesByProviders form").ajaxForm(options);
+  }
+
+  function cfgPurchasesByUserFrm() {
+    $("#secPurchasesByUsers #purchases_by_users").hide();
+
+    loadAdvancedCfgPurchasesByUsersFrm();
+
+    function prepareCfgDataForSubmit_users(addTo) {
+      selected_shops=[];
+      selected_products=[];
+      selected_brands=[];
+      selected_providers=[];
+
+      // Shops...
+      chks=$("#secPurchasesByUsers .secAdvancedConfig .chkShop_users");
+      tope=chks.length;
+      for (x=0;x<tope;x++)
+        if (chks[x].checked)
+          selected_shops.push(chks[x].id.substr("chkShop_users".length));
+
+      // Products...
+      chks=$("#secPurchasesByUsers .secAdvancedConfig .chkProduct_users");
+      tope=chks.length;
+      for (x=0;x<tope;x++)
+        if (chks[x].checked)
+          selected_products.push(chks[x].id.substr("chkProduct_users".length));
+
+      // Brands...
+      chks=$("#secPurchasesByUsers .secAdvancedConfig .chkBrand_users");
+      tope=chks.length;
+      for (x=0;x<tope;x++)
+        if (chks[x].checked)
+          selected_brands.push(chks[x].id.substr("chkBrand_users".length));
+
+      // Providers...
+      chks=$("#secPurchasesByUsers .secAdvancedConfig .chkProvider_users");
+      tope=chks.length;
+      for (x=0;x<tope;x++)
+        if (chks[x].checked)
+          selected_providers.push(chks[x].id.substr("chkProvider_users".length));
+
+      shops = {
+        "name": "shops",
+        "type": "text", 
+        "required": true,
+        "value": JSON.stringify(selected_shops)
+      };
+
+      products = {
+        "name": "products",
+        "type": "text", 
+        "required": true,
+        "value": JSON.stringify(selected_products)
+      };
+
+      brands = {
+        "name": "brands",
+        "type": "text", 
+        "required": true,
+        "value": JSON.stringify(selected_brands)
+      };
+
+      providers = {
+        "name": "providers",
+        "type": "text", 
+        "required": true,
+        "value": JSON.stringify(selected_providers)
+      };
+
+      if (addTo!=null) {
+        addTo.push(shops);
+        addTo.push(products);
+        addTo.push(brands);
+        addTo.push(providers);
+      }
+      else {
+        return [selected_shops, selected_products, selected_brands, selected_providers];
+      }
+    }
+
+    $("#secPurchasesByUsers .view-all").click(function() {
+      show_msg_with_toastr("info", msg_wait);
+      $(this).blur();
+
+      $("#secPurchasesByUsers form button[type='submit']").attr("disabled", "");
+
+      result = prepareCfgDataForSubmit_users(null);
+      shops=JSON.stringify(result[0]);
+      products=JSON.stringify(result[1]);
+      brands=JSON.stringify(result[2]);
+      providers=JSON.stringify(result[3]);
+
+      itm_menu = $("#secPurchasesByUsers form #itm_menu").val();
+
+      $.ajax({
+        method: "GET",
+        url: "/analytics/purchases/all-users/",
+        data: {shops: shops, products: products, brands: brands, itm_menu: itm_menu, providers: providers}
+      })
+      .done(function(result) {
+        $("#secPurchasesByUsers #purchases_by_users").html(result);
+        $("#secPurchasesByUsers form button[type='submit']").removeAttr("disabled");
+        toastr.clear();
+      });
+
+      return false;
+    })
+
+    $("#secPurchasesByUsers .actCfg").click(function() {
+      $("#secPurchasesByUsers .secAdvancedConfig").show();
+      $("#secPurchasesByUsers .hide-me-on-config").hide();
+      $("#secPurchasesByUsers .btns").hide();
+      $("#secPurchasesByUsers form button[type='submit']").attr("disabled", "");
+      $("#secPurchasesByUsers .form-control").attr("disabled", "");
+      // $(this).blur();
+      $(this).hide();
+      return false;
+    })
+
+    $("#secPurchasesByUsers #txtUser").autocomplete({
+      // source: "/users/autocomplete/my-users/",
+      source: "/users/autocomplete/users-analytics/",
+      minLength: 1,
+    });
+
+    $("#secPurchasesByUsers #txtUser").change(function() {
+      show_msg_with_toastr("info", msg_wait);
+      email=this.value.substr(this.value.indexOf('email=')+"email=".length);
+      email=email.substr(0, email.length-1);
+
+      $.ajax({
+        method: "GET",
+        url: "/users/search-by-email",
+        data: { email: email }
+      })
+      .done(function(result) {
+        toastr.clear();
+        if (!result.exist)
+          $.ajax({
+            method: "GET",
+            url: "/translator/translate",
+            data: {msg: "Please enter a valid user"}
+          })
+          .done(function(result) {
+            show_msg_with_toastr("error", result);
+            $("#secPurchasesByUsers #user_obj").val('');
+            $("#secPurchasesByUsers form button[type='submit']").attr("disabled", "");
+          });
+        else {
+          $("#secPurchasesByUsers #user_obj").val(result.user);
+          $("#secPurchasesByUsers form button[type='submit']").removeAttr("disabled");
+        }
+      });
+    });
+
+    function showRequest(formData, jqForm, options) {
+      toastr.clear(); 
+      show_msg_with_toastr("info", msg_wait);
+      error=false;
+      if (selected_shops.length<1) {
+        $.ajax({
+          method: "GET",
+          url: "/translator/translate/",
+          data: {msg: "Please select at least one store"}
+        })
+        .done(function(result) {
+          toastr.clear();
+          show_msg_with_toastr("error", result);
+          $("#secPurchasesByUsers .actCfg").click();
+        });
+        error=true;
+      }
+
+      if (selected_products.length<1) {
+        $.ajax({
+          method: "GET",
+          url: "/translator/translate/",
+          data: {msg: "Please select at least one product"}
+        })
+        .done(function(result) {
+          //toastr.clear();
+          show_msg_with_toastr("error", result);
+          $("#secPurchasesByUsers .actCfg").click();
+        });
+        error=true;
+      }
+
+      if (selected_brands.length<1) {
+        $.ajax({
+          method: "GET",
+          url: "/translator/translate/",
+          data: {msg: "Please select at least one brand"}
+        })
+        .done(function(result) {
+          //toastr.clear();
+          show_msg_with_toastr("error", result);
+          $("#secPurchasesByUsers .actCfg").click();
+        });
+        error=true;
+      }
+
+      if (error)
+        return false;
+
+      prepareCfgDataForSubmit_users(formData);
+      $("#secPurchasesByUsers form button[type='submit']").attr("disabled", "");
+      return true;
+    }
+ 
+    function showResponse(responseText, statusText, xhr, $form)  {
+      toastr.clear();
+      $("#secPurchasesByUsers form button[type='submit']").removeAttr("disabled");
+    }
+
+    options = { 
+      target:        '#secPurchasesByUsers #purchases_by_users',
+      beforeSubmit:  showRequest,
+      success:       showResponse
+    };
+
+    $("#secPurchasesByUsers form").ajaxForm(options);
+  }
+
+  function cfgPurchasesByProductFrm() {
+    $("#secPurchasesByProducts #purchases_by_products").hide();
+
+    loadAdvancedCfgPurchasesByProductsFrm();
+
+    function prepareCfgDataForSubmit_products(addTo) {
+      selected_shops=[];
+      selected_products=[];
+      selected_brands=[];
+      selected_users=[];
+      selected_providers=[];
+
+      // Shops...
+      chks=$("#secPurchasesByProducts .secAdvancedConfig .chkShop_products");
+      tope=chks.length;
+      for (x=0;x<tope;x++)
+        if (chks[x].checked)
+          selected_shops.push(chks[x].id.substr("chkShop_products".length));
+
+      // Products...
+      chks=$("#secPurchasesByProducts .secAdvancedConfig .chkProduct_products");
+      tope=chks.length;
+      for (x=0;x<tope;x++)
+        if (chks[x].checked)
+          selected_products.push(chks[x].id.substr("chkProduct_products".length));
+
+      // Brands...
+      chks=$("#secPurchasesByProducts .secAdvancedConfig .chkBrand_products");
+      tope=chks.length;
+      for (x=0;x<tope;x++)
+        if (chks[x].checked)
+          selected_brands.push(chks[x].id.substr("chkBrand_products".length));
+
+      // Users...
+      chks=$("#secPurchasesByProducts .secAdvancedConfig .chkUser_products");
+      tope=chks.length;
+      for (x=0;x<tope;x++)
+        if (chks[x].checked)
+          selected_users.push(chks[x].id.substr("chkUser_products".length));
+
+      // Providers...
+      chks=$("#secPurchasesByProducts .secAdvancedConfig .chkProvider_products");
+      tope=chks.length;
+      for (x=0;x<tope;x++)
+        if (chks[x].checked)
+          selected_providers.push(chks[x].id.substr("chkProvider_products".length));
+
+      shops = {
+        "name": "shops",
+        "type": "text", 
+        "required": true,
+        "value": JSON.stringify(selected_shops)
+      };
+
+      products = {
+        "name": "products",
+        "type": "text", 
+        "required": true,
+        "value": JSON.stringify(selected_products)
+      };
+
+      brands = {
+        "name": "brands",
+        "type": "text", 
+        "required": true,
+        "value": JSON.stringify(selected_brands)
+      };
+
+      users = {
+        "name": "users",
+        "type": "text", 
+        "required": true,
+        "value": JSON.stringify(selected_users)
+      };
+
+      providers = {
+        "name": "providers",
+        "type": "text", 
+        "required": true,
+        "value": JSON.stringify(selected_providers)
+      };
+
+      if (addTo!=null) {
+        addTo.push(shops);
+        addTo.push(products);
+        addTo.push(brands);
+        addTo.push(users);
+        addTo.push(providers);
+      }
+      else {
+        return [selected_shops, selected_products, selected_brands, selected_users, selected_providers];
+      }
+    }
+
+    $("#secPurchasesByProducts .view-all").click(function() {
+      show_msg_with_toastr("info", msg_wait);
+      $(this).blur();
+
+      $("#secPurchasesByProducts form button[type='submit']").attr("disabled", "");
+
+      result = prepareCfgDataForSubmit_products(null);
+      shops=JSON.stringify(result[0]);
+      products=JSON.stringify(result[1]);
+      brands=JSON.stringify(result[2]);
+      users=JSON.stringify(result[3]);
+      providers=JSON.stringify(result[4]);
+
+      itm_menu = $("#secPurchasesByProducts form #itm_menu").val();
+
+      $.ajax({
+        method: "GET",
+        url: "/analytics/purchases/all-products/",
+        data: {shops: shops, products: products, brands: brands, itm_menu: itm_menu, users: users, providers: providers}
+      })
+      .done(function(result) {
+        $("#secPurchasesByProducts #purchases_by_products").html(result);
+        $("#secPurchasesByProducts form button[type='submit']").removeAttr("disabled");
+        toastr.clear();
+      });
+
+      return false;
+    })
+
+    $("#secPurchasesByProducts .actCfg").click(function() {
+      $("#secPurchasesByProducts .secAdvancedConfig").show();
+      $("#secPurchasesByProducts .hide-me-on-config").hide();
+      $("#secPurchasesByProducts .btns").hide();
+      $("#secPurchasesByProducts form button[type='submit']").attr("disabled", "");
+      $("#secPurchasesByProducts .form-control").attr("disabled", "");
+      // $(this).blur();
+      $(this).hide();
+      return false;
+    })
+
+    $("#secPurchasesByProducts #txtProduct").autocomplete({
+      source: "/products/autocomplete/my-products/",
+      minLength: 1,
+    });
+
+    $("#secPurchasesByProducts #txtProduct").change(function() {
+      show_msg_with_toastr("info", msg_wait);
+
+      $.ajax({
+        method: "GET",
+        url: "/products/search/by-name",
+        data: { product: this.value }
+      })
+      .done(function(result) {
+        toastr.clear();
+        if (!result.exist)
+          $.ajax({
+            method: "GET",
+            url: "/translator/translate",
+            data: {msg: "Please enter a valid product"}
+          })
+          .done(function(result) {
+            show_msg_with_toastr("error", result);
+            $("#secPurchasesByProducts #product_obj").val('');
+            $("#secPurchasesByProducts form button[type='submit']").attr("disabled", "");
+          });
+        else {
+          $("#secPurchasesByProducts #product_obj").val(result.product);
+          $("#secPurchasesByProducts form button[type='submit']").removeAttr("disabled");
+        }
+      });
+    });
+
+    function showRequest(formData, jqForm, options) {
+      toastr.clear(); 
+      show_msg_with_toastr("info", msg_wait);
+      error=false;
+      if (selected_shops.length<1) {
+        $.ajax({
+          method: "GET",
+          url: "/translator/translate/",
+          data: {msg: "Please select at least one store"}
+        })
+        .done(function(result) {
+          toastr.clear();
+          show_msg_with_toastr("error", result);
+          $("#secPurchasesByProducts .actCfg").click();
+        });
+        error=true;
+      }
+
+      if (selected_products.length<1) {
+        $.ajax({
+          method: "GET",
+          url: "/translator/translate/",
+          data: {msg: "Please select at least one product"}
+        })
+        .done(function(result) {
+          //toastr.clear();
+          show_msg_with_toastr("error", result);
+          $("#secPurchasesByProducts .actCfg").click();
+        });
+        error=true;
+      }
+
+      if (selected_brands.length<1) {
+        $.ajax({
+          method: "GET",
+          url: "/translator/translate/",
+          data: {msg: "Please select at least one brand"}
+        })
+        .done(function(result) {
+          //toastr.clear();
+          show_msg_with_toastr("error", result);
+          $("#secPurchasesByProducts .actCfg").click();
+        });
+        error=true;
+      }
+
+      if (error)
+        return false;
+
+      prepareCfgDataForSubmit_products(formData);
+      $("#secPurchasesByProducts form button[type='submit']").attr("disabled", "");
+      return true;
+    }
+ 
+    function showResponse(responseText, statusText, xhr, $form)  {
+      toastr.clear();
+      $("#secPurchasesByProducts form button[type='submit']").removeAttr("disabled");
+    }
+
+    options = { 
+      target:        '#secPurchasesByProducts #purchases_by_products',
+      beforeSubmit:  showRequest,
+      success:       showResponse
+    };
+
+    $("#secPurchasesByProducts form").ajaxForm(options);
+  }
+
+  function cfgPurchasesByBrandFrm() {
+    $("#secPurchasesByBrands #purchases_by_brands").hide();
+
+    loadAdvancedCfgPurchasesByBrandsFrm();
+
+    function prepareCfgDataForSubmit_brands(addTo) {
+      selected_shops=[];
+      selected_products=[];
+      selected_brands=[];
+      selected_users=[];
+      selected_providers=[];
+
+      // Shops...
+      chks=$("#secPurchasesByBrands .secAdvancedConfig .chkShop_brands");
+      tope=chks.length;
+      for (x=0;x<tope;x++)
+        if (chks[x].checked)
+          selected_shops.push(chks[x].id.substr("chkShop_brands".length));
+
+      // Products...
+      chks=$("#secPurchasesByBrands .secAdvancedConfig .chkProduct_brands");
+      tope=chks.length;
+      for (x=0;x<tope;x++)
+        if (chks[x].checked)
+          selected_products.push(chks[x].id.substr("chkProduct_brands".length));
+
+      // Brands...
+      chks=$("#secPurchasesByBrands .secAdvancedConfig .chkBrand_brands");
+      tope=chks.length;
+      for (x=0;x<tope;x++)
+        if (chks[x].checked)
+          selected_brands.push(chks[x].id.substr("chkBrand_brands".length));
+
+      // Users...
+      chks=$("#secPurchasesByBrands .secAdvancedConfig .chkUser_brands");
+      tope=chks.length;
+      for (x=0;x<tope;x++)
+        if (chks[x].checked)
+          selected_users.push(chks[x].id.substr("chkUser_brands".length));
+
+      // Providers...
+      chks=$("#secPurchasesByBrands .secAdvancedConfig .chkProvider_brands");
+      tope=chks.length;
+      for (x=0;x<tope;x++)
+        if (chks[x].checked)
+          selected_providers.push(chks[x].id.substr("chkProvider_brands".length));
+
+      shops = {
+        "name": "shops",
+        "type": "text", 
+        "required": true,
+        "value": JSON.stringify(selected_shops)
+      };
+
+      products = {
+        "name": "products",
+        "type": "text", 
+        "required": true,
+        "value": JSON.stringify(selected_products)
+      };
+
+      brands = {
+        "name": "brands",
+        "type": "text", 
+        "required": true,
+        "value": JSON.stringify(selected_brands)
+      };
+
+      users = {
+        "name": "users",
+        "type": "text", 
+        "required": true,
+        "value": JSON.stringify(selected_users)
+      };
+
+      providers = {
+        "name": "providers",
+        "type": "text", 
+        "required": true,
+        "value": JSON.stringify(selected_providers)
+      };
+
+      if (addTo!=null) {
+        addTo.push(shops);
+        addTo.push(products);
+        addTo.push(brands);
+        addTo.push(users);
+        addTo.push(providers);
+      }
+      else {
+        return [selected_shops, selected_products, selected_brands, selected_users, selected_providers];
+      }
+    }
+
+    $("#secPurchasesByBrands .view-all").click(function() {
+      show_msg_with_toastr("info", msg_wait);
+      $(this).blur();
+
+      $("#secPurchasesByBrands form button[type='submit']").attr("disabled", "");
+
+      result = prepareCfgDataForSubmit_brands(null);
+      shops=JSON.stringify(result[0]);
+      products=JSON.stringify(result[1]);
+      brands=JSON.stringify(result[2]);
+      users=JSON.stringify(result[3]);
+      providers=JSON.stringify(result[4]);
+
+      itm_menu = $("#secPurchasesByBrands form #itm_menu").val();
+
+      $.ajax({
+        method: "GET",
+        url: "/analytics/purchases/all-brands/",
+        data: {shops: shops, products: products, brands: brands, itm_menu: itm_menu, users: users, providers: providers}
+      })
+      .done(function(result) {
+        $("#secPurchasesByBrands #purchases_by_brands").html(result);
+        $("#secPurchasesByBrands form button[type='submit']").removeAttr("disabled");
+        toastr.clear();
+      });
+
+      return false;
+    })
+
+    $("#secPurchasesByBrands .actCfg").click(function() {
+      $("#secPurchasesByBrands .secAdvancedConfig").show();
+      $("#secPurchasesByBrands .hide-me-on-config").hide();
+      $("#secPurchasesByBrands .btns").hide();
+      $("#secPurchasesByBrands form button[type='submit']").attr("disabled", "");
+      $("#secPurchasesByBrands .form-control").attr("disabled", "");
+      // $(this).blur();
+      $(this).hide();
+      return false;
+    })
+
+    $("#secPurchasesByBrands #txtBrand").autocomplete({
+      source: "/brands/autocomplete/my-brands/",
+      minLength: 1,
+    });
+
+    $("#secPurchasesByBrands #txtBrand").change(function() {
+      show_msg_with_toastr("info", msg_wait);
+
+      $.ajax({
+        method: "GET",
+        url: "/brands/search/by-name",
+        data: { brand: this.value }
+      })
+      .done(function(result) {
+        toastr.clear();
+        if (!result.exist)
+          $.ajax({
+            method: "GET",
+            url: "/translator/translate",
+            data: {msg: "Please enter a valid brand"}
+          })
+          .done(function(result) {
+            show_msg_with_toastr("error", result);
+            $("#secPurchasesByBrands #brand_obj").val('');
+            $("#secPurchasesByBrands form button[type='submit']").attr("disabled", "");
+          });
+        else {
+          $("#secPurchasesByBrands #brand_obj").val(result.brand);
+          $("#secPurchasesByBrands form button[type='submit']").removeAttr("disabled");
+        }
+      });
+    });
+
+    function showRequest(formData, jqForm, options) {
+      toastr.clear(); 
+      show_msg_with_toastr("info", msg_wait);
+      error=false;
+      if (selected_shops.length<1) {
+        $.ajax({
+          method: "GET",
+          url: "/translator/translate/",
+          data: {msg: "Please select at least one store"}
+        })
+        .done(function(result) {
+          toastr.clear();
+          show_msg_with_toastr("error", result);
+          $("#secPurchasesByBrands .actCfg").click();
+        });
+        error=true;
+      }
+
+      if (selected_products.length<1) {
+        $.ajax({
+          method: "GET",
+          url: "/translator/translate/",
+          data: {msg: "Please select at least one product"}
+        })
+        .done(function(result) {
+          //toastr.clear();
+          show_msg_with_toastr("error", result);
+          $("#secPurchasesByBrands .actCfg").click();
+        });
+        error=true;
+      }
+
+      if (selected_brands.length<1) {
+        $.ajax({
+          method: "GET",
+          url: "/translator/translate/",
+          data: {msg: "Please select at least one brand"}
+        })
+        .done(function(result) {
+          //toastr.clear();
+          show_msg_with_toastr("error", result);
+          $("#secPurchasesByBrands .actCfg").click();
+        });
+        error=true;
+      }
+
+      if (error)
+        return false;
+
+      prepareCfgDataForSubmit_brands(formData);
+      $("#secPurchasesByBrands form button[type='submit']").attr("disabled", "");
+      return true;
+    }
+ 
+    function showResponse(responseText, statusText, xhr, $form)  {
+      toastr.clear();
+      $("#secPurchasesByBrands form button[type='submit']").removeAttr("disabled");
+    }
+
+    options = { 
+      target:        '#secPurchasesByBrands #purchases_by_brands',
+      beforeSubmit:  showRequest,
+      success:       showResponse
+    };
+
+    $("#secPurchasesByBrands form").ajaxForm(options);
+  }
+
+  function cfgPurchasesByShopFrm() {
+    $("#secPurchasesByShops #purchases_by_shops").hide();
+
+    loadAdvancedCfgPurchasesByShopsFrm();
+
+    function prepareCfgDataForSubmit_shops(addTo) {
+      selected_shops=[];
+      selected_products=[];
+      selected_brands=[];
+      selected_users=[];
+      selected_providers=[];
+
+      // Shops...
+      chks=$("#secPurchasesByShops .secAdvancedConfig .chkShop_shops");
+      tope=chks.length;
+      for (x=0;x<tope;x++)
+        if (chks[x].checked)
+          selected_shops.push(chks[x].id.substr("chkShop_shops".length));
+
+      // Products...
+      chks=$("#secPurchasesByShops .secAdvancedConfig .chkProduct_shops");
+      tope=chks.length;
+      for (x=0;x<tope;x++)
+        if (chks[x].checked)
+          selected_products.push(chks[x].id.substr("chkProduct_shops".length));
+
+      // Brands...
+      chks=$("#secPurchasesByShops .secAdvancedConfig .chkBrand_shops");
+      tope=chks.length;
+      for (x=0;x<tope;x++)
+        if (chks[x].checked)
+          selected_brands.push(chks[x].id.substr("chkBrand_shops".length));
+
+      // Users...
+      chks=$("#secPurchasesByShops .secAdvancedConfig .chkUser_shops");
+      tope=chks.length;
+      for (x=0;x<tope;x++)
+        if (chks[x].checked)
+          selected_users.push(chks[x].id.substr("chkUser_shops".length));
+
+      // Providers...
+      chks=$("#secPurchasesByShops .secAdvancedConfig .chkProvider_shops");
+      tope=chks.length;
+      for (x=0;x<tope;x++)
+        if (chks[x].checked)
+          selected_providers.push(chks[x].id.substr("chkProvider_shops".length));
+
+      shops = {
+        "name": "shops",
+        "type": "text", 
+        "required": true,
+        "value": JSON.stringify(selected_shops)
+      };
+
+      products = {
+        "name": "products",
+        "type": "text", 
+        "required": true,
+        "value": JSON.stringify(selected_products)
+      };
+
+      brands = {
+        "name": "brands",
+        "type": "text", 
+        "required": true,
+        "value": JSON.stringify(selected_brands)
+      };
+
+      users = {
+        "name": "users",
+        "type": "text", 
+        "required": true,
+        "value": JSON.stringify(selected_users)
+      };
+
+      providers = {
+        "name": "providers",
+        "type": "text", 
+        "required": true,
+        "value": JSON.stringify(selected_providers)
+      };
+
+      if (addTo!=null) {
+        addTo.push(shops);
+        addTo.push(products);
+        addTo.push(brands);
+        addTo.push(users);
+        addTo.push(providers);
+      }
+      else {
+        return [selected_shops, selected_products, selected_brands, selected_users, selected_providers];
+      }
+    }
+
+    $("#secPurchasesByShops .view-all").click(function() {
+      show_msg_with_toastr("info", msg_wait);
+      $(this).blur();
+
+      $("#secPurchasesByShops form button[type='submit']").attr("disabled", "");
+
+      result = prepareCfgDataForSubmit_shops(null);
+      shops=JSON.stringify(result[0]);
+      products=JSON.stringify(result[1]);
+      brands=JSON.stringify(result[2]);
+      users=JSON.stringify(result[3]);
+      providers=JSON.stringify(result[4]);
+
+      itm_menu = $("#secPurchasesByShops form #itm_menu").val();
+
+      $.ajax({
+        method: "GET",
+        url: "/analytics/purchases/all-shops/",
+        data: {shops: shops, products: products, brands: brands, itm_menu: itm_menu, users: users, providers: providers}
+      })
+      .done(function(result) {
+        $("#secPurchasesByShops #purchases_by_shops").html(result);
+        $("#secPurchasesByShops form button[type='submit']").removeAttr("disabled");
+        toastr.clear();
+      });
+
+      return false;
+    })
+
+    $("#secPurchasesByShops .actCfg").click(function() {
+      $("#secPurchasesByShops .secAdvancedConfig").show();
+      $("#secPurchasesByShops .hide-me-on-config").hide();
+      $("#secPurchasesByShops .btns").hide();
+      $("#secPurchasesByShops form button[type='submit']").attr("disabled", "");
+      $("#secPurchasesByShops .form-control").attr("disabled", "");
+      // $(this).blur();
+      $(this).hide();
+      return false;
+    })
+
+    $("#secPurchasesByShops #txtShop").autocomplete({
+      source: "/shops/autocomplete/my-shops/",
+      minLength: 1,
+    });
+
+    $("#secPurchasesByShops #txtShop").change(function() {
+      show_msg_with_toastr("info", msg_wait);
+
+      shopname = this.value.substring(0, this.value.indexOf(" ["));
+
+      $.ajax({
+        method: "GET",
+        url: "/shops/search/by-name",
+        data: { shopname: shopname }
+      })
+      .done(function(result) {
+        toastr.clear();
+        if (!result.exist)
+          $.ajax({
+            method: "GET",
+            url: "/translator/translate",
+            data: {msg: "Please enter a valid shop"}
+          })
+          .done(function(result) {
+            show_msg_with_toastr("error", result);
+            $("#secPurchasesByShops #shop_obj").val('');
+            $("#secPurchasesByShops form button[type='submit']").attr("disabled", "");
+          });
+        else {
+          $("#secPurchasesByShops #shop_obj").val(result.shop);
+          $("#secPurchasesByShops form button[type='submit']").removeAttr("disabled");
+        }
+      });
+    });
+
+    function showRequest(formData, jqForm, options) {
+      toastr.clear(); 
+      show_msg_with_toastr("info", msg_wait);
+      error=false;
+      if (selected_shops.length<1) {
+        $.ajax({
+          method: "GET",
+          url: "/translator/translate/",
+          data: {msg: "Please select at least one store"}
+        })
+        .done(function(result) {
+          toastr.clear();
+          show_msg_with_toastr("error", result);
+          $("#secPurchasesByShops .actCfg").click();
+        });
+        error=true;
+      }
+
+      if (selected_products.length<1) {
+        $.ajax({
+          method: "GET",
+          url: "/translator/translate/",
+          data: {msg: "Please select at least one product"}
+        })
+        .done(function(result) {
+          //toastr.clear();
+          show_msg_with_toastr("error", result);
+          $("#secPurchasesByShops .actCfg").click();
+        });
+        error=true;
+      }
+
+      if (selected_brands.length<1) {
+        $.ajax({
+          method: "GET",
+          url: "/translator/translate/",
+          data: {msg: "Please select at least one brand"}
+        })
+        .done(function(result) {
+          //toastr.clear();
+          show_msg_with_toastr("error", result);
+          $("#secPurchasesByShops .actCfg").click();
+        });
+        error=true;
+      }
+
+      if (error)
+        return false;
+
+      prepareCfgDataForSubmit_shops(formData);
+      $("#secPurchasesByShops form button[type='submit']").attr("disabled", "");
+      return true;
+    }
+ 
+    function showResponse(responseText, statusText, xhr, $form)  {
+      toastr.clear();
+      $("#secPurchasesByShops form button[type='submit']").removeAttr("disabled");
+    }
+
+    options = { 
+      target:        '#secPurchasesByShops #purchases_by_shops',
+      beforeSubmit:  showRequest,
+      success:       showResponse
+    };
+
+    $("#secPurchasesByShops form").ajaxForm(options);
+  }
+
+  $(document).ready(function(){
+    $("div.menu a#{{itm_menu}}").parent().addClass("active");
+    //html = '<script type="text/javascript">';
+  	//html = 'alert("ok");';
+  	//html += '';
+    //$("#script").html(html);
+    //alert("{{script}}");
+
+    {{purchases_of_the_day_chart|safe}}
+
+    cfgPurchasesByRangeFrm();
+    cfgPurchasesByProviderFrm();
+    cfgPurchasesByUserFrm();
+    cfgPurchasesByProductFrm();
+    cfgPurchasesByBrandFrm();
+    cfgPurchasesByShopFrm();
+  });
+</script>
+
+<div id="divViewDetails"></div>
+
+{% block actions_js %}
+{% endblock %}

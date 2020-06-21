@@ -1,0 +1,128 @@
+{% load static i18n %}
+
+<!-- Jquery DataTable Plugin Js -->
+<script src="{% static 'js/jquery-datatable/jquery.dataTables.js' %}"></script>
+<script src="{% static 'js/jquery-datatable/skin/bootstrap/js/dataTables.bootstrap.js' %}"></script>
+<script src="{% static 'js/jquery-datatable/extensions/export/dataTables.buttons.min.js' %}"></script>
+<script src="{% static 'js/jquery-datatable/extensions/export/buttons.flash.min.js' %}"></script>
+<script src="{% static 'js/jquery-datatable/extensions/export/jszip.min.js' %}"></script>
+<script src="{% static 'js/jquery-datatable/extensions/export/pdfmake.min.js' %}"></script>
+<script src="{% static 'js/jquery-datatable/extensions/export/vfs_fonts.js' %}"></script>
+<script src="{% static 'js/jquery-datatable/extensions/export/buttons.html5.min.js' %}"></script>
+<script src="{% static 'js/jquery-datatable/extensions/export/buttons.print.min.js' %}"></script>
+
+<!-- JQuery DataTable Css -->
+<link href="{% static 'js/jquery-datatable/skin/bootstrap/css/dataTables.bootstrap.css' %}" 
+rel="stylesheet">
+
+<style type="text/css">
+	table.dataTable thead tr th,
+	table.dataTable tbody tr td:last-child  {
+		text-align: center;
+	}
+
+	.centered-text-alignment {
+		text-align: center;
+	}
+</style>
+
+<script src="{% static 'js/dashboard/search-results/before-load-html.js' %}"></script>
+
+{% block msg_pre_form %}
+	<p>
+		{% blocktrans count counter=products|length %}
+			Encontramos un producto comprado.
+		{% plural %}
+			Encontramos {{ counter }} productos comprados.
+		{% endblocktrans %}
+	</p>
+{% endblock %}
+
+<input 
+name="csrfmiddlewaretoken"
+value="{{csrf}}">
+
+<div class="table-responsive">
+  <table class="table table-bordered table-striped table-hover dataTable js-exportable" 
+  id="tblResults">
+    <thead>
+      <tr style="text-align: center;">
+        <th>{% trans 'Product' %}</th>
+        <th>{% trans 'Brand' %}</th>
+        <th>{% trans 'SKU' %}</th>
+        <th>{% trans 'Purchased at' %}</th>
+        <th>{% trans 'Purchased when' %}</th>
+        <th>{% trans 'Purchase ID' %}</th>
+      	<th>{% trans 'In store' %}</th>
+        <th>{% trans 'Options' %}</th>
+      </tr>
+    </thead>
+
+    <tbody>
+    	{% for product in products %}
+    		<tr>
+          <td>
+          	{{product.purchase_detail.product.name}}
+          </td>
+
+          <td>
+          	{{product.purchase_detail.brand.name}}
+          </td>
+
+          <td class="centered-text-alignment">
+          	{{product.sku}}
+          </td>
+
+          <td class="centered-text-alignment">
+          	{{product.purchase_detail.purchase.purchased_at}}
+          </td>
+
+          <td class="centered-text-alignment">
+          	{{product.purchase_detail.purchase.purchased_when}}
+          </td>
+
+          <td class="centered-text-alignment">
+          	{{product.purchase_detail.purchase.identifier}}
+          </td>
+
+          <td>
+          	{% if product.stored %}
+          		{{product.in_store.name}}
+          	{% else %}
+          		{% trans 'None male' %}
+          	{% endif  %}
+          </td>
+
+          <td>
+          	<a href="#" 
+          	onclick="showDetails('{{product.id}}', 'products-stores', '{{can_edit}}', '{{can_delete}}', false, false, '{{itm_menu}}');" 
+          	data-placement="bottom"
+          	data-toggle="tooltip" 
+          	title="{% trans 'Details' %}" 
+          	data-original-title="{% trans 'Details' %}"><i class="material-icons">zoom_in</i></a>
+
+          	{% if can_edit %}
+          	<a href="#" data-placement="bottom"
+          	data-toggle="tooltip"
+          	onclick="showDetails('{{product.id}}', 'products-stores', '{{can_edit}}', '{{can_delete}}', true, false, '{{itm_menu}}');"  
+          	title="{% trans 'Edit' %}" 
+          	data-original-title="{% trans 'Edit' %}"><i class="material-icons">edit</i></a>
+          	{% endif  %}
+
+          	{% if can_delete %}
+          	<a href="#" data-placement="top"
+          	data-toggle="tooltip" 
+          	onclick="showDetails('{{product.id}}', 'products-stores', '{{can_edit}}', '{{can_delete}}', false, true, '{{itm_menu}}');" 
+          	title="{% trans 'Delete' %}" 
+          	data-original-title="{% trans 'Delete' %}"><i class="material-icons">delete</i></a>
+          	{% endif  %}
+        	</td>
+      	</tr>
+    	{% endfor %}
+    </tbody>
+  </table>
+</div>
+
+<script src="{% static 'js/dashboard/search-results/after-load-html.js' %}"></script>
+
+<div id="divViewDetails"></div>

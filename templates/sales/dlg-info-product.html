@@ -1,0 +1,220 @@
+{% load static i18n %}
+
+{% if msg %}
+<script type="text/javascript">
+	toastr.clear();
+	show_msg_with_toastr("{{status}}", "{{msg}}");
+</script>
+{% else %}
+<!-- Jquery DataTable Plugin Js -->
+<script src="{% static 'js/jquery-datatable/jquery.dataTables.js' %}"></script>
+<script src="{% static 'js/jquery-datatable/skin/bootstrap/js/dataTables.bootstrap.js' %}"></script>
+<script src="{% static 'js/jquery-datatable/extensions/export/dataTables.buttons.min.js' %}"></script>
+<script src="{% static 'js/jquery-datatable/extensions/export/buttons.flash.min.js' %}"></script>
+<script src="{% static 'js/jquery-datatable/extensions/export/jszip.min.js' %}"></script>
+<script src="{% static 'js/jquery-datatable/extensions/export/pdfmake.min.js' %}"></script>
+<script src="{% static 'js/jquery-datatable/extensions/export/vfs_fonts.js' %}"></script>
+<script src="{% static 'js/jquery-datatable/extensions/export/buttons.html5.min.js' %}"></script>
+<script src="{% static 'js/jquery-datatable/extensions/export/buttons.print.min.js' %}"></script>
+
+<!-- JQuery DataTable Css -->
+<link href="{% static 'js/jquery-datatable/skin/bootstrap/css/dataTables.bootstrap.css' %}" rel="stylesheet">
+<!--
+<script src="{% static 'js/dashboard/search-results/before-load-html.js' %}"></script>
+-->
+<script type="text/javascript">
+	toastr.clear();
+</script>
+
+<div id="cardProductDetails">
+	<div class="card">
+		<div class="header">
+			<h2>
+				{% trans 'Product details' %}
+				<small>
+					{% trans 'Searching by' %}&nbsp;{{search_by}}:
+					<strong>{{query}}</strong>
+				</small>
+			</h2>
+
+			<ul class="header-dropdown m-r-0">
+				<li>
+					<a 
+					onclick="$('#cardProductDetails').remove();
+					$('#txtSKU').focus()" 
+					href="javascript:void(0);">
+						<i class="material-icons">cancel</i>
+					</a>
+				</li>
+			</ul>
+		</div>
+
+		<div class="body">
+			<div class="body table-responsive">
+	      <table class="table table-bordered table-hover dataTable js-exportable" id="tblResults">
+	      	<thead>
+	      		<tr>
+	      			<!--<th>{% trans 'Image' %}</th>-->
+	      			<th>{% trans 'SKU' %}</th>
+	      			<th>{% trans 'Product' %}</th>
+	      			<th>{% trans 'Brand' %}</th>
+	      			<th>{% trans 'Unit price' %}</th>
+	      			<th>{% trans 'Options' %}</th>
+	      			<!--<th>{% trans 'In store' %}</th>
+	      			<th>{% trans 'In shop' %}</th>-->
+	      		</tr>
+	      	</thead>
+
+          <tbody>
+          	{% for ppd in products %}
+	            <tr>
+	            	<td sku="{{ppd.sku}}">
+	              	{{ppd.sku}}
+	              </td>
+
+	              <td>
+	              	{{ppd.purchase_detail.product.name}}
+	              </td>
+
+	              <td>
+	              	{{ppd.purchase_detail.brand.name}}
+	              </td>
+
+	              <td>
+	              	{{ppd.purchase_detail.sale_price}}
+	              </td>
+
+	              <td>
+            			<a href="#" 
+                	onclick="showProductDetails('{{ppd.id}}');" 
+                	data-placement="bottom"
+                	data-toggle="tooltip" 
+                	title="{% trans 'Details' %}" 
+                	data-original-title="{% trans 'Details' %}"><i class="material-icons">zoom_in</i></a>
+
+                	<a href="#" data-placement="bottom"
+                	data-toggle="tooltip"
+                	onclick="addProductToSale('{{ppd.id}}','{{ppd.sku}}','{{ppd.purchase_detail.product.name}}','{{ppd.purchase_detail.brand.name}}','{{ppd.purchase_detail.sale_price}}',this); return false;"  
+                	title="{% trans 'Add to sale' %}" 
+                	data-original-title="{% trans 'Add to sale' %}"><i class="material-icons">add_shopping_cart</i></a>
+	              </td>
+	            </tr>
+            {% endfor %}
+          </tbody>
+	      </table>
+	  	</div>
+		</div>
+	</div>
+</div>
+
+<script src="{% static 'js/dashboard/search-results/after-load-html.js' %}"></script>
+
+<!-- <div id="divViewDetails"></div> -->
+
+<script type="text/javascript">
+	$('[data-toggle="tooltip"]').tooltip();
+/*
+	function showProductDetails(ppd) {
+		show_msg_with_toastr("info", msg_wait);
+		$("#divViewDetails").load("/sales/view-selected-product-details/?ppd="+ppd, function() {
+				$("#dlgViewDetails").modal("show");
+		});
+	}
+
+	function removeProductFromSale(ppd,sku,product,brand,sp) {
+		row=$("#tblProductDetails tr#"+ppd).html();
+		$("#tblProductDetails tr#"+ppd).remove();
+
+		rows=$("#tblProductDetails tbody tr");
+		if (rows.length<1)
+			$("#tblProductDetails").hide();
+
+		$("#tblResults tbody").append('<tr id="'+ppd+'">'+row+'</tr>');
+
+		html=
+			'<a href="#" data-placement="bottom" ' +
+    	'data-toggle="tooltip" ' +
+    	'onclick="addProductToSale(' + ppd +
+    	",'"+ sku + "','" + product + "','" + 
+    	brand + "','" + sp + "',this); return false;\"" +
+    	" title=\"{% trans 'Add to sale' %}\" " +
+    	"data-original-title=\"{% trans 'Add to sale' %}\"><i class=\"material-icons\">add_shopping_cart</i></a>";
+
+    $("#tblResults tbody tr#"+ppd+" td a.replaceme-by-add-to-list").parent().append(html);
+    $("#tblResults tbody tr#"+ppd+" td a.replaceme-by-add-to-list").remove();
+    $("#cardProductDetails").show();
+	}
+
+	function addProductToSale(ppd,sku,product,brand,sp,invoker) {
+		skus=$("#tblProductDetails .sku");
+		tope=skus.length;
+		for (x=0;x<tope;x++) {
+			if (skus[x].innerHTML==sku) {
+				$.ajax({
+          method: "GET",
+          url: "/translator/translate/",
+          data: {msg: "Product already exists in the list of sold products"}
+        })
+        .done(function(result) {
+          toastr.clear();
+          show_msg_with_toastr("error", result);
+        });
+				return false;
+			}
+		}
+
+		$(invoker).parent().parent().remove();
+		rows=$("#tblResults tbody tr");
+		if (rows.length<1)
+			$('#cardProductDetails').hide();
+
+		html=	"<tr id='" + ppd + "'>";
+
+		html+=	"<td class='sku'>";
+		html+=		sku;
+		html+=	"</td>";
+
+		html+=	"<td>";
+		html+=		product;
+		html+=		"<span class='products'>";
+		html+=		ppd;
+		html+=		"</span>";
+		html+=	"</td>";
+
+		html+=	"<td>";
+		html+=		brand;
+		html+=	"</td>";
+
+		html+=	"<td>";
+		html+=		sp;
+		html+=	"</td>";
+
+		html+=	"<td>";
+		html+=		
+						'<a href="#" '+ 
+          	'onclick="showProductDetails(' + ppd + ');return false;" ' +
+          	'data-placement="bottom" ' +
+          	'data-toggle="tooltip" ' +
+          	"title=\"{% trans 'Details' %}\" " +
+          	"data-original-title=\"{% trans 'Details' %}\"><i class=\"material-icons\">zoom_in</i></a>"+
+
+          	'<a href="#" data-placement="bottom" ' +
+          	'data-toggle="tooltip" ' +
+          	'class="replaceme-by-add-to-list" ' +
+          	'onclick="removeProductFromSale(' + ppd +
+    				",'" + sku + "','" + product + "','" + 
+    				brand + "','" + sp + "'); " +
+    				"return false;\" " +
+          	"title=\"{% trans 'Remove from sale' %}\""+
+          	" data-original-title=\"{% trans 'Remove from sale' %}\"><i class=\"material-icons\">remove_shopping_cart</i></a>";
+		html+=	"</td>";
+		html+="</tr>";
+
+		$("#tblProductDetails tbody").append(html);
+		$('#tblProductDetails').show();
+		//$('[data-toggle="tooltip"]').tooltip();
+		$('#txtSKU').focus();
+	}
+*/
+</script>
+{% endif %}

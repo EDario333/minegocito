@@ -1,0 +1,238 @@
+{% load static i18n %}
+
+<!-- Jquery DataTable Plugin Js -->
+<script src="{% static 'js/jquery-datatable/jquery.dataTables.js' %}"></script>
+<script src="{% static 'js/jquery-datatable/skin/bootstrap/js/dataTables.bootstrap.js' %}"></script>
+<script src="{% static 'js/jquery-datatable/extensions/export/dataTables.buttons.min.js' %}"></script>
+<script src="{% static 'js/jquery-datatable/extensions/export/buttons.flash.min.js' %}"></script>
+<script src="{% static 'js/jquery-datatable/extensions/export/jszip.min.js' %}"></script>
+<script src="{% static 'js/jquery-datatable/extensions/export/pdfmake.min.js' %}"></script>
+<script src="{% static 'js/jquery-datatable/extensions/export/vfs_fonts.js' %}"></script>
+<script src="{% static 'js/jquery-datatable/extensions/export/buttons.html5.min.js' %}"></script>
+<script src="{% static 'js/jquery-datatable/extensions/export/buttons.print.min.js' %}"></script>
+
+<!-- JQuery DataTable Css -->
+<link href="{% static 'js/jquery-datatable/skin/bootstrap/css/dataTables.bootstrap.css' %}" rel="stylesheet">
+
+<style type="text/css">
+	.my-modal {
+		width: 75%;
+	}
+
+	table.dataTable thead tr th,
+	table.dataTable tbody tr td:last-child  {
+		text-align: center;
+	}
+</style>
+
+<script type="text/javascript">
+	var msg_wait;
+
+  $.ajax({
+    method: "GET",
+    url: "/translator/translate/",
+    data: { msg: "Please wait"}
+  })
+  .done(function(result) {
+    msg_wait = result;
+  });
+
+	function showDetails(shop, can_edit, can_delete, enter_and_edit, enter_and_delete, itm_menu) {
+		show_msg_with_toastr("info", msg_wait);
+
+		$.ajax({
+	    method: "GET",
+	    url: "/shops/view-details",
+	    data: { shop: shop, can_edit: can_edit, can_delete: can_delete, itm_menu: itm_menu}
+	  })
+	  .done(function(result) {
+	  	//$("#dlgSearchResults").modal("hide");
+	  	//$("#dlgSearchResults").modal().hide();
+	  	$("div#divViewDetails").html(result);
+	  	$("#dlgViewDetails table.tbl-view-details tbody tr td:first-child").addClass("right-alignment");
+	  	$("#dlgViewDetails").modal();
+	  	toastr.clear();
+	  	if (enter_and_edit) {
+	  		$("#dlgViewDetails a#actEditData").click();
+	  		//prepareEditFrm();
+	  	}
+	  	if (enter_and_delete) {
+	  		$("#dlgViewDetails a#actDelete").click();
+	  		/*
+	  		$("#dlgViewDetails .confirm-delete").removeClass("hidden");
+	  		$("#dlgViewDetails form textarea").focus();
+	  		*/
+	  	}
+	  	on_close_dlgViewDetails();
+	  });
+	  return false;
+	}
+</script>
+
+<div class="bg-gradient-primary modal fade" 
+id="dlgSearchResults" tabindex="-1" role="dialog" 
+aria-labelledby="lblHeader" aria-hidden="true">
+  <div class="modal-dialog my-modal" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="lblHeader">
+          {% trans 'Search results' %}
+        </h5>
+
+        <button class="close" type="button" 
+        data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">×</span>
+        </button>
+      </div>
+      <hr />
+
+      <div class="modal-body">
+      	<p>
+      		{% blocktrans count counter=shops|length %}
+						Encontramos un registro que coincide con sus criterios de b&uacute;squeda.
+					{% plural %}
+						Encontramos {{ counter }} registros que coinciden con sus criterios de b&uacute;squeda.
+					{% endblocktrans %}
+      	</p>
+      	<div class="table-responsive">
+          <table class="table table-bordered table-striped table-hover dataTable js-exportable" id="tblResults">
+            <thead>
+	            <tr style="text-align: center;">
+                <th>{% trans 'Shop name' %}</th>
+                <th>{% trans 'Main address' %}</th>
+                <th>{% trans 'City' %}</th>
+                <th>{% trans 'Admin' %}</th>
+                <th>{% trans 'Cell phone' %}</th>
+              	<th>{% trans 'Options' %}</th>
+	            </tr>
+            </thead>
+
+            <!--
+            <tfoot>
+            	<tr style="text-align: right;">
+				        <th style="font-weight: bold">
+				          {% trans 'Total' %}:
+				        </th>
+
+				        <th colspan="5" 
+				        style="text-align: center">
+				          {{ shops.count }}
+				        </th>
+				      </tr>
+            </tfoot>
+          	-->
+
+            <tbody>
+            	{% for shop in shops %}
+            		<tr>
+	                <td>{{shop.name}}</td>
+	                <td>{{shop.address_line1}}</td>
+	                <td>{{shop.city.display_name}}</td>
+
+	                <td>
+	                	{{shop.admin.first_name}}&nbsp;{{shop.admin.last_name}}&nbsp;[email={{shop.admin.email}}]
+	              	</td>
+
+	                <td>{{shop.cell_phone}}</td>
+
+	                <td>
+	                	<a href="#" 
+	                	onclick="showDetails('{{shop.id}}', '{{can_edit}}', '{{can_delete}}', false, false, '{{itm_menu}}');" 
+	                	data-placement="bottom"
+	                	data-toggle="tooltip" 
+	                	title="{% trans 'Details' %}" 
+	                	data-original-title="{% trans 'Details' %}"><i class="material-icons">zoom_in</i></a>
+
+	                	{% if can_edit %}
+	                	<a href="#" data-placement="bottom"
+	                	data-toggle="tooltip"
+	                	onclick="showDetails('{{shop.id}}', '{{can_edit}}', '{{can_delete}}', true, false, '{{itm_menu}}');"  
+	                	title="{% trans 'Edit' %}" 
+	                	data-original-title="{% trans 'Edit' %}"><i class="material-icons">edit</i></a>
+	                	{% endif  %}
+
+	                	{% if can_delete %}
+	                	<a href="#" data-placement="top"
+	                	data-toggle="tooltip" 
+	                	onclick="showDetails('{{shop.id}}', '{{can_edit}}', '{{can_delete}}', false, true, '{{itm_menu}}');" 
+	                	title="{% trans 'Delete' %}" 
+	                	data-original-title="{% trans 'Delete' %}"><i class="material-icons">delete</i></a>
+	                	{% endif  %}
+	                </td>
+	              </tr>
+            	{% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+      <hr />
+
+      <div class="modal-footer">
+      	<button type="button" class="btn btn-primary" 
+      	data-dismiss="modal">
+      		<!--<i class="material-icons">clear</i>-->
+      		{% trans 'Close' %}
+      	</button>
+      </div>
+    </div>
+	</div>
+</div>
+
+<script type="text/javascript">
+	$(document).ready(function(){
+		toastr.clear();
+
+		$('[data-toggle="tooltip"]').tooltip();
+
+		//Exportable table
+	  $('.js-exportable').DataTable({
+	    dom: 'Bfrtip',
+	    responsive: true,
+	    buttons: [
+	      'copy', 'csv', 'excel', 'pdf', 'print'
+	    ]
+	  });
+
+		$.ajax({
+      method: "GET",
+      url: "/translator/many/",
+      data: { msgs: "Show,entries,Search,Showing,to,of,Previous,Next,Copy,Print"}
+	  })
+	  .done(function(result) {
+	    result = result.split(',');
+
+	    if ($("#tblResults_length label")[0] != undefined) {
+     		$("#tblResults_length label")[0].childNodes[0].textContent = result[0] + ": ";
+      	$("#tblResults_length label")[0].childNodes[2].textContent = result[1];
+      }
+
+      $("#tblResults_filter label")[0].childNodes[0].textContent = result[2] + ": ";
+
+      msg = $("#tblResults_info")[0].innerText;
+
+      strings = msg.split(' ');
+
+      msg = result[3];
+      for (x = 0; x < strings.length; x++) {
+        str = strings[x];
+        if (str == "Showing")
+          msg += ' ' + strings[x+1];
+        else if (str == "to")
+          msg += result[4] + ' ' + strings[x+1];
+        else if (strings[x] == "of")
+          msg += result[5] + ' ' + strings[x+1];
+        else if (strings[x] == "entries")
+          msg += result[1];
+      }
+
+      $("#tblResults_info")[0].innerText = msg;
+      $("#tblResults_previous")[0].childNodes[0].textContent = result[6];
+      $("#tblResults_next")[0].childNodes[0].textContent = result[7];
+
+     	$("#tblResults_wrapper .dt-buttons a.buttons-copy span")[0].innerText = result[8];
+     	$("#tblResults_wrapper .dt-buttons a.buttons-print span")[0].innerText = result[9];
+	  });
+	});
+</script>
+
+<div id="divViewDetails"></div>

@@ -1,0 +1,26 @@
+{% load static i18n %}
+
+<div class="container-fluid">
+  <div class="block-header">
+    <h2>
+    	{% trans 'Dashboard'|upper %}
+  	</h2>
+    <span
+      id="tutorialStep6"
+      data-toggle="popover-x" 
+      data-placement="bottom"
+      data-target="#ftt-Step6">
+    </span>
+  </div>
+
+  <!-- Widgets 
+  {% include 'dashboard/assets/content/widgets/widgets.html' %}
+  -->
+
+  <div class="row clearfix">
+    <img src="{% static 'imgs/logo.jpg' %}" 
+    alt="Logo" class="img-responsive img-rounded" 
+    style="display: block; margin: 0 auto 0 auto;" />
+  </div>
+
+</div>

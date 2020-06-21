@@ -1,0 +1,764 @@
+{% load i18n static %}
+
+<style type="text/css">
+  #dlgProductDetails table tbody tr td:first-child {
+    text-align: right;
+    font-weight: bold;
+  }
+</style>
+
+<div class="bg-gradient-primary modal fade" 
+id="dlgProductDetails" tabindex="-1" role="dialog"
+onfocus='$("#dlgProductDetails input")[0].focus();'  
+aria-labelledby="lblHeader" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="lblHeader">
+          {% trans 'Product details' %}
+        </h5>
+
+        <button class="close" type="button" 
+        data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">×</span>
+        </button>
+      </div>
+      <hr />
+
+      <div class="modal-body">
+        <div class="col-sm-6">
+          <table id="tblDetails" 
+          class="table table-bordered table-striped table-hover dataTable js-exportable no-footer">
+
+            <tbody id="optView">
+              <tr>
+                <td>
+                  {% trans 'Product' %}:
+                </td>
+                <td>{{product}}</td>
+              </tr>
+
+              <tr>
+                <td>{% trans 'Brand' %}:</td>
+                <td>{{brand}}</td>
+              </tr>
+
+              <tr>
+                <td>{% trans 'Purchase price' %}:</td>
+                <td>{{purchase_price}}</td>
+              </tr>
+
+              <tr>
+                <td>{% trans 'Purchase price' %}:</td>
+                <td>{{sale_price}}</td>
+              </tr>
+
+              <tr>
+                <td>{% trans 'Quantity' %}:</td>
+                <td id="quantityField">{{quantity}}</td>
+              </tr>
+
+              <tr>
+                <td colspan="2" style="text-align: left">
+                  {% trans 'Description' %}:
+                </td>
+              </tr>
+
+              <tr>
+                <td colspan="2" style="text-align: left">
+                  {{description}}
+                </td>
+              </tr>
+
+              <tr>
+                <td colspan="2" style="text-align: left">
+                  {% trans 'Notes or comments' %}:
+                </td>
+              </tr>
+
+              <tr>
+                <td colspan="2" style="text-align: left">
+                  {{notes}}
+                </td>
+              </tr>
+            </tbody>
+
+            <tbody id="optEdit">
+              <tr>
+                <td style="text-align: left">
+                  <label for="txtEditProduct">
+                    *&nbsp;{% trans 'Product' %}:
+                  </label>
+
+                  <input id="txtEditProduct" 
+                  class="form-control" 
+                  next-target="txtEditBrand"
+                  value="{{product}}" 
+                  name="product" />
+
+                  <input id="row_number" 
+                  value="{{row_number}}" 
+                  name="row_number" />
+
+                  <input id="product_obj" 
+                  value="{{product_obj}}" 
+                  name="product_obj" hidden="" 
+                  style="visibility: hidden;" />
+                </td>
+              </tr>
+
+              <tr>
+                <td style="text-align: left">
+                  <label for="txtEditBrand">
+                    *&nbsp;{% trans 'Brand' %}:
+                  </label>
+
+                  <input id="txtEditBrand" 
+                  class="form-control" 
+                  value="{{brand}}" 
+                  next-target="txtEditPurchasePrice"
+                  name="brand" />
+
+                  <input id="brand_obj" 
+                  value="{{brand_obj}}" 
+                  name="brand_obj" hidden="" 
+                  style="visibility: hidden;" />
+                </td>
+              </tr>
+
+              <tr>
+                <td style="text-align: left">
+                  <label for="txtEditPurchasePrice">
+                    *&nbsp;{% trans 'Purchase price' %}:
+                  </label>
+
+                  <input id="txtEditPurchasePrice" 
+                  class="form-control" 
+                  value="0.01" type="number"
+                  next-target="txtEditSalePrice"
+                  min="0.01" step="0.01" 
+                  value="{{purchase_price}}" 
+                  name="purchase_price" />
+                </td>
+              </tr>
+
+              <tr>
+                <td style="text-align: left">
+                  <label for="txtEditSalePrice">
+                    *&nbsp;{% trans 'Sale price' %}:
+                  </label>
+
+                  <input id="txtEditSalePrice" 
+                  class="form-control" 
+                  value="0.01" type="number"
+                  next-target="txtEditQuantity"
+                  min="0.01" step="0.01" 
+                  value="{{sale_price}}" 
+                  name="sale_price" />
+                </td>
+              </tr>
+
+              <tr>
+                <td style="text-align: left">
+                  <label for="txtEditQuantity">
+                    *&nbsp;{% trans 'Quantity' %}:
+                  </label>
+
+                  <input id="txtEditQuantity" 
+                  class="form-control" 
+                  type="number" min="1" step="1" 
+                  next-target="txtEditDescription"
+                  value="{{quantity}}" 
+                  name="quantity" />
+                </td>
+              </tr>
+
+              <tr>
+                <td style="text-align: left">
+                  <label for="txtEditDescription">
+                    {% trans 'Description' %}:
+                  </label>
+
+                  <textarea name="description" 
+                  class="form-control" cols="50" 
+                  style="margin: 0 0 10px 0" 
+                  id="txtEditDescription">{{description}}</textarea>
+                </td>
+              </tr>
+
+              <tr>
+                <td style="text-align: left">
+                  <label for="txtEditNotes">
+                    {% trans 'Notes or comments' %}:
+                  </label>
+
+                  <textarea name="notes" 
+                  class="form-control" 
+                  style="margin: 0 0 10px 0" 
+                  id="txtEditNotes">{{notes}}</textarea>
+                </td>
+              </tr>
+
+              <tr>
+                <td style="text-align: left">
+                  <button type="button" id="btnSave" 
+                  class="btn btn-primary waves-effect">
+                    {% trans 'Save' %}
+                  </button>
+
+                  <button type="button" 
+                  id="btnCancelEdit" 
+                  class="btn btn-secondary waves-effect">
+                    {% trans 'Cancel' %}
+                  </button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="col-sm-6" 
+        id="divProductsDetails">
+          <input name="skus" value="{{skus}}" 
+          id="txtSKUs" />
+          <input name="images" value="{{images}}" 
+          id="txtImages" />
+          <input name="quantity" 
+          id="txtProductsTotal" 
+          value="{{products_total}}" />
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button type="button"
+        id="btnAccept" 
+        class="btn btn-primary waves-effect">
+          {% trans 'Accept' %}
+        </button>
+
+        <button class="btn btn-secondary waves-effect" 
+        type="button" id="btnEdit">
+          {% trans 'Edit' %}
+        </button>
+
+        <button class="btn btn-secondary waves-effect" 
+        type="button" 
+        onclick="deleteProduct('{{row_number}}', 'product_details')">
+          {% trans 'Delete' %}
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script type="text/javascript" src="{% static 'js/jquery-ui-1.12.1/jquery-ui.min.js' %}"></script>
+
+<link href="{% static 'js/jquery-ui-1.12.1/jquery-ui.min.css' %}" rel="stylesheet">
+
+<script type="text/javascript">
+  var is_editing = false;
+
+  skus = $("#dlgProductDetails div#divProductsDetails input#txtSKUs").val();
+  images = $("#dlgProductDetails div#divProductsDetails input#txtImages").val();
+  quantity = $("#dlgProductDetails div#divProductsDetails input#txtProductsTotal").val();
+
+  //imgs = $.url.param("images");
+
+  data = {
+    quantity: quantity,
+    with_data: true,
+    skus: skus, images: images,
+    enter_and_edit: false
+  }
+
+  $.ajax({
+    method: "GET",
+    url: "/purchases/sku-products/",
+    data: data
+  })
+  .done(function(result) {
+    toastr.clear();
+    $("#dlgProductDetails div#divProductsDetails").html(result);
+  });
+
+  $("#dlgProductDetails #tblDetails #optEdit").hide();
+
+  $("#dlgProductDetails #btnEdit").click(function() {
+    $("#dlgProductDetails #tblDetails #optView").hide();
+    $("#dlgProductDetails #tblDetails #optEdit").show();
+    $("#dlgProductDetails #btnEdit").hide();
+
+    $("#divProductsDetails .edit").show();
+    $("#divProductsDetails .view").hide();
+
+    $("#dlgProductDetails input")[0].focus();
+    is_editing = true;
+  });
+
+  $("#dlgProductDetails #btnCancelEdit").click(function() {
+    if (!confirm("Perderá los detalles de los productos capturados. ¿Seguro que desea continuar?"))
+        return false;
+
+    show_msg_with_toastr("info", msg_wait);
+
+    quantity = parseFloat($("#dlgProductDetails #quantityField")[0].innerHTML);
+    $("#dlgProductDetails #txtEditQuantity").val(quantity);
+
+    $.ajax({
+      method: "GET",
+      url: "/purchases/sku-products/",
+      data: { quantity: quantity }
+    })
+    .done(function(result) {
+      toastr.clear();
+      $("#dlgProductDetails div#divProductsDetails").html(result);
+
+      $("#dlgProductDetails #tblDetails #optView").show();
+      $("#dlgProductDetails #tblDetails #optEdit").hide();
+      $("#dlgProductDetails #btnEdit").show();
+
+      $("#divProductsDetails .edit").hide();
+      $("#divProductsDetails .view").show();
+
+      $("#dlgProductDetails").focus();
+      is_editing = false;
+    });
+  });
+
+  $("#dlgProductDetails #btnAccept").click(function() {
+    if (is_editing)
+      if (!confirm("Perderá los datos capturados. ¿Desea continuar?"))
+        return false;
+
+    $("#dlgProductDetails").modal("hide");
+  });
+
+  $("#dlgProductDetails input").keyup(function(event) {
+    if (event.which == 13)
+      $("#" + $(event.target).attr("next-target")).focus();
+  });
+
+  // ***
+  $("#dlgProductDetails input[name='product']").autocomplete({
+    source: "/products/autocomplete/my-products",
+    minLength: 1,
+  });
+
+  $("#dlgProductDetails input[name='brand']").autocomplete({
+    source: "/brands/autocomplete/my-brands",
+    minLength: 1,
+  });
+
+  $("#dlgProductDetails input[name='purchase_price']").focus(function(){
+    this.oldValue = this.value;
+  });
+
+  $("#dlgProductDetails input[name='purchase_price']").change(function(){
+    show_msg_with_toastr("info", msg_wait);
+
+    val = parseFloat($(this).val());
+    if (isNaN(val) || val <= 0) {
+      toastr.clear();
+      show_msg_with_toastr("error", msg_not_a_number);
+      this.value = this.oldValue;
+    }
+  });
+
+  $("#dlgProductDetails input[name='sale_price']").focus(function(){
+    this.oldValue = this.value;
+  });
+
+  $("#dlgProductDetails input[name='sale_price']").change(function(){
+    show_msg_with_toastr("info", msg_wait);
+
+    val = parseFloat($(this).val());
+    if (isNaN(val) || val <= 0) {
+      toastr.clear();
+      show_msg_with_toastr("error", msg_not_a_number);
+      this.value = this.oldValue;
+    }
+  });
+
+  $("#dlgProductDetails input[name='quantity']").focus(function(){
+    this.oldValue = this.value;
+  });
+
+  $("#dlgProductDetails input[name='quantity']").change(function(event){
+    show_msg_with_toastr("info", msg_wait);
+
+    val = parseFloat($(this).val());
+    if (isNaN(val) || val <= 0) {
+      toastr.clear();
+      show_msg_with_toastr("error", msg_not_a_number);
+      this.value = this.oldValue;
+    }
+  });
+
+  $("#dlgProductDetails input[name='product']").autocomplete("option", "appendTo", "#dlgProductDetails .modal-body");
+
+  $("#dlgProductDetails input[name='brand']").autocomplete("option", "appendTo", "#dlgProductDetails .modal-body");
+
+  $("#dlgProductDetails input[name='product']").change(function(){
+    show_msg_with_toastr("info", msg_wait);
+    $.ajax({
+      method: "GET",
+      url: "/products/search/by-name",
+      data: { product: this.value }
+    })
+    .done(function(result) {
+      toastr.clear();
+      if (result['exist'] != undefined && 
+          !result['exist'] || result.dropped)
+        $.ajax({
+          method: "GET",
+          url: "/translator/translate",
+          data: { msg: "Please enter a valid product"}
+        })
+        .done(function(result) {
+          show_msg_with_toastr("error", result);
+          $("#dlgProductDetails input[name='product_obj']").val("");
+          $("#dlgProductDetails #btnSave").attr("disabled", "");
+        });
+      else if (result.exist == undefined) {
+        show_msg_with_toastr(result.status, result.msg);
+      }
+      else {
+        $("#dlgProductDetails input[name='product_obj']").val(result.product);
+        $("#dlgProductDetails #btnSave").removeAttr("disabled");
+      }
+    });
+  });
+
+  $("#dlgProductDetails input[name='brand']").change(function(){
+    show_msg_with_toastr("info", msg_wait);
+    $.ajax({
+      method: "GET",
+      url: "/brands/search/by-name",
+      data: { brand: this.value }
+    })
+    .done(function(result) {
+      toastr.clear();
+      if (result['exist'] != undefined && 
+          !result['exist'] || result.dropped)
+        $.ajax({
+          method: "GET",
+          url: "/translator/translate",
+          data: { msg: "Please enter a valid brand"}
+        })
+        .done(function(result) {
+          show_msg_with_toastr("error", result);
+          $("#dlgProductDetails input[name='brand_obj']").val("");
+          $("#dlgProductDetails #btnSave").attr("disabled", "");
+        });
+      else if (result['exist'] == undefined) {
+        show_msg_with_toastr(result.status, result.msg);
+      }
+      else {
+        $("#dlgProductDetails input[name='brand_obj']").val(result.brand);
+        $("#dlgProductDetails #btnSave").removeAttr("disabled");
+      }
+    });
+  });
+
+  $("#dlgProductDetails input[name='quantity']").change(function(event){
+    show_msg_with_toastr("info", msg_wait);
+
+    val = parseFloat($(this).val());
+    if (isNaN(val) || val <= 0) {
+      toastr.clear();
+      show_msg_with_toastr("error", msg_not_a_number);
+      this.value = this.oldValue;
+      reloadProductsDetailsSection(1, true, "EDIT_DETAILS");
+    }
+    else {
+      reloadProductsDetailsSection(val, true, "EDIT_DETAILS");
+    }
+  });
+
+  $("#dlgProductDetails #btnSave").click(function() {
+    show_msg_with_toastr("info", msg_wait);
+    product = $("#dlgProductDetails #product_obj");
+    brand = $("#dlgProductDetails #brand_obj");
+    purchase_price = $("#dlgProductDetails #txtEditPurchasePrice");
+    sale_price = $("#dlgProductDetails #txtEditSalePrice");
+    quantity = $("#dlgProductDetails #txtEditQuantity");
+
+    valid = true;
+
+    if (!validField(product)) {
+      valid = false;
+      show_msg_with_toastr("error", msg_valid_product);
+    }
+
+    if (!validField(brand)) {
+      valid = false;
+      show_msg_with_toastr("error", msg_valid_brand);
+    }
+
+    if (!validField(purchase_price)) {
+      valid = false;
+      show_msg_with_toastr("error", msg_valid_pp);
+    }
+
+    if (!validField(sale_price)) {
+      valid = false;
+      show_msg_with_toastr("error", msg_valid_sp);
+    }
+
+    if (!validField(quantity)) {
+      valid = false;
+      show_msg_with_toastr("error", msg_valid_quantity);
+    }
+
+    products = $("#tblProductDetails .product_obj");
+    brands = $("#tblProductDetails .brand_obj");
+    product_number = $("#dlgProductDetails #row_number").val();
+
+    tope_p = products.length;
+    x = 0;
+    found = false;
+
+    while (x < tope_p && !found) {
+      row = products[x];
+      row = $(row).parent().parent()[0];
+      p = products[x].innerHTML;
+      if (row.id.includes(product_number)) {
+        /*if (p == $(product).val() && 
+          brands[x].innerHTML == $(brand).val()) {
+          toastr.clear();
+          valid = false;
+          found = true;
+          show_msg_with_toastr("error", msg_product_exist);
+        }*/
+        //alert("next");
+        x++;
+        //continue;
+      }
+      if (x < tope_p) {
+        p = products[x].innerHTML;
+        /*alert(p);
+        alert($(brand).val());
+        alert($(product).val());*/
+        if (p == $(product).val()) {
+          tope_b = brands.length;
+          y = 0;
+          while (y < tope_b && !found)
+            if (brands[y++].innerHTML == $(brand).val()) {
+              toastr.clear();
+              valid = false;
+              found = true;
+              show_msg_with_toastr("error", msg_product_exist);
+            }
+        }
+      }
+      x++;
+    }
+
+    if (valid) {
+      skus = $("#dlgProductDetails .product-sku");
+      images = $("#dlgProductDetails .product-image");
+      product = $(product).val();
+      brand = $(brand).val();
+      quantity = $(quantity).val();
+
+      //console.log(skus);
+
+      //tope = skus.length;
+      skus_values = [];
+      images_values = [];
+      //tope = images.length;
+
+      for (x = 0; x < quantity; x++) {
+        skus_values.push($(skus[x]).val());
+        o_file = $(images[x])[0].files[0];
+        if (o_file != undefined) {
+          image = {
+            "filename": o_file.name,
+            "type": o_file.type,
+            "input_name": $(images[x])[0].name
+          }
+          //images_values.push(image.filename);
+          image_files.push($(images[x]));
+        }
+        else
+          image = undefined;
+
+        images_values.push(image);
+      }
+
+      /*console.log("skus_values");
+      console.log(skus_values);
+      console.log("images");
+      console.log(images);
+
+      skus = JSON.stringify(skus_values);
+      console.log("skus");
+      console.log(skus);*/
+
+      skus = {
+        "skus": skus_values
+      };
+
+      imgs = {
+        "images": images_values
+      };
+
+      product_name = $("#dlgProductDetails #txtEditProduct").val();
+      brand_name = $("#dlgProductDetails #txtEditBrand").val();
+      purchase_price = $(purchase_price).val();
+      sale_price = $(sale_price).val();
+
+      description = $("#dlgProductDetails #txtEditDescription").val();
+      notes = $("#dlgProductDetails #txtEditNotes").val();
+
+      html =   "<td>";
+      html +=       "<span class='product_name'>";
+      html +=       product_name;
+      html +=       "</span>";
+      html +=       "<br />";
+      html +=       "<span class='product_obj'>";
+      html +=       product;
+      html +=       "</span>";
+
+      html +=   "</td>";
+
+      html +=   "<td>";
+      html +=       "<span class='brand_name'>";
+      html +=       brand_name;
+      html +=       "</span>";
+      html +=       "<span class='brand_obj'>";
+      html +=       brand;
+      html +=       "</span>";
+      html +=   "</td>";
+
+      html +=   "<td class='price'>";
+      html +=       purchase_price;
+      html +=   "</td>";
+
+      html +=   "<td class='sale-price'>";
+      html +=       sale_price;
+      html +=   "</td>";
+
+      html +=   "<td class='quantity'>";
+      html +=       quantity;
+      html +=   "</td>";
+
+      html +=   "<td class='skus'>";
+      html +=       JSON.stringify(skus);
+      html +=   "</td>";
+
+      html +=   "<td class='images'>";
+      //html +=       images_values;
+      html +=       JSON.stringify(imgs);
+      html +=   "</td>";
+
+      html +=   "<td class='description'>";
+      //html +=       images_values;
+      html +=       description;
+      html +=   "</td>";
+
+      html +=   "<td class='notes'>";
+      //html +=       images_values;
+      html +=       notes;
+      html +=   "</td>";
+
+      html +=   "<td>";
+
+      html +=
+                    '<a href="#" '+
+                    'onclick="viewProduct(' +
+                    '\'' + product_name + '\', ' +
+                    '\'' + product + '\', ' +
+                    '\'' + brand_name + '\', ' +
+                    '\'' + brand + '\', ' +
+                    '\'' + purchase_price + '\', ' +
+                    '\'' + sale_price + '\', ' +
+                    '\'' + quantity + '\', ' +
+                    '\'' + description + '\', ' +
+                    '\'' + notes + '\', ' +
+                    '\'' + product_number + '\', ' +
+                    'false, \'' +
+                    skus_values + '\', \'' +
+                    images_values + '\'' +
+                    ');" ' +
+                    'data-placement="bottom" ' +
+                    'data-toggle=\'tooltip\' ' +
+                    'title=\'{% trans "Details" %}\' ' +
+                    'data-original-title=\'' +
+                    '{% trans "Details" %}\'>' +
+                    '<i class="material-icons">'+
+                    'zoom_in</i></a>';
+
+      html +=
+                    '<a href="#" ' +
+                    'data-placement="bottom" ' +
+                    'data-toggle="tooltip" ' +
+                    'onclick="viewProduct(' +
+                    '\'' + product_name + '\', ' +
+                    '\'' + product + '\', ' +
+                    '\'' + brand_name + '\', ' +
+                    '\'' + brand + '\', ' +
+                    '\'' + purchase_price + '\', ' +
+                    '\'' + sale_price + '\', ' +
+                    '\'' + quantity + '\', ' +
+                    '\'' + description + '\', ' +
+                    '\'' + notes + '\', ' +
+                    '\'' + product_number + '\', ' +
+                    'true, \'' +
+                    skus_values + '\', \'' +
+                    images_values + '\'' +
+                    ');" ' +
+                    'title=\'{% trans "Edit" %}\' ' +
+                    'data-original-title=\'' +
+                    '{% trans "Edit" %}\'> ' +
+                    '<i class="material-icons">'+
+                    'edit</i></a>';
+
+      html +=
+                    '<a href="#" ' +
+                    'data-placement="bottom" ' +
+                    'data-toggle="tooltip" ' +
+                    'onclick="deleteProduct(' +
+                    product_number + ', ' +
+                    '\'product_add\')" ' +
+                    'title=\'{% trans "Delete" %}\' ' +
+                    'data-original-title=\'' +
+                    '{% trans "Delete" %}\'> ' +
+                    '<i class="material-icons">'+
+                    'delete</i></a>';
+
+      html +=   "</td>";
+
+      /*$(product).val('');
+      $(brand).val('');
+      $("#dlgAddProduct #txtProduct").val('');
+      $("#dlgAddProduct #txtBrand").val('');
+      $(purchase_price).val('');
+      $(quantity).val('');
+      $("#dlgAddProduct #txtDescription").val('');
+      $("#dlgAddProduct #txtNotes").val('');
+
+      $("#tblProductDetails tbody").append(html);
+      */
+      $("#tblProductDetails tr#product" + product_number).html(html);
+
+      //show_msg_with_toastr("info", msg_added_product);
+
+      $("#dlgProductDetails").modal("hide");
+      toastr.clear();
+    }
+  });
+</script>
+
+{% if enter_and_edit and enter_and_edit|upper == 'TRUE' %}
+<script type="text/javascript"> 
+  /*
+  $("#dlgProductDetails #tblProductDetails #optEdit").show();
+  $("#dlgProductDetails #tblProductDetails #optView").hide();
+  $("#dlgProductDetails #btnEdit").hide();
+  console.log($("#dlgProductDetails input"));
+  $("#dlgProductDetails input")[0].focus();
+  */
+  $("#dlgProductDetails #btnEdit").click();
+</script>
+{% endif  %}

@@ -1,0 +1,119 @@
+{% load static i18n %}
+
+{% block extra_js %}
+  <script src="https://apis.google.com/js/api:client.js"></script>
+{% endblock %}
+
+<div class="bg-gradient-primary modal fade" 
+id="dlgLogin" tabindex="-1" role="dialog" 
+aria-labelledby="lblLogin" aria-hidden="true"
+onfocus='$("#dlgLogin #txtEmail").focus();'>
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="lblLogin">
+          {% trans 'Login' %}
+        </h5>
+
+        <button class="close" type="button" 
+        data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">×</span>
+        </button>
+      </div>
+
+      <div class="modal-body">
+        <form class="user" method="post" 
+        action="/users/login/">
+
+          {% csrf_token %}
+
+          <div class="form-group">
+            <input type="email" class="form-control form-control-user" id="txtEmail" 
+            required="true" 
+            aria-describedby="emailHelp" name="email" 
+            placeholder="{% trans 'Email address' %}">
+          </div>
+
+          <div class="form-group">
+            <input type="password" class="form-control form-control-user" id="txtPassword" 
+            name="password" required="true" 
+            placeholder="{% trans 'Password' %}">
+          </div>
+
+          <div class="form-group">
+            <div class="custom-control custom-checkbox small">
+              <input type="checkbox" 
+              class="custom-control-input" 
+              id="customCheck">
+
+              <label class="custom-control-label" for="customCheck">
+              	{% trans 'Remember me' %}
+              </label>
+            </div>
+          </div>
+
+          <button type="submit" 
+          class="btn btn-primary btn-user btn-block">
+            {% trans 'Login' %}
+          </button>
+
+          <input type="text" id="txtRecaptchaResponse" 
+          name="g-recaptcha-response" 
+          hidden="true" style="visibility: hidden;">
+        </form>
+
+        <!--<hr>-->
+
+        <a href="#" id="btnLoginWithGoogle" 
+        onclick="google_auth(this.id);" 
+        class="btn btn-google btn-user btn-block">
+          <i class="icon icon-google"></i> 
+          {% trans 'Login with Google' %}
+        </a>
+
+        <a href="#" 
+        class="btn btn-facebook btn-user btn-block">
+          <i class="icon icon-facebook-official"></i> 
+          {% trans 'Login with Facebook' %}
+        </a>
+        <div id="status"></div>
+      </div>
+
+      <div class="modal-footer">
+        <div class="text-center">
+          <a class="small" href="#" 
+          data-dismiss="modal" data-toggle="modal"
+          data-target="#dlgForgotPassword">
+          	{% trans 'Forgot password' %}
+          </a>
+        </div>
+
+        <div class="text-center">
+          <a class="small" href="#"
+          data-dismiss="modal" data-toggle="modal"
+          data-target="#dlgCreateUserAccount">
+          	{% trans 'Create user account' %}
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script type="text/javascript">
+  $(document).ready(function(){
+    $(".btn-facebook ").click(function() {
+      $.ajax({
+        method: "GET",
+        url: "{% static 'js/fb-auth.js' %}",
+        dataType: "script"
+      })
+      .done(function(result) {
+        FB.getLoginStatus(function(response) {
+          statusChangeCallback(response);
+        });
+      });
+      return false;
+    });
+  });
+</script>

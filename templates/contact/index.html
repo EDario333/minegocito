@@ -1,0 +1,152 @@
+{% extends 'base.html' %}
+
+{% load static i18n %}
+
+{% block title_suffix %}
+  {% trans 'Contact' %}
+{% endblock %}
+
+{% block content %}
+<div class="bg-light py-3">
+  <div class="container">
+    <div class="row">
+      <div class="col-md-12 mb-0">
+      	<a href="/">{% trans 'Home' %}</a>
+      	<span class="mx-2 mb-0">/</span> 
+      	<strong class="text-black">
+      		{% trans 'Contact' %}
+      	</strong>
+      </div>
+    </div>
+  </div>
+</div>  
+
+<div class="site-section">
+  <div class="container">
+    <div class="row">
+      <div class="col-md-12">
+        <h2 class="h3 mb-3 text-black">
+        	{% trans 'Get in touch' %}
+      	</h2>
+      </div>
+
+      <!-- <div class="col-md-7"> -->
+    	<div class="col-md-12">
+        <form action="/contact/send-message/" method="post">
+          {% csrf_token %}
+
+          <div class="p-3 p-lg-5 border">
+            <div class="form-group row">
+              <div class="col-md-6">
+                <label for="c_fname" class="text-black">
+                	{% trans 'First name' %}<span class="text-danger">*</span>
+                </label>
+
+                <input type="text" class="form-control" 
+                id="c_fname" name="c_fname" required="">
+              </div>
+
+              <div class="col-md-6">
+                <label for="c_lname" class="text-black">
+                	{% trans 'Last name' %}<span class="text-danger">*</span>
+                </label>
+
+                <input type="text" class="form-control" 
+                id="c_lname" name="c_lname" required="">
+              </div>
+            </div>
+
+            <div class="form-group row">
+              <div class="col-md-12">
+                <label for="c_email" class="text-black">
+                	{% trans 'Email' %}<span class="text-danger">*</span>
+                </label>
+
+                <input type="email" class="form-control" required="" 
+                id="c_email" name="c_email" placeholder="">
+              </div>
+            </div>
+
+            <div class="form-group row">
+              <div class="col-md-12">
+                <label for="c_subject" class="text-black">
+                	{% trans 'Subject' %}
+              	</label>
+
+                <input type="text" class="form-control" 
+                id="c_subject" name="c_subject" value="{{subject}}">
+              </div>
+            </div>
+
+            <div class="form-group row">
+              <div class="col-md-12">
+                <label for="c_message" class="text-black">
+                	{% trans 'Message' %}<span class="text-danger">*</span>
+              	</label>
+
+                <textarea name="c_message" 
+                id="c_message" cols="30" 
+                rows="7" required="" 
+                class="form-control"></textarea>
+              </div>
+            </div>
+
+            <div class="form-group row">
+              <div class="col-lg-12">
+                <input type="submit" 
+                class="btn btn-primary btn-lg btn-block" 
+                value="{% trans 'Send message' %}">
+              </div>
+            </div>
+          </div>
+        </form>
+      </div>
+
+<!--
+      <div class="col-md-5 ml-auto">
+        <div class="p-4 border mb-3">
+          <span class="d-block text-primary h6 text-uppercase">
+          	City 1
+        	</span>
+
+          <p class="mb-0">
+          	Addr 1
+        	</p>
+        </div>
+
+        <div class="p-4 border mb-3">
+          <span class="d-block text-primary h6 text-uppercase">
+          	City 2
+        	</span>
+
+          <p class="mb-0">
+          	Addr 2
+          </p>
+        </div>
+
+        <div class="p-4 border mb-3">
+          <span class="d-block text-primary h6 text-uppercase">
+          	City 3
+        	</span>
+
+          <p class="mb-0">
+          	Addr 3
+        	</p>
+        </div>
+   		</div>
+-->
+		</div>
+  </div>
+</div>
+{% endblock content %}
+
+{% block js_footer %}
+<script type="text/javascript">
+  $("ul.site-menu li").removeClass("active");
+  $("ul.site-menu li#navContact").addClass("active");
+
+  $(document).ready(function(){
+    $("#c_fname").focus();
+  });
+</script>
+{% endblock %}

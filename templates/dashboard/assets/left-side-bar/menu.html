@@ -1,0 +1,84 @@
+{% load i18n %}
+
+<div class="menu">
+  <ul class="list">
+    <li class="header">
+      {% trans 'Main navigation'|upper %}
+    </li>
+    <span
+      id="tutorialStep8"
+      data-toggle="popover-x" 
+      data-placement="top top-left"
+      data-target="#ftt-Step8">
+    </span>
+
+    <li class="active">
+      <a href="#" id="lnkHome" 
+      onclick="showMainPanel(); return false;">
+        <i class="material-icons">home</i>
+
+        <span>
+          {% trans 'Home' %}
+        </span>
+      </a>
+    </li>
+
+    {% for app in my_user.menu %}
+      <li>
+        <a href="#" onclick="return false;" 
+        class="menu-toggle">
+          <i class="material-icons">{{app.icon}}</i>
+
+          <span>
+            {{app.app}}
+          </span>
+        </a>
+
+        <ul class="ml-menu">
+          {% for itm in app.children %}
+            <li>
+              <a href="{{itm.action}}" 
+              id="lnk{{itm.id}}"
+              class="action">
+                <i class="material-icons">{{itm.icon}}</i>
+
+                <span>
+                  {{itm.label}}
+                </span>
+              </a>
+            </li>
+          {% endfor %}
+        </ul>
+      </li>
+    {% endfor %}
+  </ul>
+</div>
+
+<script type="text/javascript">
+  $(document).ready(function(){
+    $(".menu a.action").click(function() {
+      action = this.href.substring(this.href.indexOf("#")+1);
+      showLoader();
+
+      data = {
+        user: "{{user}}", app_version: "{{app_version}}",
+        itm_menu: this.id
+      };
+
+      $.ajax({
+        method: "GET",
+        url: action,
+        data: data
+      })
+      .done(function(result) {
+        //$("section.content").empty();
+        $("div.menu li.active").removeClass("active");
+        $("section.content").html(result);
+        if ($("section.content form") != undefined)
+          if ($("section.content form input")[0] != undefined)
+            $("section.content form input")[0].focus();
+      });
+      return false;
+    });
+  });
+</script>

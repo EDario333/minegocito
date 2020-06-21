@@ -1,0 +1,268 @@
+{% load static i18n %}
+
+{% block additional_meta %}
+<!--
+  <meta name="google-signin-scope" 
+  content="profile email">
+  <meta name="google-signin-client_id" 
+  content="885662440357-92k6a467q4nq58t349k3k1jmb7pc9ksn.apps.googleusercontent.com">
+-->
+{% endblock %}
+
+{% block extra_js %}
+  <!--
+  <script src="https://apis.google.com/js/platform.js" async defer></script>
+  -->
+  <script src="https://apis.google.com/js/api:client.js"></script>
+{% endblock %}
+
+<style type="text/css">
+  /*
+  #btnRegisterWithGoogle, #btnRegisterWithGoogle:hover {
+    color: #fff;
+    background-color: #ea4335;
+    border-color: #ff;
+  }
+  */
+
+  /*
+  .btn-facebook, .btn-facebook:hover {
+    color: #fff;
+    background-color: #3b5998;
+    border-color: #fff;
+  }
+  */
+</style>
+
+<script type="text/javascript">
+  function verifyAgreementAcceptance() {
+    if (!$("#chkAgreement")[0].checked) {
+      alert("Debe aceptar las Condiciones del Servicio");
+      return false;
+    }
+    return true;
+  }  
+</script>
+
+<div class="bg-gradient-primary modal fade" 
+id="dlgCreateUserAccount" tabindex="-1" role="dialog" aria-labelledby="lblCreateUserAccount" aria-hidden="true" 
+onfocus='$("#dlgCreateUserAccount #txtFirstName").focus();'>
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="lblCreateUserAccount">
+          {% trans 'Create user account' %}
+        </h5>
+
+        <button class="close" type="button" 
+        data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">×</span>
+        </button>
+      </div>
+
+      <div class="modal-body">
+        <h6>
+          {% trans 'Fields marked are mandatory' %}
+        </h6>
+
+        <form class="user" method="post" 
+        action="/users/register/" 
+        onsubmit="return verifyAgreementAcceptance()" 
+        id="frmCreateUserAccount">
+
+          {% csrf_token %}
+
+          <div class="form-group row">
+            <div class="col-sm-6 mb-3 mb-sm-0">
+              <input type="text" class="form-control form-control-user" id="txtFirstName" 
+              placeholder="{% trans 'First name' %}*" 
+              required="true" name="first_name">
+            </div>
+
+            <div class="col-sm-6">
+              <input type="text" class="form-control form-control-user" id="txtMiddleName" 
+              placeholder="{% trans 'Middle name' %}"
+              name="middle_name">
+            </div>
+          </div>
+
+          <div class="form-group row">
+            <div class="col-sm-6 mb-3 mb-sm-0">
+              <input type="text" class="form-control form-control-user" id="txtLastName" 
+              required="true" name="last_name" 
+              placeholder="{% trans 'Last name' %}*">
+            </div>
+
+            <div class="col-sm-6">
+              <input type="text" class="form-control form-control-user" id="txtMothersLastName" placeholder="{% trans 'Mothers last name' %}"
+              name="mothers_last_name">
+            </div>
+          </div>
+
+          <div class="form-group">
+            <input type="email" class="form-control form-control-user" id="txtEmail" 
+            required="true" name="email" 
+            placeholder="{% trans 'Email Address' %}">
+          </div>
+
+          <div class="form-group row">
+            <div class="col-sm-6 mb-3 mb-sm-0">
+              <input type="password" class="form-control form-control-user" id="txtPassword" 
+              required="true" name="password" 
+              placeholder="{% trans 'Password' %}">
+            </div>
+
+            <div class="col-sm-6">
+              <input type="password" class="form-control form-control-user" id="txtPassword2" 
+              required="true" name="password2" 
+              placeholder="{% trans 'Confirm password' %}">
+            </div>
+          </div>
+
+          <input type="text" id="txtRecaptchaResponse" 
+          name="g-recaptcha-response" 
+          hidden="true" style="visibility: hidden;">
+
+          <div class="form-group">
+            <div class="custom-control custom-checkbox small">
+              <input type="checkbox" 
+              class="custom-control-input" 
+              id="chkAgreement">
+
+              <label class="custom-control-label" 
+              for="chkAgreement">
+                {% trans 'I accept' %}
+                <a href="/agreements/main/" target="_blank">
+                {% trans 'Agreement chk label' %}
+                </a>
+              </label>
+            </div>
+          </div>
+
+          <button class="btn btn-primary btn-user btn-block"
+          type="submit" id="btnSubmit">
+            {% trans 'Create user account' %}
+          </button>
+
+          <a href="#" id="btnRegisterWithGoogle" 
+          onclick="google_auth(this.id);" 
+          class="btn btn-google btn-user btn-block">
+            <i class="icon icon-google"></i> 
+            {% trans 'Register with Google' %}
+          </a>
+
+          <a href="#" 
+          class="btn btn-facebook btn-user btn-block">
+            <i class="icon icon-facebook-official"></i>
+            {% trans 'Register with Facebook' %}
+          </a>
+        </form>
+      </div>
+
+      <div class="modal-footer">
+        <div class="text-center">
+          <a class="small" href="#" 
+          data-dismiss="modal" data-toggle="modal"
+          data-target="#dlgForgotPassword">
+            {% trans 'Forgot password' %}
+          </a>
+        </div>
+
+        <div class="text-center">
+          <a class="small" href="#"
+          data-dismiss="modal" data-toggle="modal"
+          data-target="#dlgLogin">
+            {% trans 'Already have an user account' %}
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+{% block extra_js_footer %}
+<script type="text/javascript" src="{% static 'js/google-auth.js' %}"></script>
+
+<script type="text/javascript">
+  $(document).ready(function() {
+    grecaptcha.ready(function() {
+      grecaptcha.execute('6Ld-f6sUAAAAAB81NR_oPrcJ3AdoGV8IIqCZL7wN', {action: 'creating_user_account'}).then(function(token) {
+        $("#frmCreateUserAccount #txtRecaptchaResponse").val(token);
+      });
+    });
+
+    $("#frmCreateUserAccount #txtPassword2").change(function() {
+      if (this.value != $("#frmCreateUserAccount #txtPassword").val()) {
+        $("#frmCreateUserAccount #btnSubmit").attr("disabled", "true");
+        $.ajax({
+          method: "GET",
+          url: "/translator/translate/",
+          data: { msg: "Passwords does not match" }
+        })
+        .done(function(result) {
+          show_msg_with_toastr("error", result);
+        });
+      }
+      else
+        $("#frmCreateUserAccount #btnSubmit").removeAttr("disabled");
+    });
+
+    $("#frmCreateUserAccount #txtPassword").change(function() {
+      var strongRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#.\$%\^&\*\>\<\,\;\:\-\_])(?=.{8,})/;
+
+      // contains six characters or more and has at least one lowercase and one uppercase alphabetical character or has at least one lowercase and one numeric character or has at least one uppercase and one numeric character. We’ve chosen to leave special characters out of this one.
+      var mediumRegex = /^(((?=.*[a-z])(?=.*[A-Z]))|((?=.*[a-z])(?=.*[0-9]))|((?=.*[A-Z])(?=.*[0-9])))(?=.{6,})/;
+
+      if (!strongRegex.test(this.value)) {
+        $("#frmCreateUserAccount #btnSubmit").attr("disabled", "true");
+        $.ajax({
+          method: "GET",
+          url: "/translator/translate/",
+          data: { msg: "Required password strength" }
+        })
+        .done(function(result) {
+          show_msg_with_toastr("error", result);
+        });
+      }
+      else
+        $("#frmCreateUserAccount #btnSubmit").removeAttr("disabled");
+    });
+
+    $("#dlgCreateUserAccount #txtEmail").change(function() {
+      if (this.validity.valid) {
+        //valid_csrftoken();
+        $.ajax({
+          //method: "POST",
+          method: "GET",
+          url: "/users/exist-user-account-by-email",
+          data: { email: this.value }
+        })
+        .done(function(result) {
+          if (!result.passed) {
+            $("#frmCreateUserAccount #btnSubmit").attr("disabled", "true");
+            show_msg_with_toastr(result.level, result.msg);
+          }
+          else
+            $("#frmCreateUserAccount #btnSubmit").removeAttr("disabled");
+        });
+      }
+    });
+
+    $("a.btn-facebook").click(function() {
+      $.ajax({
+        method: "GET",
+        url: "{% static 'js/fb-auth.js' %}",
+        dataType: "script"
+      })
+      .done(function(result) {
+        FB.getLoginStatus(function(response) {
+          statusChangeCallback(response);
+        });
+      });
+      return false;
+    });
+  });
+</script>
+
+<script src="{% static 'js/bootbox/bootbox.min.js' %}"></script>
+{% endblock %}

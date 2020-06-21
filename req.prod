@@ -1,0 +1,10 @@
+uwsgi==2.0.18
+django==2.2.9
+django-cities-light==3.5.0
+Pillow==6.2.1
+django-taggit
+python-dateutil
+django-qsstats-magic
+python-memcached==1.59
+django-redis==4.11.0
+django-debug-toolbar==2.1

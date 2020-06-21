@@ -1,0 +1,513 @@
+{% load static i18n %}
+
+{% if msg %}
+  <script type="text/javascript">
+    $(document).ready(function(){
+      show_msg_with_toastr("{{level}}", "{{msg}}");
+      if ($("section.content form input")[0] != undefined)
+        $("section.content form input")[0].focus();
+    });
+  </script>
+{% endif %}
+
+<script type="text/javascript">
+  var msg_wait;
+  var missed_query;
+
+  $.ajax({
+    method: "GET",
+    url: "/translator/many/",
+    data: { msgs: "Please wait,Please enter at least one search criteria"}
+  })
+  .done(function(result) {
+    result = result.split(',');
+    msg_wait = result[0];
+    missed_query = result[1];
+  });
+
+  function view_all(url, action) {
+    show_msg_with_toastr("info", msg_wait);
+    $("section.content form button[type='submit']").attr("disabled", "true");
+    url = url + "?itm_menu={{itm_menu}}&user={{user}}";
+
+    if (action.toUpperCase() == 'EDIT')
+      url = url + "&edit=true";
+    else if (action.toUpperCase() == 'DELETE')
+      url = url + "&delete=true";
+
+    $.ajax({
+      method: "GET",
+      url: url
+    })
+    .done(function(result) {
+      $("section.content").html(result);
+      //toastr.clear();
+      return false;
+    });
+  }
+</script>
+
+<style type="text/css">
+  .btn {
+    width: 120px;
+    margin: 0 0 10px 0;
+  }
+</style>
+
+{% block modal_dialogs %}
+{% endblock %}
+
+<div class="container-fluid">
+  <!--
+  <div class="block-header" style="margin: 0 0 15px -15px">
+    <h2>
+      {{form.title|upper}}
+  	</h2>
+  </div>
+  -->
+
+  <div class="row clearfix">
+    <div class="card">
+      <div class="header">
+    		<h2>
+      		{{form.title|upper}}
+  			</h2>
+  		</div>
+
+			<div class="body">
+		    <p>
+		      {% block msg_pre_form %}
+		      {% endblock %}
+		    </p>
+
+		    <form action="{{form.action}}" method="post"
+		    onreset="$('section.content form input')[0].focus();">
+		      {{form.as_table}}
+
+		      {% if 'AGREGAR' in form.title|upper %}
+		        <label for="txtPassword2">
+		          * {% trans 'Confirm password' %}:
+		        </label>
+		      
+		        <input type="password" 
+		        class="form-control form-control-user" 
+		        id="txtPassword2" 
+		        style="margin: 0 0 10px 0"
+		        required="true" name="password2">
+
+		        <div class="form-group">
+		          <input type="checkbox" 
+		          id="chkRandomPassword" 
+		          name="randompassword">
+
+		          <label for="chkRandomPassword">
+		            {% trans 'Generate password automatically' %}
+		          </label>  
+
+		          <p>
+		          	{% trans 'Message random password' %}
+		          </p>
+		        </div>
+
+		        <input name="usergroup" 
+		        style="visibility: hidden;" 
+		        hidden="true" />
+		        <input name="permissions"
+		        style="visibility: hidden;" 
+		        hidden="true" />
+
+		        <div class="form-group">
+		          <a href="#" id="actAssignGroup">
+		            <i class="material-icons">
+		              group_add
+		            </i>
+		            {% trans 'Assign group' %}
+		          </a>
+
+		          <p>
+		            {% trans 'Message assign group to user' %}
+		          </p>
+		        </div>
+
+		        <div class="form-group">
+		          <a href="#" id="actAssignPermissions">
+		            <i class="material-icons">
+		              done_all
+		            </i>
+		            {% trans 'Assign permissions' %}
+		          </a>
+
+		          <p>
+		            {% trans 'Message assign permissions to user' %}
+		          </p>
+		        </div>
+		      {% else %}
+		      	<script type="text/javascript">
+		      		$("form label[for='id_password']").remove();
+		      	</script>
+		      {% endif %}
+		      {% csrf_token %}
+
+		      {% if 'AGREGAR' not in form.title|upper %}
+		        <p>
+		          {% if 'EDITAR' in form.title|upper %}
+		            <a href="#" class="act-list-all"
+		            onclick="view_all('/users/admin/list-all', 'edit'); return false;" >
+		              {% trans 'View all' %}
+		            </a>
+		          {% elif 'ELIMINAR' in form.title|upper %}
+		            <a href="#" class="act-list-all"
+		            onclick="view_all('/users/admin/list-all', 'delete'); return false;" >
+		              {% trans 'View all' %}
+		            </a>
+		          {% else %}
+		            <a href="#" class="act-list-all"
+		            onclick="view_all('/users/admin/list-all', 'search'); return false;" >
+		              {% trans 'View all' %}
+		            </a>
+		          {% endif %}
+		        </p>
+
+		        <!--
+		        <p>
+		          <a href="#" 
+		          class="act-search-config">
+		            {% trans 'Search config' %}
+		          </a>
+		        </p>
+		        -->
+		      {% endif %}
+
+		      <input hidden="true" style="visibility: hidden;"
+		      name="user" value="{{user}}" id="txtEmailHid" />
+
+		      <input hidden="true" style="visibility: hidden;"
+		      name="module" value="my_admin_module" />
+
+		      <input hidden="true" style="visibility: hidden;"
+		      name="app_version" value="{{app_version}}" />
+
+		      <input hidden="true" style="visibility: hidden;" 
+		      type="text" name="itm_menu" value="{{itm_menu}}" />
+
+		      <button class="btn btn-primary waves-effect"
+		      type="submit" id="btnSubmit">
+		        <i class="material-icons">
+		          {{form.icon_btn_submit}}
+		        </i>
+		        {{form.btn_label}}
+		      </button>
+
+		      <button class="btn btn-warning waves-effect"
+		      type="reset">
+		        <i class="material-icons">clear_all</i>
+		        {% trans 'Clean all' %}
+		      </button>
+
+		      <button class="btn btn-default waves-effect act-cancel-form" type="button">
+		        <i class="material-icons">cancel</i>
+		        {% trans 'Cancel' %}
+		      </button>
+		    </form>
+		  </div>
+		</div>
+	</div>
+</div>
+
+<script type="text/javascript" src="{% static 'js/jquery-ui-1.12.1/jquery-ui.min.js' %}"></script>
+
+<link href="{% static 'js/jquery-ui-1.12.1/jquery-ui.min.css' %}" rel="stylesheet">
+
+<script type="text/javascript" src="{% static 'js/jquery.form.min.js' %}"></script>
+
+{% if 'AGREGAR' in form.title|upper %}
+<script type="text/javascript">
+  $(document).ready(function(){
+    $("form #txtPassword2").change(function() {
+      if (this.value != $("form #id_password").val()) {
+        $("form #btnSubmit").attr("disabled", "true");
+        $.ajax({
+          method: "GET",
+          url: "/translator/translate/",
+          data: { msg: "Passwords does not match" }
+        })
+        .done(function(result) {
+          show_msg_with_toastr("error", result);
+        });
+      }
+      else
+        $("form #btnSubmit").removeAttr("disabled");
+    });
+
+    $("form #id_password").change(function() {
+      var strongRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#.\$%\^&\*\>\<\,\;\:\-\_])(?=.{8,})/;
+
+      // contains six characters or more and has at least one lowercase and one uppercase alphabetical character or has at least one lowercase and one numeric character or has at least one uppercase and one numeric character. We’ve chosen to leave special characters out of this one.
+      var mediumRegex = /^(((?=.*[a-z])(?=.*[A-Z]))|((?=.*[a-z])(?=.*[0-9]))|((?=.*[A-Z])(?=.*[0-9])))(?=.{6,})/;
+
+      if (!strongRegex.test(this.value)) {
+        $("form #btnSubmit").attr("disabled", "true");
+        $.ajax({
+          method: "GET",
+          url: "/translator/translate/",
+          data: { msg: "Required password strength" }
+        })
+        .done(function(result) {
+          show_msg_with_toastr("error", result);
+        });
+      }
+      else
+        $("form #btnSubmit").removeAttr("disabled");
+    });
+
+    $("form #id_email").change(function() {
+      if (this.validity.valid) {
+        $.ajax({
+          method: "GET",
+          url: "/users/exist-user-account-by-email",
+          data: { email: this.value }
+        })
+        .done(function(result) {
+          if (!result.passed) {
+            $("form #btnSubmit").attr("disabled", "true");
+            show_msg_with_toastr(result.level, result.msg);
+          }
+          else
+            $("form #btnSubmit").removeAttr("disabled");
+        });
+      }
+    });
+  });
+</script>
+{% endif %}
+
+<script type="text/javascript">
+  $(document).ready(function(){
+    var options = { 
+      target:        'section.content',
+      beforeSubmit:  showRequest,
+      success:       showResponse 
+    }; 
+
+    $(".act-cancel-form").click(function() {
+      showMainPanel();
+    });
+
+    function showRequest(formData, jqForm, options) { 
+      show_msg_with_toastr("info", msg_wait);
+      $("section.content form button[type='submit']").attr("disabled", "true");
+
+      module_name = $(".container-fluid .card .header h2")[0].innerHTML;
+      module_name = module_name.toUpperCase();
+     
+      if (!module_name.includes('AGREGAR')) {
+        inputs = $('section.content form input.validate');
+        tope = inputs.length;
+        x = -1;
+        disable_btn = false;
+        counter_failed = 0;
+
+        while (++x < tope)
+          if (!validField(inputs[x]))
+            counter_failed++;
+
+        if (counter_failed == tope)
+          disable_btn = true;
+
+        toastr.clear();
+
+        if (disable_btn) {
+          
+          //$("section.content form button[type='submit']").attr("disabled", "true");
+          $("section.content form button[type='submit']").removeAttr("disabled");
+          show_msg_with_toastr("error", missed_query);
+        }
+        else {
+          //$("section.content form button[type='submit']").removeAttr("disabled");
+        }
+
+        return !disable_btn;
+      }
+
+      return true; 
+    }
+ 
+    function showResponse(responseText, statusText, xhr, $form)  { 
+      $(".page-loader-wrapper").remove();
+    }
+
+    $("section.content form").ajaxForm(options);
+    $("div.menu a#{{itm_menu}}").parent().addClass("active");
+
+    $("form #actAssignPermissions").click(function() {
+    	if (group_assigned)
+				group_assigned = !confirm("Perderá los permisos asignados con base en el grupo seleccionado. ¿Desea continuar?");
+
+  		if (group_assigned)
+  			return false;
+
+    	show_msg_with_toastr("info", msg_wait);
+
+    	$("form input[name='usergroup']").val("");
+
+    	user = $("#dlgViewDetails .modal-footer input[name='user']").val();
+
+    	$.ajax({
+        method: "GET",
+        url: "/permissions/get-permissions/"
+      })
+      .done(function(result) {
+      	toastr.clear();
+        if (result.status == "success") {
+        	$('#dlgAssignPermissions div#divPermissions').html(result.html);
+
+        	permissions = $("form input[name='permissions']").val();
+
+        	if (permissions.length > 0) {
+	        	permissions = permissions.split(",");
+	        	tope = permissions.length;
+	        	x = 0;
+	        	for (; x < tope; x++)
+	        		$('#dlgAssignPermissions #permission' + permissions[x]).attr("checked", "true");
+
+	        	all_permissions_granted = x == permissions.length;
+        	}
+
+        	$("#dlgAssignPermissions div#divPermissions #actSelectall").click(function() {
+        		show_msg_with_toastr("info", msg_wait);
+
+        		chks = $("#dlgAssignPermissions input[name='permissions']");
+        		tope = chks.length;
+        		for (x = 0; x < tope; x++)
+        			if (!chks[x].checked)
+        				$(chks[x]).click();
+			      //$("#dlgAssignPermissions input[name='permissions']").click();
+
+			      $("#dlgAssignPermissions div#divPermissions #parSelectNone").show();
+			      $("#dlgAssignPermissions div#divPermissions .select-none").show();
+			      $("#dlgAssignPermissions div#divPermissions #parSelectAll").hide();
+			      $("#dlgAssignPermissions div#divPermissions .select-all").hide();
+			      all_permissions_granted = true;
+			      toastr.clear();
+			      return false;
+			    });
+
+        	$("#dlgAssignPermissions div#divPermissions #actSelectNone").click(function() {
+        		show_msg_with_toastr("info", msg_wait);
+
+        		chks = $("#dlgAssignPermissions input[name='permissions']");
+        		tope = chks.length;
+        		for (x = 0; x < tope; x++)
+        			if (chks[x].checked)
+        				$(chks[x]).click();
+			      //$("#dlgAssignPermissions input[name='permissions']:checked").removeAttr("checked");
+
+			      $("#dlgAssignPermissions div#divPermissions #parSelectNone").hide();
+			      $("#dlgAssignPermissions div#divPermissions .select-none").hide();
+			      $("#dlgAssignPermissions div#divPermissions #parSelectAll").show();
+			      $("#dlgAssignPermissions div#divPermissions .select-all").show();
+			      all_permissions_granted = false;
+			      toastr.clear();
+			      return false;
+			    });
+
+        	// ****************
+        	$("#dlgAssignPermissions div#divPermissions a.select-all-group").click(function() {
+        		show_msg_with_toastr("info", msg_wait);
+        		group = this.id;
+        		group = group.substr("actSelectNoneGroup".length-1);
+
+        		chks = $("#dlgAssignPermissions input[class='group" + group + "']");
+        		tope = chks.length;
+        		for (x = 0; x < tope; x++)
+        			if (!chks[x].checked)
+        				$(chks[x]).click();
+			      //$("#dlgAssignPermissions input[class='group" +group + "']").click();
+
+			      $("#dlgAssignPermissions div#divPermissions a#actSelectNoneGroup" + group).show();
+
+			      $("#dlgAssignPermissions div#divPermissions a#actSelectNoneGroup" + group).parent().show();
+
+			      $("#dlgAssignPermissions div#divPermissions a#actSelectAllGroup" + group).hide();
+			      toastr.clear();
+			      return false;
+			    });
+
+        	$("#dlgAssignPermissions div#divPermissions a.select-none-group").click(function() {
+        		show_msg_with_toastr("info", msg_wait);
+        		group = this.id;
+        		group = group.substr("actSelectAllGroup".length+1);
+
+        		chks = $("#dlgAssignPermissions input[class='group" + group + "']");
+        		tope = chks.length;
+        		for (x = 0; x < tope; x++)
+        			if (chks[x].checked)
+        				$(chks[x]).click();
+			      //$("#dlgAssignPermissions input[class='group" + group + "']").click();
+
+			      $("#dlgAssignPermissions div#divPermissions a#actSelectNoneGroup" + group).hide();
+
+			      $("#dlgAssignPermissions div#divPermissions a#actSelectAllGroup" + group).show();
+			      toastr.clear();
+			      return false;
+			    });
+        	// *****
+			    if (all_permissions_granted) {
+			      $("#dlgAssignPermissions div#divPermissions #parSelectNone").show();
+			      $("#dlgAssignPermissions div#divPermissions .select-none").show();
+			      $("#dlgAssignPermissions div#divPermissions #parSelectAll").hide();
+			      $("#dlgAssignPermissions div#divPermissions .select-all").hide();
+			    }
+			    else {
+	        	$("#dlgAssignPermissions div#divPermissions #parSelectNone").hide();
+
+	        	$("#dlgAssignPermissions div#divPermissions .select-none").hide();
+        	}
+
+          $('#dlgAssignPermissions').modal('show'); 
+        }
+        else
+          show_msg_with_toastr(result.status, result.msg);
+      });
+
+      return false;
+    });
+
+		$("form #actAssignGroup").click(function() {
+			if (permissions_assigned)
+				permissions_assigned = !confirm("Perderá los permisos asignados. ¿Desea continuar?");
+
+  		if (permissions_assigned)
+  			return false;
+
+  		$("form input[name='permissions']").val("");
+
+    	$('#dlgAssignGroup').modal('show'); 
+    	return false;
+		});
+
+    $("form #chkRandomPassword").change(function() {
+      if (this.checked) {
+        $("form #txtPassword2").removeAttr("required");
+        $("form #txtPassword2").attr("readonly", "true");
+        $("form input[name='password']").removeAttr("required");
+        $("form input[name='password']").attr("readonly", "true");
+
+        $("form #txtPassword2").val("randomPassword");
+        $("form input[name='password']").val("randomPassword");
+      }
+      else {
+        $("form #txtPassword2").attr("required", "true");
+        $("form #txtPassword2").removeAttr("readonly");
+        $("form input[name='password']").attr("required", "true");
+        $("form input[name='password']").removeAttr("readonly");
+
+        $("form #txtPassword2").val("");
+        $("form input[name='password']").val("");
+      }
+    });
+  });
+</script>
+
+{% block actions_js %}
+{% endblock %}

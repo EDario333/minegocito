@@ -1,0 +1,357 @@
+{% load i18n %}
+
+<div class="col-sm-12" style="margin: 10px 0 0 0">
+	<h4>{{form.title}}</h4>
+	{{form.as_table}}
+
+	<input hidden="true" 
+  style="visibility: hidden;" 
+  type="text" name="city_obj"
+  id="city_contact_person">
+
+	<button class="btn btn-primary waves-effect" 
+	type="button" id="btnAddContactPerson">
+	  {{form.btn_label}}
+	</button>
+
+	<button class="btn btn-warning waves-effect" 
+	type="button" id="btnCancel">
+	  {% trans 'Cancel' %}
+	</button>
+</div>
+
+<script type="text/javascript">
+	$("#secContactPerson #id_dob").datepicker({maxDate: "-18Y",  showButtonPanel: true, changeMonth: true, changeYear: true});
+
+  $("#secContactPerson #id_dob").datepicker("option", $.datepicker.regional["es"] );
+
+  //$("#id_dob").attr("readonly", "readonly");
+
+  $("#secContactPerson #id_dob").change(function(){
+    show_msg_with_toastr("info", msg_wait);
+
+    if (this.value=='') {
+      toastr.clear();
+      $("#secContactPerson #btnAddContactPerson").removeAttr("disabled");
+      return true;
+    }
+
+    // Regular expression taken from https://www.regextester.com/99555
+    var re = /^([0-2][0-9]|(3)[0-1])(\/)(((0)[0-9])|((1)[0-2]))(\/)\d{4}$/;
+
+    if (!re.test(this.value)) {
+      $.ajax({
+        method: "GET",
+        url: "/translator/translate/",
+        data: {msg: "Wrong format for date of birth"}
+      })
+      .done(function(result) {
+        toastr.clear();
+        show_msg_with_toastr("error", result);
+        $("#secContactPerson #btnAddContactPerson").attr("disabled", "true");
+      });
+    }
+    else {
+      toastr.clear();
+      $("#secContactPerson #btnAddContactPerson").removeAttr("disabled");
+    }
+  });
+
+  $("#secContactPerson #id_city_contact_person").autocomplete({
+    source: "{% url 'cities-autocomplete' %}",
+    minLength: 1,
+  });
+
+  $("#id_city_contact_person").change(function(){
+    show_msg_with_toastr("info", msg_wait);
+
+    if (this.value=='') {
+      $("#secContactPerson input[name='city_obj']").val('');
+      $("#secContactPerson #btnAddContactPerson").removeAttr("disabled");
+      toastr.clear();
+      return true;
+    }
+
+    $.ajax({
+      method: "GET",
+      url: "{% url 'search-city-by-name' %}",
+      data: {name: this.value}
+    })
+    .done(function(result) {
+      toastr.clear();
+      if (!result.exist)
+        $.ajax({
+          method: "GET",
+          url: "/translator/translate",
+          data: { msg: "Please enter a valid city"}
+        })
+        .done(function(result) {
+          show_msg_with_toastr("error", result);
+          $("#secContactPerson input[name='city_obj']").val('');
+          $("#secContactPerson #btnAddContactPerson").attr("disabled", "true");
+        });
+      else {
+        $("#secContactPerson input[name='city_obj']").val(result["city"]);
+        $("#secContactPerson #btnAddContactPerson").removeAttr("disabled");
+      }
+    });
+  });
+
+	function showDetails(invoker, can_edit, can_delete) {
+		module_name = $(".container-fluid .card .header h2")[0].innerHTML;
+
+    module_name = module_name.toUpperCase();
+
+    can_edit=module_name.includes('EDITAR') || can_edit;
+    can_delete=module_name.includes('ELIMINAR') || can_delete;
+
+		row=$(invoker).parent().parent();
+		id="#tblContactPersons tbody tr#" + row[0].id;
+		fn=$(id + " td.first-name").html();
+		mn=$(id + " td.middle-name").html();
+		ln=$(id + " td.last-name").html();
+		mln=$(id + " td.mothers-last-name").html();
+		gender=$(id + " td .gender").html();
+		dob=$(id + " td .dob").html();
+		email=$(id + " td .email").html();
+		city=$(id + " td .city").html();
+		addr1=$(id + " td .addr1").html();
+		addr2=$(id + " td .addr2").html();
+		cp=$(id + " td .cell_phone").html();
+		hp=$(id + " td .home_phone").html();
+		op=$(id + " td .other_phone").html();
+		enter_and_edit=can_edit;
+
+		//row_id=row[0].id.substr("row").substr("row".length);
+		row_id=row[0].id;
+
+		data=JSON.stringify(
+			{
+				fn: fn, mn: mn, ln: ln, mln: mln, 
+				gender: gender, dob: dob, email: email, 
+				city: city, addr1: addr1, addr2: addr2,
+				cp: cp, hp: hp, op: op, 
+				can_edit: can_edit, can_delete: can_delete,
+				enter_and_edit: enter_and_edit,
+				row_id: row_id
+			});
+
+		$("#secDetailsContactPerson").load("/providers/details-contact-person/?data="+data, function() {
+				$("#dlgDetailsContactPerson").modal("show");
+			}
+		);
+	}
+
+	function removeContactPerson(invoker) {
+		if (confirm("Esta acción no se puede revertir. ¿Desea continuar?")) {
+			$(invoker).parent().parent().remove();
+			rows=$("#tblContactPersons tbody tr");
+			if (rows.length<1) {
+				$("#secContactPersons").hide();
+			}
+			$("#dlgDetailsContactPerson").modal("hide");
+		}
+	}
+
+	$(document).ready(function() {
+		$("#btnCancel").click(function() {
+			if (confirm("Perderá los datos capturados de la persona de contacto. ¿Desea continuar?"))
+				$(this).parent().remove();
+		});
+
+		$("#btnAddContactPerson").click(function() {
+			module_name = $(".container-fluid .card .header h2")[0].innerHTML;
+
+    	module_name = module_name.toUpperCase();
+
+    	if (module_name.includes('AGREGAR')) {
+				error=false;
+				emails=$("#tblContactPersons .email");
+		    tope=emails.length;
+		    email=$("#secContactPerson #id_email_contact_person").val();
+		    for (x=0;x<tope;x++) {
+		      if (emails[x].innerHTML==email) {
+		        $.ajax({
+		          method: "GET",
+		          url: "/translator/translate/",
+		          data: {msg: "The contact person with the specified email already exists in the list of contact persons"}
+		        })
+		        .done(function(result) {
+		          toastr.clear();
+		          show_msg_with_toastr("error", result);
+		        });
+		        error=true;
+		      }
+		    }
+
+		    if (error) 
+		    	return false;
+
+		    phones=$("#tblContactPersons .cell_phone");
+		    tope=phones.length;
+		    phone=$("#secContactPerson #id_cell_phone_contact_person").val();
+		    for (x=0;x<tope;x++) {
+		      if (phones[x].innerHTML==phone) {
+		        $.ajax({
+		          method: "GET",
+		          url: "/translator/translate/",
+		          data: {msg: "The contact person with the specified cell phone already exists in the list of contact persons"}
+		        })
+		        .done(function(result) {
+		          toastr.clear();
+		          show_msg_with_toastr("error", result);
+		        });
+		        error=true;
+		      }
+		    }
+
+		    if (error) 
+		    	return false;
+
+		    /*module_name = $(".container-fluid .card .header h2")[0].innerHTML;
+
+		    module_name = module_name.toUpperCase();*/
+
+		    if (!(validField($("#secContactPerson #id_last_name")))) {
+					$("#secContactPerson #id_last_name").focus();
+					show_msg_with_toastr("error", "Especifique el  apellido paterno de la persona de contacto");
+					return false;
+		    }
+
+		    if (!(validField($("#secContactPerson #id_first_name")))) {
+					$("#secContactPerson #id_first_name").focus();
+					show_msg_with_toastr("error", "Especifique el  primer nombre de la persona de contacto");
+					return false;
+		    }
+
+		    if (!(validField($("#secContactPerson #id_email_contact_person")))) {
+					$("#secContactPerson #id_email_contact_person").focus();
+					show_msg_with_toastr("error", "Especifique el  correo electrónico de la persona de contacto");
+					return false;
+		    }
+
+		    if (!(validField($("#secContactPerson #id_cell_phone_contact_person")))) {
+					$("#secContactPerson #id_cell_phone_contact_person").focus();
+					show_msg_with_toastr("error", "Especifique el  teléfono celular de la persona de contacto");
+					return false;
+		    }
+		  }
+
+	    fn=$("#secContactPerson #id_first_name").val();
+	    mn=$("#secContactPerson #id_middle_name").val();
+	    ln=$("#secContactPerson #id_last_name").val();
+	    mln=$("#secContactPerson #id_mothers_last_name").val();
+	    gender=$("#secContactPerson #id_gender").val();
+	    dob=$("#secContactPerson #id_dob").val();
+	    email=$("#secContactPerson #id_email_contact_person").val();
+	    // city=$("#secContactPerson #id_city_contact_person").val();
+	    city=$("#secContactPerson #city_contact_person").val();
+	    addr1=$("#secContactPerson #id_address_line1_contact_person").val();
+	    addr2=$("#secContactPerson #id_address_line2_contact_person").val();
+	    cp=$("#secContactPerson #id_cell_phone_contact_person").val();
+	    hp=$("#secContactPerson #id_home_phone_contact_person").val();
+	    op=$("#secContactPerson #id_other_phone_contact_person").val();
+
+	    rows=$("#tblContactPersons tbody tr");
+
+	    html= "<tr id='row" + rows.length+1 + "'>";
+
+	    html+=  "<td class='first-name'>";
+	    html+=    fn;
+	    html+=  "</td>";
+
+	    html+=  "<td class='middle-name'>";
+	    html+=    mn;
+	    html+=  "</td>";
+
+	    html+=  "<td class='last-name'>";
+	    html+=    ln;
+	    html+=  "</td>";
+
+	    html+=  "<td class='mothers-last-name'>";
+	    html+=    mln;
+	    html+=  "</td>";
+
+	    html+=  "<td>";
+	    html+=    
+	            '<a href="#" '+ 
+	            'onclick="showDetails(this, false, false); return false;" ' +
+	            'data-placement="bottom" ' +
+	            'data-toggle="tooltip" ' +
+	            "title=\"{% trans 'Details' %}\" " +
+	            "data-original-title=\"{% trans 'Details' %}\"><i class=\"material-icons\">zoom_in</i></a>"+
+
+	            '<a href="#" '+ 
+	            'onclick="showDetails(this, true, true); return false;" ' +
+	            'data-placement="bottom" ' +
+	            'data-toggle="tooltip" ' +
+	            "title=\"{% trans 'Edit' %}\" " +
+	            "data-original-title=\"{% trans 'Edit' %}\"><i class=\"material-icons\">edit</i></a>"+
+
+	            '<a href="#" data-placement="bottom" ' +
+	            'data-toggle="tooltip" ' +
+	            'onclick="removeContactPerson(this); return false;" ' +
+	            'class="remove-contact-person" ' + 
+	            'id="actRemoveContactPerson' + 
+	            rows.length+1 + '" ' +
+	            "title=\"{% trans 'Remove' %}\""+
+	            " data-original-title=\"{% trans 'Remove' %}\"><i class=\"material-icons\">delete</i></a>";
+	    html+=  "</td>";
+
+	    html+=	"<td hidden='' style='visibility: hidden'>";
+
+	    html+=	"<span class='gender'>";
+	    html+=		gender;
+	    html+=	"</span>";
+
+	    html+=	"<span class='dob'>";
+	    html+=		dob;
+	    html+=	"</span>";
+
+	    html+=	"<span class='email'>";
+	    html+=		email;
+	    html+=	"</span>";
+
+	    html+=	"<span class='city'>";
+	    html+=		city;
+	    html+=	"</span>";
+
+	    html+=	"<span class='addr1'>";
+	    html+=		addr1;
+	    html+=	"</span>";
+
+	    html+=	"<span class='addr2'>";
+	    html+=		addr2;
+	    html+=	"</span>";
+
+	    html+=	"<span class='cell_phone'>";
+	    html+=		cp;
+	    html+=	"</span>";
+
+	    html+=	"<span class='home_phone'>";
+	    html+=		hp;
+	    html+=	"</span>";
+
+	    html+=	"<span class='other_phone'>";
+	    html+=		op;
+	    html+=	"</span>";
+
+	    html+=	"</td>";
+	    html+="</tr>";
+
+	    $("#tblContactPersons tbody").append(html);
+	    // $('#secContactPersons').removeAttr("hidden");
+	    // $('#secContactPersons').css("visibility", "visible");
+	    //console.log($("#secContactPersons").html());
+	    $("#secContactPersons").show();
+	    //$("#actRemoveContactPersons").show();
+
+	    //$('#tblContactPersons').show();
+	    $('[data-toggle="tooltip"]').tooltip();
+
+	    // $("#actRemoveContactPersons").removeAttr("hidden");
+	    // $("#actRemoveContactPersons").css("visibility", "visible");
+	    // $("#actRemoveContactPersons").show();
+		});
+	});
+</script>

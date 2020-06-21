@@ -1,0 +1,558 @@
+{% load static i18n %}
+
+{% if msg %}
+  <script type="text/javascript">
+    $(document).ready(function(){
+      show_msg_with_toastr("{{level}}", "{{msg}}");
+      if ($("section.content form input")[0] != undefined)
+        $("section.content form input")[0].focus();
+    });
+  </script>
+{% endif %}
+
+{% block global_vars_js %}
+{% endblock %}
+
+<script type="text/javascript">
+  var msg_wait;
+  var missed_query;
+
+  $.ajax({
+    method: "GET",
+    url: "/translator/many/",
+    data: { msgs: "Please wait,Please enter at least one search criteria"}
+  })
+  .done(function(result) {
+    result = result.split(',');
+    msg_wait = result[0];
+    missed_query = result[1];
+  });
+
+  function view_all(url, action) {
+    show_msg_with_toastr("info", msg_wait);
+    $("section.content form button[type='submit']").attr("disabled", "true");
+    url = url + "?itm_menu={{itm_menu}}&user={{user}}";
+
+    if (action.toUpperCase() == 'EDIT')
+      url = url + "&edit=true";
+    else if (action.toUpperCase() == 'DELETE')
+      url = url + "&delete=true";
+
+    $.ajax({
+      method: "GET",
+      url: url
+    })
+    .done(function(result) {
+      $("section.content").html(result);
+      //toastr.clear();
+      return false;
+    });
+  }
+</script>
+
+<style type="text/css">
+  .btn {
+    width: 120px;
+    margin: 0 0 10px 0;
+  }
+</style>
+
+<div class="container-fluid">
+  <!--
+  <div class="block-header" style="margin: 0 0 15px -15px">
+    <h2>
+      {{form.title|upper}}
+  	</h2>
+  </div>
+  -->
+
+  <div class="row clearfix">
+    <div class="card">
+      <div class="header">
+        <h2>
+          {{form.title|upper}}
+        </h2>
+      </div>
+
+      <div class="body">
+        <p>
+          {% block msg_pre_form %}
+          {% endblock %}
+        </p>
+        
+        <div class="row">
+          <div class="col-sm-6">
+            <form action="{{form.action}}" 
+            method="post" enctype='multipart/form-data'
+            onreset="$('section.content form input')[0].focus();">
+              {{form.as_table}}
+
+              <input hidden="true" 
+              style="visibility: hidden;" 
+              name="provider_obj" />
+
+              {% if 'AGREGAR' in form.title|upper %}
+                <input type="checkbox" 
+                name="all-products-in-store"
+                id="chkAllProductsInStore" />
+
+                <label for="chkAllProductsInStore">
+                  {% trans 'Assign all products to store' %}
+                </label>
+                <br />
+
+                <span class="global-store">
+                  <label for="txtStore">
+                    *&nbsp;{% trans 'Store name' %}:
+                  </label>
+
+                  <input name="storename"
+                  id="txtStore" class="form-control" />
+
+                  <input name="store_obj" type="hidden" 
+                  style="visibility: hidden;" hidden />
+                </span>
+              {% endif %}
+
+              <p 
+              style="color: blue; 
+              font-size: x-large; font-weight: bold;">
+                {% trans 'Total' %}:
+                $<span id="secTotal" 
+                class="purchase-total">0.0</span>
+              </p>
+
+              {% csrf_token %}
+
+              <input hidden="true" 
+              style="visibility: hidden;" 
+              name="app_version" 
+              value="{{app_version}}">
+
+              <input hidden="true" 
+              style="visibility: hidden;" 
+              name="itm_menu" 
+              value="{{itm_menu}}">
+
+              {% if 'AGREGAR' not in form.title|upper %}
+              <p>
+                {% if 'EDITAR' in form.title|upper %}
+                  <a href="#" class="act-list-all"
+                  onclick="view_all('/purchases/list-all', 'edit'); return false;" >
+                    {% trans 'View all' %}
+                  </a>
+                {% elif 'ELIMINAR' in form.title|upper %}
+                  <a href="#" class="act-list-all"
+                  onclick="view_all('/purchases/list-all', 'delete'); return false;" >
+                    {% trans 'View all' %}
+                  </a>
+                {% else %}
+                  <a href="#" class="act-list-all"
+                  onclick="view_all('/purchases/list-all', 'search'); return false;" >
+                    {% trans 'View all' %}
+                  </a>
+                {% endif %}
+              </p>
+
+              <!--
+              <p>
+                <a href="#" 
+                class="act-search-config">
+                  {% trans 'Search config' %}
+                </a>
+              </p>
+              -->
+              {% endif %}
+
+              <input hidden="true" 
+              style="visibility: hidden;" 
+              name="user" 
+              value="{{user}}"
+              id="txtEmailHid">
+
+              <button class="btn btn-primary waves-effect"
+              type="submit">
+                <i class="material-icons">
+                  {{form.icon_btn_submit}}
+                </i>
+                {{form.btn_label}}
+              </button>
+
+              <button 
+              class="btn btn-warning waves-effect reset-form" type="reset">
+                <i class="material-icons">clear_all</i>
+                {% trans 'Clean all' %}
+              </button>
+
+              <button class="btn btn-default waves-effect act-cancel-form" type="button">
+                <i class="material-icons">cancel</i>
+                {% trans 'Cancel' %}
+              </button>
+            </form>
+          </div>
+
+          <div class="col-sm-6">
+            <fieldset>
+              <legend>
+                {% trans 'Products details' %}
+              </legend>
+
+              <button type="button" 
+              id="btnAddProduct"
+              class="btn btn-primary waves-effect">
+                <i class="material-icons">
+                  add_shopping_cart
+                </i>
+                {% trans 'Add' %}  
+              </button>
+
+              <button type="button" 
+              id="btnRemoveProducts"
+              class="btn btn-warning waves-effect">
+                <i class="material-icons">
+                  remove_shopping_cart
+                </i>
+                {% trans 'Remove all' %}  
+              </button>
+
+              <div class="table-responsive">
+              <table id="tblProductDetails"
+              class="table table-bordered table-striped table-hover no-footer">
+                <thead>
+                  <tr>
+                    <th>{% trans 'Product' %}</th>
+                    <th>{% trans 'Brand' %}</th>
+                    <th>{% trans 'Purchase price' %}</th>
+                    <th>{% trans 'Sale price' %}</th>
+                    <th>{% trans 'Quantity' %}</th>
+                    <th>Subtotal</th>
+                    <th>{% trans 'Options' %}</th>
+                  </tr>
+                </thead>
+
+                <tbody>
+                  <tr id="rowEmptyTable">
+                    <td colspan="5">
+                      {% trans 'Add products using the button above' %}
+                    </td>
+                  </tr>
+                </tbody>
+
+                <tfoot>
+                  <tr 
+                  style="text-align: right; 
+                  font-weight: bold">
+                    <td colspan="4">
+                      {% trans 'Totals' %}:
+                    </td>
+
+                    <td id="secCounterProducts"></td>
+
+                    <td>
+                    $<span class="purchase-total"></span>
+                    </td>
+                  </tr>
+                </tfoot>
+              </table>
+              </div>
+
+              {% include 'purchases/dlg-add-product.html' %}
+              <div id="divProductDetails"></div>
+            </fieldset>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<script type="text/javascript" src="{% static 'js/jquery-ui-1.12.1/jquery-ui.min.js' %}"></script>
+
+<link href="{% static 'js/jquery-ui-1.12.1/jquery-ui.min.css' %}" rel="stylesheet">
+
+<script type="text/javascript" src="{% static 'js/jquery-ui-1.12.1/datepicker-es.js' %}"></script>
+
+<script type="text/javascript" src="{% static 'js/jquery-timepicker/jquery.timepicker.min.js' %}"></script>
+
+<link href="{% static 'js/jquery-timepicker/jquery.timepicker.min.css' %}" rel="stylesheet">
+
+<script type="text/javascript" src="{% static 'js/jquery.form.min.js' %}"></script>
+
+<script type="text/javascript">
+  var image_files = [];
+
+  $(document).ready(function(){
+    var options = { 
+      target:        'section.content',
+      beforeSubmit:  showRequest,
+      success:       showResponse 
+    }; 
+
+    $("#id_provider").autocomplete({
+      source: "/providers/autocomplete/my-providers/",
+      minLength: 3,
+    });
+
+    $("#id_provider").change(function() {
+      show_msg_with_toastr("info", msg_wait);
+      rfc=this.value.substr(this.value.indexOf("RFC=")+"RFC=".length);
+      rfc=rfc.substr(0, rfc.length-1);
+
+      $.ajax({
+        method: "GET",
+        url: "/providers/search/by-rfc/",
+        data: { rfc: rfc }
+      })
+      .done(function(result) {
+        toastr.clear();
+        if (!result.exist)
+          $.ajax({
+            method: "GET",
+            url: "/translator/translate",
+            data: {msg: "Please enter a valid provider"}
+          })
+          .done(function(result) {
+            show_msg_with_toastr("error", result);
+            $("input[name='provider_obj']").val("");
+            $("section.content form button[type='submit']").attr("disabled", "true");
+          });
+        else {
+          $("input[name='provider_obj']").val(result.provider);
+          $("section.content form button[type='submit']").removeAttr("disabled");
+        }
+      });
+    });
+
+    $("form #txtStore").autocomplete({
+      source: "/stores/autocomplete/my-stores/",
+      minLength: 1,
+    });
+
+    $("form #txtStore").change(function(){
+      show_msg_with_toastr("info", msg_wait);
+      obj = $(this);
+      storename = this.value.substr(0, this.value.indexOf(' ['))
+
+      $.ajax({
+        method: "GET",
+        url: "/stores/search/by-name/",
+        data: { store: storename }
+      })
+      .done(function(result) {
+        toastr.clear();
+        if (!result['exist'])
+          $.ajax({
+            method: "GET",
+            url: "/translator/translate",
+            data: { msg: "Please enter a valid store"}
+          })
+          .done(function(result) {
+            show_msg_with_toastr("error", result);
+            $("input[name='store_obj']").val("");
+            $(obj).val('');
+            //$("section.content form button[type='submit']").attr("disabled", "true");
+          });
+        else {
+          $("input[name='store_obj']").val(result.store);
+          //$("section.content form button[type='submit']").removeAttr("disabled");
+        }
+      });
+    });
+
+    $(".act-cancel-form").click(function() {
+      showMainPanel();
+    });
+
+    function prepareProductsDataForSubmit(addTo) {
+      products = $("#tblProductDetails .product_obj");
+      products_names = $("#tblProductDetails .product_name");
+      brands = $("#tblProductDetails .brand_obj");
+      brands_names = $("#tblProductDetails .brand_name");
+      prices = $("#tblProductDetails .price");
+      sale_prices = $("#tblProductDetails .sale-price");
+      quantities = $("#tblProductDetails .quantity");
+      skus = $("#tblProductDetails .skus");
+      images = $("#tblProductDetails .images");
+      stores = $("#tblProductDetails .stores");
+      descriptions = $("#tblProductDetails .description");
+      notes = $("#tblProductDetails .notes");
+
+      tope_p = products.length;
+      products_objs = [];
+      //brands_vals = [];
+
+      for (x = 0; x < tope_p; x++) {
+        product = products[x].innerHTML;
+        product_obj = {
+          "id": product,
+          "name": products_names[x].innerHTML,
+          "price": prices[x].innerHTML,
+          "sale_price": sale_prices[x].innerHTML,
+          "quantity": quantities[x].innerHTML,
+          "skus": skus[x].innerHTML,
+          "images": images[x].innerHTML,
+          "store": stores[x].innerHTML,
+          "description": descriptions[x].innerHTML,
+          "notes": notes[x].innerHTML,
+          "brand": {
+            "id": brands[x].innerHTML,
+            "name": brands_names[x].innerHTML
+          }
+        };
+        //alert(product_obj);
+        products_objs.push(product_obj);
+      }
+
+      tope_p = products_objs.length;
+
+      for (y = 0; y < tope_p; y++) {
+        product_obj = products_objs[y];
+        tope_i = image_files.length;
+
+        for (x = 0; x < tope_i; x++) {
+          if (image_files[x] == undefined) {
+            continue;
+          }
+          file_ctrl = image_files[x][0];
+          fn = file_ctrl.files[0].name;
+
+          if (product_obj.images.includes(fn)) {
+            input_name = "product-" +
+              product_obj.id + "-" + file_ctrl.name
+
+            img_obj = {
+              "name": input_name,
+              "type": "file",
+              "value": file_ctrl.files[0]
+            };
+            //formData.push(image_files[x][0].files[0]);
+            //formData.push(image_files[x][0]);
+            addTo.push(img_obj);
+            image_files[x] = undefined;
+          }
+        }
+      }
+
+      products_obj = {
+        "name": "products",
+        "type": "text", 
+        "required": true,
+        "value": JSON.stringify(products_objs)
+      };
+
+      addTo.push(products_obj);
+      //$("section.content form").ajaxSubmit(options);
+      //var queryString = $.param(formData); 
+      /*console.log(queryString);
+      console.log(formData);*/
+      //return false;
+    }
+
+    function showRequest(formData, jqForm, options) { 
+      show_msg_with_toastr("info", msg_wait);
+      //$("section.content form button[type='submit']").attr("disabled", "true");
+
+      module_name = $(".container-fluid .card .header h2")[0].innerHTML;
+      module_name = module_name.toUpperCase();
+
+      if (module_name.includes('AGREGAR')) {
+        products = $("#tblProductDetails .product_obj");
+
+        if (products.length < 1) {
+          $.ajax({
+            method: "GET",
+            url: "/translator/translate",
+            data: { msg: "Please add at least one product to this purchase"}
+          })
+          .done(function(result) {
+            toastr.clear();
+            show_msg_with_toastr("error", result);
+            $("section.content form button[type='submit']").removeAttr("disabled");
+          });
+
+          return false;
+        }
+        else {
+          prepareProductsDataForSubmit(formData);
+        }
+      }
+      //else if (module_name.includes('BUSCAR')) {
+      else {
+        inputs = $('section.content form input.validate');
+        tope = inputs.length;
+        x = -1;
+        disable_btn = false;
+        counter_failed = 0;
+
+        while (++x < tope)
+          if (!validField(inputs[x]))
+            counter_failed++;
+
+        if (counter_failed == tope)
+          disable_btn = true;
+
+        toastr.clear();
+
+        if (disable_btn) {
+          //$("section.content form button[type='submit']").attr("disabled", "true");
+          $("section.content form button[type='submit']").removeAttr("disabled");
+          show_msg_with_toastr("error", missed_query);
+        }
+        else {
+          //$("section.content form button[type='submit']").removeAttr("disabled");
+          prepareProductsDataForSubmit(formData);
+        }
+
+        return !disable_btn;
+      }
+
+      return true; 
+    }
+ 
+    function showResponse(responseText, statusText, xhr, $form)  { 
+      $(".page-loader-wrapper").remove();
+    }
+ 
+    
+/*
+    $("input[name='shop']").change(function(){
+      show_msg_with_toastr("info", msg_wait);
+      shopname = this.value.substring(0, this.value.indexOf(" ["));
+      $.ajax({
+        method: "GET",
+        url: "/shops/search/by-name",
+        data: { shopname: shopname}
+      })
+      .done(function(result) {
+        toastr.clear();
+        if (result['exist'] != undefined && 
+          !result['exist'] || result.dropped)
+          $.ajax({
+            method: "GET",
+            url: "/translator/translate",
+            data: { msg: "Please enter a valid shop"}
+          })
+          .done(function(result) {
+            show_msg_with_toastr("error", result);
+            $("input[name='shop_obj']").val("");
+            $("section.content form button[type='submit']").attr("disabled", "true");
+          });
+        else if (result['exist'] == undefined) {
+          show_msg_with_toastr(result.status, result.msg);
+        }
+        else {
+          $("input[name='shop_obj']").val(result.shop);
+          $("section.content form button[type='submit']").removeAttr("disabled");
+        }
+      });
+    });
+*/
+
+    $("section.content form").ajaxForm(options);
+    $("div.menu a#{{itm_menu}}").parent().addClass("active");
+  });
+</script>
+
+{% block actions_js %}
+{% endblock %}
